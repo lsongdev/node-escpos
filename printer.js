@@ -1,7 +1,7 @@
 var CONSTANTS = require('./constants');
 
 /**
- * [function Printer]
+ * [function ESC/POS Printer]
  * @param  {[type]} adapter [description]
  * @return {[type]}         [description]
  */
@@ -19,7 +19,7 @@ Printer.prototype.println = function(content, callback){
 };
 
 /**
- * [function text]
+ * [function Print alpha-numeric text]
  * @param  {[type]}   content  [description]
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
@@ -29,7 +29,7 @@ Printer.prototype.text = function(content, callback){
 };
 
 /**
- * [function description]
+ * [function Cut paper]
  * @param  {[type]} part [description]
  * @return {[type]}      [description]
  */
@@ -107,6 +107,36 @@ Printer.prototype.size = function(width, height){
 
 Printer.prototype.hardware = function(hw){
   this.adapter.write(CONSTANTS.HARDWARE[ 'HW_'+ hw ]);
+};
+
+Printer.prototype.barcode = function(code, type, width, height, position, font){
+  if(width >= 1 || width <= 255){
+    this.adapter.write(CONSTANTS.BARCODE_FORMAT.BARCODE_WIDTH);
+  }
+  if(height >=2  || height <= 6){
+    this.adapter.write(CONSTANTS.BARCODE_FORMAT.BARCODE_HEIGHT);
+  }
+  this.adapter.write(CONSTANTS.BARCODE_FORMAT[
+    'BARCODE_FONT_' + (font || 'A').toUpperCase()
+  ]);
+  this.adapter.write(CONSTANTS.BARCODE_FORMAT[
+    'BARCODE_TXT_' + (position || 'BLW').toUpperCase()
+  ]);
+  this.adapter.write(CONSTANTS.BARCODE_FORMAT[
+    'BARCODE_' + ((type || 'EAN13').replace('-', '_').toUpperCase())
+  ]);
+  this.adapter.write(code);
+};
+
+/**
+ * [function Send pulse to kick the cash drawer]
+ * @param  {[type]} pin [description]
+ * @return {[type]}     [description]
+ */
+Printer.prototype.cashdraw = function(pin){
+  this.adapter.write(CONSTANTS.CASH_DRAWER[
+    'CD_KICK_' + (pin || 2)
+  ]);
 };
 
 module.exports = Printer;
