@@ -1,10 +1,19 @@
 var usb   = require('usb');
 
+/**
+ * [function USB]
+ * @param  {[type]} vid [description]
+ * @param  {[type]} pid [description]
+ * @return {[type]}     [description]
+ */
 var USB = function(vid, pid){
   this.device = usb.findByIds(vid, pid);
   return this;
 };
-
+/**
+ * [open description]
+ * @return {[type]} [description]
+ */
 USB.prototype.open = function () {
   var self = this;
   this.device.open();
@@ -15,7 +24,7 @@ USB.prototype.open = function () {
       try{
         interface.detachKernelDriver();
       }catch(e){
-        console.error("Could not detatch kernel driver: %s", e)
+        console.error("[ERROR] Could not detatch kernel driver: %s", e)
       }
     }
     interface.endpoints.filter(function(endpoint){
@@ -26,7 +35,11 @@ USB.prototype.open = function () {
   });
   return this;
 };
-
+/**
+ * [function write]
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
 USB.prototype.write = function(data){
   var done = false;
   this.endpoint.transfer(data, function(err){

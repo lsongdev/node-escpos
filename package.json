@@ -1,6 +1,6 @@
 {
   "name": "escpos",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
   "repository": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/song940/node-escpos#readme",
   "dependencies": {
+    "iconv-lite": "^0.4.11",
     "usb": "^1.0.6"
   }
 }

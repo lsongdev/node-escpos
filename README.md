@@ -1,4 +1,4 @@
-## node-escpos ![npm](https://badge.fury.io/js/node-escpos.png)
+## node-escpos ![npm](https://badge.fury.io/js/escpos.png)
 
 
 

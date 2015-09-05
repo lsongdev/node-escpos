@@ -1,3 +1,4 @@
+var iconv     = require('iconv-lite');
 var CONSTANTS = require('./constants');
 
 /**
@@ -9,15 +10,24 @@ var Printer = function(adapter){
   this.adapter = adapter;
   this.adapter.open();
 };
-
-Printer.prototype.print = function(content, callback){
-  this.adapter.write(new Buffer(content), callback);
+/**
+ * [function print]
+ * @param  {[type]}   content  [description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
+Printer.prototype.print = function(content, encode){
+  this.adapter.write(iconv.encode(content, encode || 'gbk'));
 };
-
+/**
+ * [function println]
+ * @param  {[type]}   content  [description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
 Printer.prototype.println = function(content, callback){
   this.print([ content, CONSTANTS.EOL ].join(''));
 };
-
 /**
  * [function Print alpha-numeric text]
  * @param  {[type]}   content  [description]
@@ -34,7 +44,7 @@ Printer.prototype.text = function(content, callback){
  * @return {[type]}      [description]
  */
 Printer.prototype.cut = function(part){
-  this.print(new Array(6).join(CONSTANTS.EOL));
+  this.print(new Array(3).join(CONSTANTS.EOL));
   this.adapter.write(CONSTANTS.PAPER[
     part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
   ]);
@@ -50,19 +60,31 @@ Printer.prototype.control = function(ctrl, callback){
     'CTL_' + ctrl.toUpperCase()
   ]);
 };
-
+/**
+ * [function align]
+ * @param  {[type]} align [description]
+ * @return {[type]}       [description]
+ */
 Printer.prototype.align = function(align){
   this.adapter.write(CONSTANTS.TEXT_FORMAT[
     'TXT_ALIGN_' + align.toUpperCase()
   ]);
 };
-
+/**
+ * [function font]
+ * @param  {[type]} family [description]
+ * @return {[type]}        [description]
+ */
 Printer.prototype.font = function(family){
   this.adapter.write(CONSTANTS.TEXT_FORMAT[
     'TXT_FONT_' + family.toUpperCase()
   ]);
 };
-
+/**
+ * [function style]
+ * @param  {[type]} type [description]
+ * @return {[type]}      [description]
+ */
 Printer.prototype.style = function(type){
   switch(type.toUpperCase()){
     case 'B':
@@ -92,8 +114,12 @@ Printer.prototype.style = function(type){
       break;
   }
 };
-
-
+/**
+ * [function size]
+ * @param  {[type]} width  [description]
+ * @param  {[type]} height [description]
+ * @return {[type]}        [description]
+ */
 Printer.prototype.size = function(width, height){
   // DEFAULT SIZE: NORMAL
   this.adapter.write(CONSTANTS.TEXT_FORMAT.TXT_NORMAL);
@@ -104,11 +130,24 @@ Printer.prototype.size = function(width, height){
     this.adapter.write(CONSTANTS.TEXT_FORMAT.TXT_2HEIGHT);
   }
 };
-
+/**
+ * [function hardware]
+ * @param  {[type]} hw [description]
+ * @return {[type]}    [description]
+ */
 Printer.prototype.hardware = function(hw){
   this.adapter.write(CONSTANTS.HARDWARE[ 'HW_'+ hw ]);
 };
-
+/**
+ * [function barcode]
+ * @param  {[type]} code     [description]
+ * @param  {[type]} type     [description]
+ * @param  {[type]} width    [description]
+ * @param  {[type]} height   [description]
+ * @param  {[type]} position [description]
+ * @param  {[type]} font     [description]
+ * @return {[type]}          [description]
+ */
 Printer.prototype.barcode = function(code, type, width, height, position, font){
   if(width >= 1 || width <= 255){
     this.adapter.write(CONSTANTS.BARCODE_FORMAT.BARCODE_WIDTH);
