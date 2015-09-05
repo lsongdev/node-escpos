@@ -42,6 +42,8 @@ exports.CASH_DRAWER = {
 exports.PAPER = {
   PAPER_FULL_CUT  : '\x1d\x56\x00' , // Full cut paper
   PAPER_PART_CUT  : '\x1d\x56\x01' , // Partial cut paper
+  PAPER_CUT_A     : '\x1d\x56\x41' , // Partial cut paper
+  PAPER_CUT_B     : '\x1d\x56\x42' , // Partial cut paper
 };
 
 /**
@@ -52,13 +54,17 @@ exports.TEXT_FORMAT = {
   TXT_NORMAL      : '\x1b\x21\x00', // Normal text
   TXT_2HEIGHT     : '\x1b\x21\x10', // Double height text
   TXT_2WIDTH      : '\x1b\x21\x20', // Double width text
+
   TXT_UNDERL_OFF  : '\x1b\x2d\x00', // Underline font OFF
   TXT_UNDERL_ON   : '\x1b\x2d\x01', // Underline font 1-dot ON
   TXT_UNDERL2_ON  : '\x1b\x2d\x02', // Underline font 2-dot ON
   TXT_BOLD_OFF    : '\x1b\x45\x00', // Bold font OFF
   TXT_BOLD_ON     : '\x1b\x45\x01', // Bold font ON
+
   TXT_FONT_A      : '\x1b\x4d\x00', // Font type A
   TXT_FONT_B      : '\x1b\x4d\x01', // Font type B
+  TXT_FONT_C      : '\x1b\x4d\x02', // Font type C
+
   TXT_ALIGN_LT    : '\x1b\x61\x00', // Left justification
   TXT_ALIGN_CT    : '\x1b\x61\x01', // Centering
   TXT_ALIGN_RT    : '\x1b\x61\x02', // Right justification
@@ -73,10 +79,13 @@ exports.BARCODE_FORMAT = {
   BARCODE_TXT_ABV : '\x1d\x48\x01' , // HRI barcode chars above
   BARCODE_TXT_BLW : '\x1d\x48\x02' , // HRI barcode chars below
   BARCODE_TXT_BTH : '\x1d\x48\x03' , // HRI barcode chars both above and below
+
   BARCODE_FONT_A  : '\x1d\x66\x00' , // Font type A for HRI barcode chars
   BARCODE_FONT_B  : '\x1d\x66\x01' , // Font type B for HRI barcode chars
+
   BARCODE_HEIGHT  : '\x1d\x68\x64' , // Barcode Height [1-255]
   BARCODE_WIDTH   : '\x1d\x77\x03' , // Barcode Width  [2-6]
+
   BARCODE_UPC_A   : '\x1d\x6b\x00' , // Barcode type UPC-A
   BARCODE_UPC_E   : '\x1d\x6b\x01' , // Barcode type UPC-E
   BARCODE_EAN13   : '\x1d\x6b\x02' , // Barcode type EAN13

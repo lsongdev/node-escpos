@@ -39,18 +39,6 @@ Printer.prototype.text = function(content, callback){
 };
 
 /**
- * [function Cut paper]
- * @param  {[type]} part [description]
- * @return {[type]}      [description]
- */
-Printer.prototype.cut = function(part){
-  this.print(new Array(3).join(CONSTANTS.EOL));
-  this.adapter.write(CONSTANTS.PAPER[
-    part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
-  ]);
-};
-
-/**
  * [function Feed control sequences]
  * @param  {[type]} ctrl [description]
  * @return {[type]}      [description]
@@ -175,6 +163,19 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
 Printer.prototype.cashdraw = function(pin){
   this.adapter.write(CONSTANTS.CASH_DRAWER[
     'CD_KICK_' + (pin || 2)
+  ]);
+};
+
+/**
+ * [function Cut paper]
+ * @param  {[type]} part [description]
+ * @return {[type]}      [description]
+ */
+Printer.prototype.cut = function(part){
+  // this.println(new Array(30).join('.'));
+  this.print(new Array(3).join(CONSTANTS.EOL));
+  this.adapter.write(CONSTANTS.PAPER[
+    part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
   ]);
 };
 
