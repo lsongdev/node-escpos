@@ -26,7 +26,7 @@ getPixels('/Users/Lsong/Desktop/test2x2.png', function(err, result){
     return _.omit(colors, 'a')
   })
   .map(function(pixel){
-    return _.sum(pixel)
+    return _.sum(_.values(pixel))
   })
   .map(function(color){
     return color / 255;

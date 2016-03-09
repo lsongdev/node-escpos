@@ -17,9 +17,9 @@
   },
   "homepage": "https://github.com/song940/node-escpos#readme",
   "dependencies": {
-    "get-pixels": "^3.2.2",
-    "iconv-lite": "^0.4.11",
-    "lodash": "^3.10.1",
-    "usb": "^1.0.6"
+    "get-pixels": "*",
+    "iconv-lite": "*",
+    "lodash": "*",
+    "usb": "*"
   }
 }

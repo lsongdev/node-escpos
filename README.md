@@ -4,7 +4,7 @@
 
 ### Installation
 ````
-$ npm install node-escpos --save
+$ npm install escpos --save
 ````
 
 ### Example

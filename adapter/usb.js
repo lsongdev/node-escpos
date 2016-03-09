@@ -1,4 +1,4 @@
-var usb   = require('usb');
+const usb   = require('usb');
 
 /**
  * [function USB]
@@ -6,7 +6,7 @@ var usb   = require('usb');
  * @param  {[type]} pid [description]
  * @return {[type]}     [description]
  */
-var USB = function(vid, pid){
+function USB(vid, pid){
   this.device = usb.findByIds(vid, pid);
   return this;
 };
@@ -17,7 +17,6 @@ var USB = function(vid, pid){
 USB.prototype.open = function () {
   var self = this;
   this.device.open();
-  // this.device.reset();
   this.device.interfaces.forEach(function(interface){
     interface.claim();
     if(interface.isKernelDriverActive()){
@@ -40,12 +39,8 @@ USB.prototype.open = function () {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-USB.prototype.write = function(data){
-  var done = false;
-  this.endpoint.transfer(data, function(err){
-    if(err) throw err;
-    done = true;
-  });
+USB.prototype.write = function(data, callback){
+  this.endpoint.transfer(data);
 };
 
 module.exports = USB;
