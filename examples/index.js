@@ -12,6 +12,5 @@ printer.align('ct');
 // console.log(new Buffer([ 27, 97, 2 ]));
 // printer.text('The quick brown fox jumps over the lazy dog');
 // printer.barcode('12345678', 'EAN8');
-printer.image();
 //
 printer.cut();

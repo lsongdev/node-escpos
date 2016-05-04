@@ -8,7 +8,8 @@
     "url": "git+https://github.com/song940/node-escpos.git"
   },
   "keywords": [
-    "escpos"
+    "escpos",
+    "printer"
   ],
   "author": "lsong",
   "license": "MIT",
@@ -17,9 +18,8 @@
   },
   "homepage": "https://github.com/song940/node-escpos#readme",
   "dependencies": {
-    "get-pixels": "*",
+    "usb": "*",
     "iconv-lite": "*",
-    "lodash": "*",
-    "usb": "*"
+    "get-pixels": "*"
   }
 }

@@ -1,18 +1,20 @@
-## node-escpos ![npm](https://badge.fury.io/js/escpos.png)
+# node-escpos
 
+ESC/POS Printer driver for node
 
+[![NPM](https://nodei.co/npm/escpos.png)](https://nodei.co/npm/escpos/)
 
-### Installation
+## Installation
 ````
 $ npm install escpos --save
 ````
 
-### Example
+## Example
 ````javascript
-var escpos = require('escpos');
+const escpos = require('escpos');
 
-var device  = new escpos.USB(0x0416, 0x5011);
-var printer = new escpos.Printer(device);
+const device  = new escpos.USB(0x0416, 0x5011);
+const printer = new escpos.Printer(device);
 
 printer.size(1,2);
 printer.control('ht');
@@ -25,23 +27,44 @@ printer.cut();
 
 ````
 
-# Escpos class
+## Documentation
+
 Escpos inherits its methods to the printers. the following methods are defined:
 
-## image("image_name.ext")
+### text("text")
 
-Prints an image. Its adjust the size in order to print it.
+Prints raw text. Raises TextError exception.
 
-image_name.ext is the complete file name and location of any image type (jpg, gif, png, bmp)
-Raises ImageSizeError exception.
+### control("align")
 
-## qr("text")
+Carrier feed and tabs.
 
-Prints a QR code. The size has been adjuested to Version 4, so it can be enough small to be printed but also enough big to be read by a smartphone.
+align is a string which takes any of the following values:
 
-text Any text that needs to be QR encoded. It could be a slogan, salutation, url, etc.
++ LF for Line Feed
++ FF for Form Feed
++ CR for Carriage Return
++ HT for Horizontal Tab
++ VT for Vertical Tab
 
-## barcode("code", "barcode_type", width, height, "position", "font")
+
+### align("align")
+
+Set text properties.
+
+align set horizontal position for text, the possible values are:
+
++ CENTER
++ LEFT
++ RIGHT
+
+Default: left
+
+font type could be A or B. Default: A
+width is a numeric value, 1 is for regular size, and 2 is twice the standard size. Default: 1
+height is a numeric value, 1 is for regular size and 2 is twice the standard size. Default: 1
+
+### barcode("code", "barcode_type", width, height, "position", "font")
 
 Prints a barcode.
 
@@ -76,63 +99,21 @@ Default: A
 
 Raises BarcodeTypeError, BarcodeSizeError, BarcodeCodeError exceptions.
 
-## text("text")
-
-Prints raw text. Raises TextError exception.
-
-## set("align", "font", "type", width, height)
-
-Set text properties.
-
-align set horizontal position for text, the possible values are:
-
-+ CENTER
-+ LEFT
-+ RIGHT
-
-Default: left
-
-font type could be A or B. Default: A
-width is a numeric value, 1 is for regular size, and 2 is twice the standard size. Default: 1
-height is a numeric value, 1 is for regular size and 2 is twice the standard size. Default: 1
-
-## cut("mode")
+### cut("mode")
 
 Cut paper.
 
 mode set a full or partial cut. Default: full
 Partial cut is not implemented in all printers.
 
-## cashdraw(pin)
+### cashdraw(pin)
 
 Sends a pulse to the cash drawer in the specified pin.
 
 pin is a numeric value which defines the pin to be used to send the pulse, it could be 2 or 5.
 Raises CashDrawerError()
 
-## hw("operation")
-
-Hardware operations.
-
-operation is any of the following options:
-
-+ INIT
-+ SELECT
-+ RESET
-
-## control("align")
-
-Carrier feed and tabs.
-
-align is a string which takes any of the following values:
-
-+ LF for Line Feed
-+ FF for Form Feed
-+ CR for Carriage Return
-+ HT for Horizontal Tab
-+ VT for Vertical Tab
-
-### Contributing
+## Contributing
 - Fork this repo
 - Clone your repo
 - Install dependencies
