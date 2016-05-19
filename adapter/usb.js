@@ -18,16 +18,16 @@ function USB(vid, pid){
 USB.prototype.open = function () {
   var self = this;
   this.device.open();
-  this.device.interfaces.forEach(function(interface){
-    interface.claim();
-    if(interface.isKernelDriverActive()){
+  this.device.interfaces.forEach(function(iface){
+    iface.claim();
+    if(iface.isKernelDriverActive()){
       try{
-        interface.detachKernelDriver();
+        iface.detachKernelDriver();
       }catch(e){
         console.error("[ERROR] Could not detatch kernel driver: %s", e)
       }
     }
-    interface.endpoints.filter(function(endpoint){
+    iface.endpoints.filter(function(endpoint){
       if(endpoint.direction == 'out'){
         self.endpoint = endpoint;
       }
