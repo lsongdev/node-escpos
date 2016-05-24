@@ -19,7 +19,6 @@ USB.prototype.open = function () {
   var self = this;
   this.device.open();
   this.device.interfaces.forEach(function(iface){
-    iface.claim();
     if(iface.isKernelDriverActive()){
       try{
         iface.detachKernelDriver();
@@ -27,6 +26,7 @@ USB.prototype.open = function () {
         console.error("[ERROR] Could not detatch kernel driver: %s", e)
       }
     }
+    iface.claim();
     iface.endpoints.filter(function(endpoint){
       if(endpoint.direction == 'out'){
         self.endpoint = endpoint;
