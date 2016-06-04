@@ -5,4 +5,4 @@ node_js:
   - "v5.5.0"
 
 before_install:
-  - apt-get install build-essential libudev-dev -y
+  - sudo apt-get install build-essential libudev-dev -y

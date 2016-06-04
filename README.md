@@ -1,8 +1,8 @@
-# node-escpos [![npm version](https://badge.fury.io/js/node-escpos.svg)](https://badge.fury.io/js/node-escpos) [![Build Status](https://travis-ci.org/song940/node-escpos.svg?branch=master)](https://travis-ci.org/song940/node-escpos) 
+# node-escpos [![npm version](https://badge.fury.io/js/escpos.svg)](https://badge.fury.io/js/node-escpos) [![Build Status](https://travis-ci.org/song940/node-escpos.svg?branch=master)](https://travis-ci.org/song940/node-escpos) 
 
 ESC/POS Printer driver for node
 
-[![NPM](https://nodei.co/npm/node-escpos.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-escpos/)
+[![NPM](https://nodei.co/npm/escpos.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-escpos/)
 
 ## Installation
 ````
