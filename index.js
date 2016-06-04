@@ -20,6 +20,7 @@ exports.image = function(url, type, callback){
   });
 };
 
+
 /**
  * [Image description]
  * @type {[type]}
@@ -31,9 +32,12 @@ exports.Image = Image;
  * @type {[type]}
  */
 exports.USB       = require('./adapter/usb');
+exports.Console   = require('./adapter/console');
+
 
 /**
  * [Printer description]
  * @type {[type]}
  */
 exports.Printer   = require('./printer');
+exports.commands  = require('./commands');

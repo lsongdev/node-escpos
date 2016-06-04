@@ -136,6 +136,10 @@ _.IMAGE_FORMAT = {
   S_RASTER_Q      : '\x1d\x76\x30\x03' , // Set raster image quadruple
 };
 
+/**
+ * [BITMAP_FORMAT description]
+ * @type {Object}
+ */
 _.BITMAP_FORMAT = {
   BITMAP_S8     : '\x1b\x2a\x00',
   BITMAP_D8     : '\x1b\x2a\x01',
@@ -143,6 +147,10 @@ _.BITMAP_FORMAT = {
   BITMAP_D24    : '\x1b\x2a\x21'
 };
 
+/**
+ * [GSV0_FORMAT description]
+ * @type {Object}
+ */
 _.GSV0_FORMAT = {
   GSV0_NORMAL   : '\x1d\x76\x30\x00',
   GSV0_DW       : '\x1d\x76\x30\x01',
