@@ -2,7 +2,7 @@
 
 ESC/POS Printer driver for node
 
-[![NPM](https://nodei.co/npm/escpos.png)](https://nodei.co/npm/escpos/)
+[![NPM](https://nodei.co/npm/node-escpos.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-escpos/)
 
 ## Installation
 ````
