@@ -1,8 +1,39 @@
-// CONSTANTS
-exports.CONSTANTS = require('./constants');
+'use strict';
+const getPixels = require('get-pixels');
+const Image     = require('./image');
 
-// Printer
-exports.Printer   = require('./printer');
+/**
+ * [image description]
+ * @param  {[type]}   url      [description]
+ * @param  {[type]}   type     [description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
+exports.image = function(url, type, callback){
+  if(typeof type == 'function'){
+    callback = type;
+    type = null;
+  }
+  getPixels(url, type, function(err, pixels){
+    if(err) return callback(err);
+    callback(new Image(pixels));
+  });
+};
 
-// USB
+/**
+ * [Image description]
+ * @type {[type]}
+ */
+exports.Image = Image;
+
+/**
+ * [USB description]
+ * @type {[type]}
+ */
 exports.USB       = require('./adapter/usb');
+
+/**
+ * [Printer description]
+ * @type {[type]}
+ */
+exports.Printer   = require('./printer');
