@@ -120,6 +120,10 @@ Sends a pulse to the cash drawer in the specified pin.
 pin is a numeric value which defines the pin to be used to send the pulse, it could be 2 or 5.
 Raises CashDrawerError()
 
+## Thanks
+
++ Part of code from [@taoyuan](https://github.com/taoyuan)
+
 ## Contributing
 - Fork this repo
 - Clone your repo
