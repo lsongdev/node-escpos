@@ -1,9 +1,10 @@
+'use strict';
 const escpos = require('../');
 
 const device  = new escpos.USB();
 const printer = new escpos.Printer(device);
 
-escpos.image(__dirname + '/tux.png', function(image){
+escpos.Image.load(__dirname + '/tux.png', function(image){
 
   device.open(function(){
 

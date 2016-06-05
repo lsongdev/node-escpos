@@ -273,16 +273,16 @@ Printer.prototype.image = function(image, density){
   var n = !!~[ 'd8', 's8' ].indexOf(density) ? 1 : 3;
   var header = commands.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
   var bitmap = image.toBitmap(n * 8);
-  var that = this;
+  var self = this;
   this.lineSpace(0); // set line spacing to 0
   bitmap.data.forEach(function (line) {
-    that.buffer.write(header);
-    that.buffer.writeUInt16LE(line.length / n);
-    that.buffer.write(line);
-    that.feed();
+    self.buffer.write(header);
+    self.buffer.writeUInt16LE(line.length / n);
+    self.buffer.write(line);
+    self.buffer.write(commands.EOL);
   });
   // restore line spacing to default
-  return this.lineSpace().flush();
+  return this.lineSpace();
 };
 
 /**
@@ -304,7 +304,7 @@ Printer.prototype.raster = function (image, mode) {
   this.buffer.writeUInt16LE(raster.width);
   this.buffer.writeUInt16LE(raster.height);
   this.buffer.write(raster.data);
-  return this.flush();
+  return this;
 };
 
 /**

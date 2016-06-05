@@ -1,3 +1,5 @@
+'use strict';
+const getPixels = require('get-pixels');
 
 /**
  * [Image description]
@@ -30,6 +32,24 @@ function Image(pixels){
     return pixel.r !== 0xFF || pixel.g !== 0xFF || pixel.b !== 0xFF ? 1 : 0;
   });
 
+};
+
+/**
+ * [load description]
+ * @param  {[type]}   url      [description]
+ * @param  {[type]}   type     [description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
+Image.load = function(url, type, callback){
+  if(typeof type == 'function'){
+    callback = type;
+    type = null;
+  }
+  getPixels(url, type, function(err, pixels){
+    if(err) return callback(err);
+    callback(new Image(pixels));
+  });
 };
 
 /**

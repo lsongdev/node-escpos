@@ -14,7 +14,7 @@ device.open(function(){
   .text('敏捷的棕色狐狸跳过懒狗')
   .barcode('12345678', 'EAN8')
   .qrimage('https://github.com/song940/node-escpos', function(err){
-    this.cut(null, 5);
+    this.cut();
   });
 
 });
