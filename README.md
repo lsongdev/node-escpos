@@ -13,8 +13,8 @@ $ npm install escpos --save
 ````javascript
 const escpos = require('escpos');
 
-var device  = new escpos.USB();
-var printer = new escpos.Printer(device);
+const device  = new escpos.USB();
+const printer = new escpos.Printer(device);
 
 device.open(function(){
 

@@ -1,7 +1,8 @@
-var escpos = require('../');
+'use strict';
+const escpos = require('../');
 
-var device  = new escpos.USB();
-var printer = new escpos.Printer(device);
+const device  = new escpos.USB();
+const printer = new escpos.Printer(device);
 
 device.open(function(){
 

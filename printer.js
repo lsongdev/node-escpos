@@ -46,7 +46,7 @@ Printer.prototype.flush = function(callback){
  */
 Printer.prototype.print = function(content){
   this.buffer.write(content);
-  return this.flush();
+  return this;
 };
 /**
  * [function println]
@@ -65,7 +65,7 @@ Printer.prototype.println = function(content){
  * @return {[Printer]} printer  [description]
  */
 Printer.prototype.text = function(content, encoding){
-  return this.print(iconv.encode(content + commands.EOL, encoding || 'gbk'));
+  return this.print(iconv.encode(content + commands.EOL, encoding || 'GB18030'));
 };
 
 /**
@@ -212,7 +212,7 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
     'BARCODE_' + ((type || 'EAN13').replace('-', '_').toUpperCase())
   ]);
   this.buffer.write(code);
-  return this.flush();
+  return this;
 };
 
 /**
@@ -233,7 +233,7 @@ Printer.prototype.qrcode = function(code, version, level, size){
   this.buffer.writeUInt8(size || 6);
   this.buffer.writeUInt16LE(code.length);
   this.buffer.write(code);
-  return this.flush();
+  return this;
 };
 
 /**
