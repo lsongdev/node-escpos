@@ -1,5 +1,6 @@
 'use strict';
-const usb   = require('usb');
+const util = require('util');
+const usb  = require('usb') ;
 
 /**
  * [USB Class Codes ]
@@ -39,14 +40,33 @@ function findPrinter(){
  * @return {[type]}     [description]
  */
 function USB(vid, pid){
+  var self = this;
   if(vid && pid){
     this.device = usb.findByIds(vid, pid);
   }else{
     this.device = findPrinter();
   }
-  if (!this.device) throw new Error('Can not find printer');
+  
+  if (!this.device)
+    throw new Error('Can not find printer');
+  
+  //https://github.com/jor3l/node-escpos/blob/master/adapter/usb.js#L84
+  usb.on('detach', function(device){
+    if(device == self.device){
+      self.emit('detach'    , device);
+      self.emit('disconnect', device);
+      self.device = null;
+    }
+  });
+  
   return this;
 };
+
+/**
+ * make USB extends EventEmitter
+ */
+util.inherits(USB, EventEmitter);
+
 /**
  * [open description]
  * @return {[type]} [description]
@@ -67,6 +87,7 @@ USB.prototype.open = function (callback){
       iface.endpoints.filter(function(endpoint){
         if(endpoint.direction == 'out'){
           self.endpoint = endpoint;
+          self.emit('connect', self.device);
           callback && callback(null, self);
         }
       });
@@ -84,6 +105,7 @@ USB.prototype.open = function (callback){
  * @return {[type]}      [description]
  */
 USB.prototype.write = function(data, callback){
+  this.emit('data', data);
   this.endpoint.transfer(data, callback);
 };
 
