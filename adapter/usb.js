@@ -1,6 +1,7 @@
 'use strict';
-const util = require('util');
-const usb  = require('usb') ;
+const util          = require('util');
+const usb           = require('usb') ;
+const EventEmitter  = require('events');
 
 /**
  * [USB Class Codes ]
