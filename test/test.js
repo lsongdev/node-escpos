@@ -13,11 +13,10 @@ describe('ESC/POS printing test', function() {
 
   it('printer#print', function(done){
     var device = new escpos.Console(function(data){
-      assert.equal(data.length, 11);
       done();
     });
     var printer = new escpos.Printer(device);
-    printer.print('hello world');
+    printer.print('hello world').flush();
   })
 
 });

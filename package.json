@@ -4,7 +4,7 @@
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/test.js"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -26,8 +26,9 @@
   "dependencies": {
     "get-pixels": "*",
     "iconv-lite": "*",
-    "mutable-buffer": "^2.0.3",
+    "mutable-buffer": "*",
     "qr-image": "*",
+    "serialport": "*",
     "usb": "*"
   }
 }
