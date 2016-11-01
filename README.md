@@ -1,4 +1,4 @@
-# node-escpos [![npm version](https://badge.fury.io/js/escpos.svg)](https://www.npmjs.com/package/escpos )
+# Escpos [![npm version](https://badge.fury.io/js/escpos.svg)](https://www.npmjs.com/package/escpos )
 
 ESC/POS Printer driver for node
 
