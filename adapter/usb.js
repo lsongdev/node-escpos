@@ -59,7 +59,7 @@ function USB(vid, pid){
       self.device = null;
     }
   });
-  
+  EventEmitter.call(this);  
   return this;
 };
 
