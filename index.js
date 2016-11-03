@@ -1,14 +1,14 @@
 'use strict';
 /**
- * [USB description]
- * @type {[type]}
+ * Adapters
  */
-exports.USB       = require('./adapter/usb');
-exports.Console   = require('./adapter/console');
+exports.USB     = require('./adapter/usb');
+exports.Serial  = require('./adapter/serial');
+exports.Network = require('./adapter/network');
+exports.Console = require('./adapter/console');
 /**
- * [Printer description]
- * @type {[type]}
+ * Printer Supports
  */
-exports.Image     = require('./image');
-exports.Printer   = require('./printer');
-exports.commands  = require('./commands');
+exports.Image   = require('./image');
+exports.Printer = require('./printer');
+exports.command = require('./commands');

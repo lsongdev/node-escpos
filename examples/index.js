@@ -2,6 +2,7 @@
 const escpos = require('../');
 
 const device  = new escpos.USB();
+// const device  = new escpos.Network('localhost');
 const printer = new escpos.Printer(device);
 
 device.open(function(){

@@ -76,14 +76,8 @@ USB.prototype.open = function (callback){
   var self = this;
   this.device.open();
   this.device.interfaces.forEach(function(iface){
-    try{
-      if(iface.isKernelDriverActive())
-        iface.detachKernelDriver();
-    }catch(e){
-      console.error("[ERROR] Could not detatch kernel driver: %s", e);
-    }
-    iface.claim();
     iface.setAltSetting(iface.altSetting, function(){
+      iface.claim();
       iface.endpoints.filter(function(endpoint){
         if(endpoint.direction == 'out'){
           self.endpoint = endpoint;
