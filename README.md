@@ -2,7 +2,7 @@
 
 ESC/POS Printer driver for node
 
-[![NPM](https://nodei.co/npm/escpos.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/escpos )
+[![NPM](https://nodei.co/npm/escpos.png?downloads=true&downloadRank=true&stars=true)](https://npmjs.org/escpos )
 
 ## Installation
 
@@ -12,9 +12,9 @@ $ npm i escpos
 
 if you use usb as an adapter :
 
-+ On Linux, you'll need libudev to build libusb. 
++ On Linux, you'll need `libudev` to build libusb. 
 + On Ubuntu/Debian: `sudo apt-get install build-essential libudev-dev`.
-+ On Windows, Use Zadig to install the WinUSB driver for your USB device. 
++ On Windows, Use [Zadig](http://sourceforge.net/projects/libwdi/files/zadig/) to install the WinUSB driver for your USB device. 
 
 Otherwise you will get `LIBUSB_ERROR_NOT_SUPPORTED` when attempting to open devices.
 

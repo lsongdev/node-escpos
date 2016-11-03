@@ -8,30 +8,11 @@ const EventEmitter  = require('events');
  * @type {Object}
  * @docs http://www.usb.org/developers/defined_class
  */
-const CLASS_CODE = {
+const IFACE_CLASS = {
   AUDIO  : 0x01,
   HID    : 0x03,
   PRINTER: 0x07,
   HUB    : 0x09
-};
-/**
- * [findPrinter description]
- * @return {[type]} [description]
- */
-function findPrinter(){
-  var devices = usb.getDeviceList();
-  devices = devices.filter(function(device){
-    try{
-      return device.configDescriptor.interfaces.filter(function(iface){
-        return iface.filter(function(conf){
-          return conf.bInterfaceClass == CLASS_CODE.PRINTER;
-        }).length;
-      }).length;
-    }catch(e){
-      return false;
-    }
-  });
-  return devices[0];
 };
 
 /**
@@ -45,13 +26,12 @@ function USB(vid, pid){
   if(vid && pid){
     this.device = usb.findByIds(vid, pid);
   }else{
-    this.device = findPrinter();
+    this.device = USB.findPrinter();
   }
   
   if (!this.device)
     throw new Error('Can not find printer');
   
-  //https://github.com/jor3l/node-escpos/blob/master/adapter/usb.js#L84
   usb.on('detach', function(device){
     if(device == self.device){
       self.emit('detach'    , device);
@@ -61,6 +41,24 @@ function USB(vid, pid){
   });
   EventEmitter.call(this);  
   return this;
+};
+
+/**
+ * [findPrinter description]
+ * @return {[type]} [description]
+ */
+USB.findPrinter = function(){
+  return usb.getDeviceList().filter(function(device){
+    try{
+      return device.configDescriptor.interfaces.filter(function(iface){
+        return iface.filter(function(conf){
+          return conf.bInterfaceClass == IFACE_CLASS.PRINTER;
+        }).length;
+      }).length;
+    }catch(e){
+      return false;
+    }
+  })[0];
 };
 
 /**
