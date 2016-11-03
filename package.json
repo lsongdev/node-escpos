@@ -30,5 +30,8 @@
     "qr-image": "*",
     "serialport": "*",
     "usb": "*"
+  },
+  "devDependencies": {
+    "mocha": "^3.1.2"
   }
 }
