@@ -1,23 +1,19 @@
 'use strict';
-const net          = require('net');
-const util         = require('util');
-const EventEmitter = require('events');
+const net     = require('net');
+const Adapter = require('../adapter');
+
 /**
- * [Network description]
- * @param {[type]} address [description]
- * @param {[type]} port    [description]
+ * Network Adapter
+ * @param {[type]} address
+ * @param {[type]} port
  */
 function Network(address, port){
-  EventEmitter.call(this);  
+  Adapter.call(this);
   this.address = address;
   this.port = port || 9100;
   this.device = new net.Socket();
   return this;
 };
-/**
- * make Network extends EventEmitter
- */
-util.inherits(Network, EventEmitter);
 
 /**
  * connect to remote device
@@ -29,7 +25,7 @@ Network.prototype.open = function(callback){
   //connect to net printer by socket (port,ip)
   this.device.connect(this.port, this.address, function(err){
     self.emit('connect', self.device);
-    callback && callback(err);
+    callback && callback(err, self.device);
   });
   return this;
 };
@@ -54,9 +50,9 @@ Network.prototype.close = function(callback){
     this.device.destroy();
     this.device = null;
   }
-  this.emmit('disconnect', this.device);
+  this.emit('disconnect', this.device);
   callback && callback(null, this.device);
   return this;
 }
 
-module.exports = Network;
+module.exports = Adapter.extends(Network);
