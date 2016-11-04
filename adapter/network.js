@@ -20,8 +20,7 @@ function Network(address, port){
 util.inherits(Network, EventEmitter);
 
 /**
- * connect to device
- * 
+ * connect to remote device
  * @praram {[type]} callback
  * @return
  */
@@ -37,7 +36,6 @@ Network.prototype.open = function(callback){
 
 /**
  * write data to printer
- * 
  * @param {[type]} data -- byte data
  * @return 
  */
@@ -56,8 +54,8 @@ Network.prototype.close = function(callback){
     this.device.destroy();
     this.device = null;
   }
-  this.emmit('disconnect',this.device);
-  callback && callback();
+  this.emmit('disconnect', this.device);
+  callback && callback(null, this.device);
   return this;
 }
 

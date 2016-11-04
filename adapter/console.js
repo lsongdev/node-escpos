@@ -1,4 +1,9 @@
-
+/**
+ * [stdout description]
+ * @param  {[type]} data [description]
+ * @param  {[type]} bit  [description]
+ * @return {[type]}      [description]
+ */
 function stdout(data, bit){
   bit = bit || 8;
   for(var i=0;i < data.length;i+= bit){

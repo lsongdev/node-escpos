@@ -1,6 +1,6 @@
 'use strict';
+const usb           = require('usb');
 const util          = require('util');
-const usb           = require('usb') ;
 const EventEmitter  = require('events');
 
 /**
@@ -67,28 +67,28 @@ USB.findPrinter = function(){
 util.inherits(USB, EventEmitter);
 
 /**
- * [open description]
- * @return {[type]} [description]
+ * [open usb device]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
  */
 USB.prototype.open = function (callback){
-  var self = this;
+  var self = this, endpoints = [];
   this.device.open();
   this.device.interfaces.forEach(function(iface){
     iface.setAltSetting(iface.altSetting, function(){
-      iface.claim();
-      iface.endpoints.filter(function(endpoint){
-        if(endpoint.direction == 'out'){
-          self.endpoint = endpoint;
-          self.emit('connect', self.device);
-          callback && callback(null, self);
-        }
-      });
-      if(!self.endpoint){
-        callback && callback(new Error('Can not find endpoint from printer'));
-      }
+      iface.claim(); // must be called before using any endpoints of this interface.
+      endpoints = endpoints.concat(iface.endpoints.filter(function(endpoint){
+        return endpoint.direction == 'out';
+      }));
     });
-
   });
+  if(endpoints.length){
+    this.endpoint = endpoints[0];
+    this.emit('connect', this.device);
+    callback && callback(null, this.device);
+  }else{
+    callback && callback(new Error('Can not find endpoint from printer'));
+  }
   return this;
 };
 /**
@@ -99,6 +99,12 @@ USB.prototype.open = function (callback){
 USB.prototype.write = function(data, callback){
   this.emit('data', data);
   this.endpoint.transfer(data, callback);
+  return this;
+};
+
+USB.prototype.close = function(callback){
+  this.device.close(callback);
+  return this;
 };
 
 /**

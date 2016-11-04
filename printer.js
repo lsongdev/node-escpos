@@ -10,8 +10,8 @@ const _            = require('./commands');
 
 /**
  * [function ESC/POS Printer]
- * @param  {[Printer.Adapter]} adapter [description]
- * @return {[Printer]} printer  [description]
+ * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 function Printer(adapter){
   if (!(this instanceof Printer)) {
@@ -29,9 +29,9 @@ function Printer(adapter){
 util.inherits(Printer, EventEmitter);
 
 /**
- * [flush description]
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
+ * Send data to hardware and flush buffer
+ * @param  {Function} callback
+ * @return printer instance
  */
 Printer.prototype.flush = function(callback){
   var buf = this.buffer.flush();
@@ -42,7 +42,7 @@ Printer.prototype.flush = function(callback){
  * [function print]
  * @param  {[String]}  content  [description]
  * @param  {[String]}  encoding [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.print = function(content){
   this.buffer.write(content);
@@ -52,7 +52,7 @@ Printer.prototype.print = function(content){
  * [function println]
  * @param  {[String]}  content  [description]
  * @param  {[String]}  encoding [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.println = function(content){
   return this.print([ content, _.EOL ].join(''));
@@ -62,7 +62,7 @@ Printer.prototype.println = function(content){
  * [function Print alpha-numeric text]
  * @param  {[String]}  content  [description]
  * @param  {[String]}  encoding [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.text = function(content, encoding){
   return this.print(iconv.encode(content + _.EOL, encoding || 'GB18030'));
@@ -81,7 +81,7 @@ Printer.prototype.feed = function (n) {
 /**
  * [feed control sequences]
  * @param  {[type]}    ctrl     [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.control = function(ctrl){
   this.buffer.write(_.FEED_CONTROL_SEQUENCES[
@@ -92,7 +92,7 @@ Printer.prototype.control = function(ctrl){
 /**
  * [text align]
  * @param  {[type]}    align    [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.align = function(align){
   this.buffer.write(_.TEXT_FORMAT[
@@ -114,7 +114,7 @@ Printer.prototype.font = function(family){
 /**
  * [font style]
  * @param  {[type]}    type     [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.style = function(type){
   switch(type.toUpperCase()){
@@ -179,7 +179,7 @@ Printer.prototype.lineSpace = function(n) {
 /**
  * [hardware]
  * @param  {[type]}    hw       [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.hardware = function(hw){
   this.buffer.write(_.HARDWARE[ 'HW_'+ hw ]);
@@ -193,7 +193,7 @@ Printer.prototype.hardware = function(hw){
  * @param  {[type]}    height   [description]
  * @param  {[type]}    position [description]
  * @param  {[type]}    font     [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.barcode = function(code, type, width, height, position, font){
   if(width >= 1 || width <= 255){
@@ -310,7 +310,7 @@ Printer.prototype.raster = function (image, mode) {
 /**
  * [function Cut paper]
  * @param  {[type]} part [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.cut = function(part, feed){
   this.feed(feed || 3);
@@ -320,17 +320,28 @@ Printer.prototype.cut = function(part, feed){
   return this.flush();
 };
 
-
 /**
  * [function Send pulse to kick the cash drawer]
  * @param  {[type]} pin [description]
- * @return {[Printer]} printer  [description]
+ * @return printer instance
  */
 Printer.prototype.cashdraw = function(pin){
   this.buffer.write(_.CASH_DRAWER[
     'CD_KICK_' + (pin || 2)
   ]);
   return this.flush();
+};
+
+/**
+ * [close description]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
+Printer.prototype.close = function(callback){
+  var self = this;
+  return this.flush(function(){
+    self.adapter.close(callback);
+  });
 };
 
 /**

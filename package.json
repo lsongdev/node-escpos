@@ -32,6 +32,6 @@
     "usb": "*"
   },
   "devDependencies": {
-    "mocha": "^3.1.2"
+    "mocha": "*"
   }
 }
