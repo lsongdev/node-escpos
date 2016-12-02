@@ -108,6 +108,8 @@ _.BARCODE_FORMAT = {
   BARCODE_CODE39  : '\x1d\x6b\x04' , // Barcode type CODE39
   BARCODE_ITF     : '\x1d\x6b\x05' , // Barcode type ITF
   BARCODE_NW7     : '\x1d\x6b\x06' , // Barcode type NW7
+  BARCODE_CODE93  : '\x1d\x6b\x07' , // Barcode type CODE93
+  BARCODE_CODE128 : '\x1d\x6b\x08' , // Barcode type CODE128
 };
 
 /**

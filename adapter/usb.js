@@ -1,6 +1,6 @@
 'use strict';
+const usb           = require('usb');
 const util          = require('util');
-const usb           = require('usb') ;
 const EventEmitter  = require('events');
 
 /**
@@ -67,8 +67,9 @@ USB.findPrinter = function(){
 util.inherits(USB, EventEmitter);
 
 /**
- * [open description]
- * @return {[type]} [description]
+ * [open usb device]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
  */
 USB.prototype.open = function (callback){
   var self = this, counter = 0;
@@ -76,7 +77,7 @@ USB.prototype.open = function (callback){
   this.device.interfaces.forEach(function(iface){
     (function(iface){
       iface.setAltSetting(iface.altSetting, function(){
-        iface.claim();
+        iface.claim(); // must be called before using any endpoints of this interface.
         iface.endpoints.filter(function(endpoint){
           if(endpoint.direction == 'out' && !self.endpoint){
             self.endpoint = endpoint;
@@ -100,6 +101,12 @@ USB.prototype.open = function (callback){
 USB.prototype.write = function(data, callback){
   this.emit('data', data);
   this.endpoint.transfer(data, callback);
+  return this;
+};
+
+USB.prototype.close = function(callback){
+  this.device.close(callback);
+  return this;
 };
 
 /**

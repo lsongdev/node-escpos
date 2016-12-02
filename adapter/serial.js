@@ -1,12 +1,11 @@
 'use strict';
-const util         = require('util');
-const EventEmitter = require('events');
-const SerialPort   = require('serialport');
+const SerialPort = require('serialport');
+const Adapter    = require('../adapter');
 
 /**
- * [Serial description]
- * @param {[type]} port    [description]
- * @param {[type]} options [description]
+ * SerialPort device
+ * @param {[type]} port
+ * @param {[type]} options
  */
 function Serial(port, options){
   var self = this;
@@ -19,43 +18,46 @@ function Serial(port, options){
     self.emit('disconnect', self.device);
     self.device = null;
   });
-  EventEmitter.call(this);  
+  Adapter.call(this);
   return this;
 };
 
-util.inherits(Serial, EventEmitter);
-
 /**
- * [open description]
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
+ * open deivce
+ * @param  {Function} callback
+ * @return {[type]}
  */
 Serial.prototype.open = function(callback){
   this.device.open(callback);
   return this;
 };
+
 /**
- * [write description]
+ * write data to serialport device
  * @param  {[type]}   buf      [description]
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
  */
-Serial.prototype.write = function(buf, callback){
-  this.device.write(buf, callback);
+Serial.prototype.write = function(data, callback){
+  this.device.write(data, callback);
   return this;
 };
 
 /**
- * [close description]
+ * close device
  * @return {[type]} [description]
  */
-Serial.prototype.close = function() {
+Serial.prototype.close = function(callback) {
   var self = this;
-  this.device.drain(function() {
+  this.device.drain(function(err) {
     self.device.close();
     self.device = null;
+    callback && callback(err, self.device);
   });
   return this;
 };
 
-module.exports = Serial;
+/**
+ * expose
+ */
+module.exports = Adapter.extends(Serial);
