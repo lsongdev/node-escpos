@@ -1,4 +1,4 @@
-const escpos = require('../');
+const escpos = require('..');
 const assert = require('assert');
 
 describe('ESC/POS printing test', function() {
@@ -13,6 +13,7 @@ describe('ESC/POS printing test', function() {
 
   it('printer#print', function(done){
     var device = new escpos.Console(function(data){
+      assert.deepEqual(data, new Buffer('hello world'));
       done();
     });
     var printer = new escpos.Printer(device);

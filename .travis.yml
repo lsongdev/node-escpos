@@ -9,4 +9,4 @@ before_install:
 
 
 install:
-  - npm install -g node-pre-gyp-github
+  - npm install -g node-pre-gyp-github && npm i
