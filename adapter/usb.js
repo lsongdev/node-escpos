@@ -71,23 +71,24 @@ util.inherits(USB, EventEmitter);
  * @return {[type]} [description]
  */
 USB.prototype.open = function (callback){
-  var self = this;
+  var self = this, counter = 0;
   this.device.open();
   this.device.interfaces.forEach(function(iface){
-    iface.setAltSetting(iface.altSetting, function(){
-      iface.claim();
-      iface.endpoints.filter(function(endpoint){
-        if(endpoint.direction == 'out'){
-          self.endpoint = endpoint;
-          self.emit('connect', self.device);
-          callback && callback(null, self);
+    (function(iface){
+      iface.setAltSetting(iface.altSetting, function(){
+        iface.claim();
+        iface.endpoints.filter(function(endpoint){
+          if(endpoint.direction == 'out' && !self.endpoint){
+            self.endpoint = endpoint;
+            self.emit('connect', self.device);
+            callback && callback(null, self);  
+          }
+        });
+        if(++counter === this.device.interfaces.length && !self.endpoint){
+          callback && callback(new Error('Can not find endpoint from printer'));
         }
       });
-      if(!self.endpoint){
-        callback && callback(new Error('Can not find endpoint from printer'));
-      }
-    });
-
+    })(iface);
   });
   return this;
 };
