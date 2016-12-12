@@ -23,23 +23,37 @@ const IFACE_CLASS = {
  */
 function USB(vid, pid){
   var self = this;
+
+  this.device = null;
+  this.devices = [];
+
   if(vid && pid){
-    this.device = usb.findByIds(vid, pid);
+    this.devices = [usb.findByIds(vid, pid)];
+    this.device = this.devices[0];
   }else{
-    this.device = USB.findPrinter();
+    this.findPrinter();
   }
-  
+
   if (!this.device)
     throw new Error('Can not find printer');
-  
+
   usb.on('detach', function(device){
-    if(device == self.device){
-      self.emit('detach'    , device);
-      self.emit('disconnect', device);
-      self.device = null;
+    self.emit('detach'    , device);
+    self.emit('disconnect', device);
+
+    for(let i in self.devices) {
+      if(device == self.devices[i]) {
+        self.devices.splice(i, 1);
+      }
+    }
+
+    if(device == self.device) {
+      if(self.devices.length > 0) {
+        self.device = self.devices[0];
+      } else self.device = null;
     }
   });
-  EventEmitter.call(this);  
+  EventEmitter.call(this);
   return this;
 };
 
@@ -47,8 +61,8 @@ function USB(vid, pid){
  * [findPrinter description]
  * @return {[type]} [description]
  */
-USB.findPrinter = function(){
-  return usb.getDeviceList().filter(function(device){
+USB.prototype.findPrinter = function(){
+  this.devices = usb.getDeviceList().filter(function(device){
     try{
       return device.configDescriptor.interfaces.filter(function(iface){
         return iface.filter(function(conf){
@@ -58,7 +72,12 @@ USB.findPrinter = function(){
     }catch(e){
       return false;
     }
-  })[0];
+  });
+
+  if(this.devices.length > 0) {
+    // Select first printer found by default
+    this.device = this.devices[0];
+  }
 };
 
 /**
@@ -71,28 +90,74 @@ util.inherits(USB, EventEmitter);
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
  */
-USB.prototype.open = function (callback){
-  var self = this, counter = 0;
+USB.prototype.open = function (callback, i){
+  let self = this, counter = 0, index = i || 0;
   this.device.open();
   this.device.interfaces.forEach(function(iface){
     (function(iface){
       iface.setAltSetting(iface.altSetting, function(){
         iface.claim(); // must be called before using any endpoints of this interface.
         iface.endpoints.filter(function(endpoint){
-          if(endpoint.direction == 'out' && !self.endpoint){
+          if(endpoint.direction == 'out' && !self.endpoint) {
             self.endpoint = endpoint;
-            self.emit('connect', self.device);
-            callback && callback(null, self);  
+            self.devices[index]._endpoint = endpoint; // store each endpoint for later
           }
         });
-        if(++counter === this.device.interfaces.length && !self.endpoint){
+
+        if(self.endpoint) {
+          self.emit('connect', self.device);
+          callback && callback(null, self);
+        } else if(++counter === this.device.interfaces.length && !self.endpoint){
           callback && callback(new Error('Can not find endpoint from printer'));
         }
       });
     })(iface);
   });
+
   return this;
 };
+
+USB.prototype.openAll = function (callback) {
+  this.openNext(0, callback);
+  return this;
+};
+
+USB.prototype.openNext = function(index, callback) {
+  let self = this;
+
+  this.setDevice(index).open(function(err) {
+    if(err) {
+      console.log(err);
+      return;
+    }
+
+    if((index+1) == self.devices.length) {
+      callback && callback(null);
+    } else {
+      self.openNext(index+1, callback);
+    }
+  }, index);
+
+  return this;
+}
+
+USB.prototype.setDevice = function(i) {
+  if(this.devices[i]) {
+    this.device = this.devices[i];
+    if('_endpoint' in this.device) {
+      this.endpoint = this.device._endpoint;
+    } else {
+      this.endpoint = null;
+    }
+  }
+
+  return this;
+};
+
+USB.prototype.getDevices = function() {
+  return this.devices.length;
+};
+
 /**
  * [function write]
  * @param  {[type]} data [description]
@@ -108,6 +173,27 @@ USB.prototype.close = function(callback){
   this.device.close(callback);
   return this;
 };
+
+USB.prototype.closeAll = function(callback){
+  let self = this;
+  self.closeNext(0, callback);
+  return this;
+};
+
+USB.prototype.closeNext = function(index, callback) {
+  let self = this;
+
+  self.setDevice(index).close(function() {
+    self.devices.splice(index, 1);
+    if(self.devices.length == 0) {
+      callback && callback(null);
+    } else {
+      self.closeNext(0, callback);
+    }
+  });
+
+  return this;
+}
 
 /**
  * [exports description]
