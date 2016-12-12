@@ -149,7 +149,7 @@ USB.prototype.setDevice = function(i) {
     } else {
       this.endpoint = null;
     }
-  }
+  } else throw new Error('Unknown device');
 
   return this;
 };
@@ -176,19 +176,19 @@ USB.prototype.close = function(callback){
 
 USB.prototype.closeAll = function(callback){
   let self = this;
-  self.closeNext(0, callback);
+  self.closeNext(callback);
   return this;
 };
 
-USB.prototype.closeNext = function(index, callback) {
+USB.prototype.closeNext = function(callback) {
   let self = this;
 
-  self.setDevice(index).close(function() {
-    self.devices.splice(index, 1);
+  self.setDevice(0).close(function() {
+    self.devices.splice(0, 1);
     if(self.devices.length == 0) {
       callback && callback(null);
     } else {
-      self.closeNext(0, callback);
+      self.closeNext(callback);
     }
   });
 

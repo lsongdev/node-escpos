@@ -20,4 +20,9 @@ device.openAll(function(){
     }, 500*i);
   }
 
+  setTimeout(function() {
+    device.closeAll(function() {
+      console.log('Closed all');
+    })
+  }, 1000*devices);
 });
