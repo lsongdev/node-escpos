@@ -12,9 +12,9 @@ $ npm i escpos
 
 if you use usb as an adapter :
 
-+ On Linux, you'll need `libudev` to build libusb. 
++ On Linux, you'll need `libudev` to build libusb.
 + On Ubuntu/Debian: `sudo apt-get install build-essential libudev-dev`.
-+ On Windows, Use [Zadig](http://sourceforge.net/projects/libwdi/files/zadig/) to install the WinUSB driver for your USB device. 
++ On Windows, Use [Zadig](http://sourceforge.net/projects/libwdi/files/zadig/) to install the WinUSB driver for your USB device.
 
 Otherwise you will get `LIBUSB_ERROR_NOT_SUPPORTED` when attempting to open devices.
 
@@ -23,6 +23,7 @@ Otherwise you will get `LIBUSB_ERROR_NOT_SUPPORTED` when attempting to open devi
 ````javascript
 const escpos = require('escpos');
 
+// Select the adapter based on your printer type
 const device  = new escpos.USB();
 // const device  = new escpos.Network('localhost');
 // const device  = new escpos.Serial('/dev/usb/lp0');
@@ -48,8 +49,37 @@ device.open(function(){
 
 
 ````
+----
+## USB Adapter methods
+### open(function calback)
+Claims the current device USB, if the printer is already in use by other process this will fail.
 
-## Documentation
+By default, the USB adapter will set the first printer found, if you have multiple printers use `setDevice` and `getDevices` to switch between printers.
+
+Triggers the callback function when done.
+
+### openAll()
+Claims all the printers connected to the machine, one by one. When done, sets the first printer found as the default device and triggers the callback function.
+
+### getDevices()
+Returns the number (N) of printers connected, if open is called you must open each device in order to use it.
+
+The ID of the printer will be the number you want to set from 0 to N-1.
+
+### setDevice(N)
+Sets the index passed as the current device, N must be higher than 0 and lower than `getDevices()`.
+
+This must be called before printing if you want to swtich between multiple printers connected to the same device.
+
+### close(function callback)
+Closes the current device and releases its USB interface.
+
+### closeAll(function callback)
+Similar to `close()` but loops through all the devices connected and closes them all.
+
+----
+
+## Printer methods
 
 Escpos inherits its methods to the printers. the following methods are defined:
 
@@ -133,11 +163,15 @@ Partial cut is not implemented in all printers.
 Sends a pulse to the cash drawer in the specified pin.
 
 pin is a numeric value which defines the pin to be used to send the pulse, it could be 2 or 5.
-Raises CashDrawerError()
+Raises `CashDrawerError()``
+
+----
 
 ## Thanks
 
 + Part of code from [@taoyuan](https://github.com/taoyuan)
+
+----
 
 ## Contributing
 - Fork this repo
@@ -147,6 +181,8 @@ Raises CashDrawerError()
 - Feel free to add your features
 - Make sure your features are fully tested
 - Open a pull request, and enjoy <3
+
+----
 
 ### MIT license
 Copyright (c) 2015 lsong
