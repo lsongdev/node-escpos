@@ -1,19 +1,21 @@
 'use strict';
-const net     = require('net');
-const Adapter = require('../adapter');
-
+const net           = require('net');
+const util          = require('util');
+const EventEmitter  = require('events');
 /**
  * Network Adapter
  * @param {[type]} address
  * @param {[type]} port
  */
 function Network(address, port){
-  Adapter.call(this);
+  EventEmitter.call(this);
   this.address = address;
   this.port = port || 9100;
   this.device = new net.Socket();
   return this;
 };
+
+util.inherits(Network, EventEmitter);
 
 /**
  * connect to remote device
@@ -55,4 +57,4 @@ Network.prototype.close = function(callback){
   return this;
 }
 
-module.exports = Adapter.extends(Network);
+module.exports = Network;

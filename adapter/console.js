@@ -1,3 +1,4 @@
+'use strict';
 /**
  * [stdout description]
  * @param  {[type]} data [description]

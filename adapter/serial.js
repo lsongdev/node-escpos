@@ -1,6 +1,7 @@
 'use strict';
-const SerialPort = require('serialport');
-const Adapter    = require('../adapter');
+const util          = require('util');
+const EventEmitter  = require('events');
+const SerialPort    = require('serialport');
 
 /**
  * SerialPort device
@@ -18,9 +19,11 @@ function Serial(port, options){
     self.emit('disconnect', self.device);
     self.device = null;
   });
-  Adapter.call(this);
+  EventEmitter.call(this);
   return this;
 };
+
+util.inherits(Serial, EventEmitter);
 
 /**
  * open deivce
@@ -60,4 +63,4 @@ Serial.prototype.close = function(callback) {
 /**
  * expose
  */
-module.exports = Adapter.extends(Serial);
+module.exports = Serial;
