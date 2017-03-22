@@ -25,7 +25,9 @@ util.inherits(Network, EventEmitter);
 Network.prototype.open = function(callback){
   var self = this;
   //connect to net printer by socket (port,ip)
-  this.device.connect(this.port, this.address, function(err){
+  this.device.on("error", (err) => {
+    callback && callback(err, self.device);
+  }).connect(this.port, this.address, function(err){
     self.emit('connect', self.device);
     callback && callback(err, self.device);
   });
