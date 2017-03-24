@@ -66,9 +66,33 @@ _.PAPER = {
  * @type {Object}
  */
 _.TEXT_FORMAT = {
+
   TXT_NORMAL      : '\x1b\x21\x00', // Normal text
   TXT_2HEIGHT     : '\x1b\x21\x10', // Double height text
   TXT_2WIDTH      : '\x1b\x21\x20', // Double width text
+  TXT_4SQUARE     : '\x1b\x21\x30', // Double width & height text
+
+  TXT_SIZE        : '\x1d\x21', // other sizes
+  TXT_HEIGHT      : {
+    1: '\x00',
+    2: '\x01',
+    3: '\x02',
+    4: '\x03',
+    5: '\x04',
+    6: '\x05',
+    7: '\x06',
+    8: '\x07'
+  },
+  TXT_WIDTH       : {
+    1: '\x00',
+    2: '\x10',
+    3: '\x20',
+    4: '\x30',
+    5: '\x40',
+    6: '\x50',
+    7: '\x60',
+    8: '\x70'
+  },
 
   TXT_UNDERL_OFF  : '\x1b\x2d\x00', // Underline font OFF
   TXT_UNDERL_ON   : '\x1b\x2d\x01', // Underline font 1-dot ON
