@@ -51,6 +51,16 @@ _.CASH_DRAWER = {
 };
 
 /**
+ * [MARGINS Margins sizes]
+ * @type {Object}
+ */
+_.MARGINS = {
+  BOTTOM:    '\x1b\x4f'           , // Fix bottom size
+  LEFT:      '\x1b\x6c'           , // Fix left size
+  RIGHT:     '\x1b\x51'           , // Fix right size
+};
+
+/**
  * [PAPER Paper]
  * @type {Object}
  */

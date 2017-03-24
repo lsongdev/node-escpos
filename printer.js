@@ -29,6 +29,39 @@ function Printer(adapter){
 util.inherits(Printer, EventEmitter);
 
 /**
+ * Fix bottom margin
+ * @param  {[String]} size
+ * @return printer instance
+ */
+Printer.prototype.marginBottom = function(size){
+  this.buffer.write(_.MARGINS.BOTTOM);
+  this.buffer.writeUInt8(size);
+  return this;
+};
+
+/**
+ * Fix left margin
+ * @param  {[String]} size
+ * @return printer instance
+ */
+Printer.prototype.marginLeft = function(size){
+  this.buffer.write(_.MARGINS.LEFT);
+  this.buffer.writeUInt8(size);
+  return this;
+};
+
+/**
+ * Fix right margin
+ * @param  {[String]} size
+ * @return printer instance
+ */
+Printer.prototype.marginRight = function(size){
+  this.buffer.write(_.MARGINS.RIGHT);
+  this.buffer.writeUInt8(size);
+  return this;
+};
+
+/**
  * Send data to hardware and flush buffer
  * @param  {Function} callback
  * @return printer instance
