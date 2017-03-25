@@ -29,6 +29,39 @@ function Printer(adapter){
 util.inherits(Printer, EventEmitter);
 
 /**
+ * Fix bottom margin
+ * @param  {[String]} size
+ * @return printer instance
+ */
+Printer.prototype.marginBottom = function(size){
+  this.buffer.write(_.MARGINS.BOTTOM);
+  this.buffer.writeUInt8(size);
+  return this;
+};
+
+/**
+ * Fix left margin
+ * @param  {[String]} size
+ * @return printer instance
+ */
+Printer.prototype.marginLeft = function(size){
+  this.buffer.write(_.MARGINS.LEFT);
+  this.buffer.writeUInt8(size);
+  return this;
+};
+
+/**
+ * Fix right margin
+ * @param  {[String]} size
+ * @return printer instance
+ */
+Printer.prototype.marginRight = function(size){
+  this.buffer.write(_.MARGINS.RIGHT);
+  this.buffer.writeUInt8(size);
+  return this;
+};
+
+/**
  * Send data to hardware and flush buffer
  * @param  {Function} callback
  * @return printer instance
@@ -118,31 +151,71 @@ Printer.prototype.font = function(family){
  */
 Printer.prototype.style = function(type){
   switch(type.toUpperCase()){
+
     case 'B':
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      break;
+    case 'I':
+      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
       break;
     case 'U':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
       break;
     case 'U2':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      break;
+
+    case 'BI':
+      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      break;
+    case 'BIU':
+      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      break;
+    case 'BIU2':
+      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
       break;
     case 'BU':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
       break;
     case 'BU2':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
       break;
+    case 'IU':
+      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      break;
+    case 'IU2':
+      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      break;
+
     case 'NORMAL':
     default:
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
       break;
+
   }
   return this;
 };
@@ -153,12 +226,33 @@ Printer.prototype.style = function(type){
  * @param  {[String]}  height  [description]
  * @return {[Printer]} printer [description]
  */
-Printer.prototype.size = function(width, height){
-  // DEFAULT SIZE: NORMAL
-  this.buffer.write(_.TEXT_FORMAT.TXT_NORMAL);
-  if(width == 2)  this.buffer.write(_.TEXT_FORMAT.TXT_2WIDTH);
-  if(height == 2) this.buffer.write(_.TEXT_FORMAT.TXT_2HEIGHT);
+Printer.prototype.size = function(width, height) {
+
+  if (2 >= width && 2 >= height) {
+
+    this.buffer.write(_.TEXT_FORMAT.TXT_NORMAL);
+
+    if (2 == width && 2 == height) {
+      this.buffer.write(_.TEXT_FORMAT.TXT_4SQUARE);
+    }
+    else if (1 == width && 2 == height) {
+      this.buffer.write(_.TEXT_FORMAT.TXT_2HEIGHT);
+    }
+    else if (2 == width && 1 == height) {
+      this.buffer.write(_.TEXT_FORMAT.TXT_2WIDTH);
+    }
+
+  }
+  else {
+
+    this.buffer.write(_.TEXT_FORMAT.TXT_SIZE);
+    this.buffer.write(_.TEXT_FORMAT.TXT_WIDTH[(8 >= width) ? width : 8]);
+    this.buffer.write(_.TEXT_FORMAT.TXT_HEIGHT[(8 >= height) ? height : 8]);
+
+  }
+
   return this;
+
 };
 
 /**

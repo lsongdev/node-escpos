@@ -51,6 +51,16 @@ _.CASH_DRAWER = {
 };
 
 /**
+ * [MARGINS Margins sizes]
+ * @type {Object}
+ */
+_.MARGINS = {
+  BOTTOM:    '\x1b\x4f'           , // Fix bottom size
+  LEFT:      '\x1b\x6c'           , // Fix left size
+  RIGHT:     '\x1b\x51'           , // Fix right size
+};
+
+/**
  * [PAPER Paper]
  * @type {Object}
  */
@@ -66,15 +76,41 @@ _.PAPER = {
  * @type {Object}
  */
 _.TEXT_FORMAT = {
+
   TXT_NORMAL      : '\x1b\x21\x00', // Normal text
   TXT_2HEIGHT     : '\x1b\x21\x10', // Double height text
   TXT_2WIDTH      : '\x1b\x21\x20', // Double width text
+  TXT_4SQUARE     : '\x1b\x21\x30', // Double width & height text
+
+  TXT_SIZE        : '\x1d\x21', // other sizes
+  TXT_HEIGHT      : {
+    1: '\x00',
+    2: '\x01',
+    3: '\x02',
+    4: '\x03',
+    5: '\x04',
+    6: '\x05',
+    7: '\x06',
+    8: '\x07'
+  },
+  TXT_WIDTH       : {
+    1: '\x00',
+    2: '\x10',
+    3: '\x20',
+    4: '\x30',
+    5: '\x40',
+    6: '\x50',
+    7: '\x60',
+    8: '\x70'
+  },
 
   TXT_UNDERL_OFF  : '\x1b\x2d\x00', // Underline font OFF
   TXT_UNDERL_ON   : '\x1b\x2d\x01', // Underline font 1-dot ON
   TXT_UNDERL2_ON  : '\x1b\x2d\x02', // Underline font 2-dot ON
   TXT_BOLD_OFF    : '\x1b\x45\x00', // Bold font OFF
   TXT_BOLD_ON     : '\x1b\x45\x01', // Bold font ON
+  TXT_ITALIC_OFF  : '\x1b\x35', // Italic font ON
+  TXT_ITALIC_ON   : '\x1b\x34', // Italic font ON
 
   TXT_FONT_A      : '\x1b\x4d\x00', // Font type A
   TXT_FONT_B      : '\x1b\x4d\x01', // Font type B
