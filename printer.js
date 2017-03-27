@@ -155,65 +155,65 @@ Printer.prototype.style = function(type){
     case 'B':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
       break;
     case 'I':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
       break;
     case 'U':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
       break;
     case 'U2':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
       break;
 
     case 'BI':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
       break;
     case 'BIU':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
       break;
     case 'BIU2':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
       break;
     case 'BU':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
       break;
     case 'BU2':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
       break;
     case 'IU':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
       break;
     case 'IU2':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
       break;
 
     case 'NORMAL':
     default:
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
       this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF); this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_OFF);
+      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
       break;
 
   }
