@@ -1,6 +1,6 @@
 {
   "name": "escpos",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,8 @@
   ],
   "author": "lsong",
   "contributors": [
-    "Jose Vera <hola@jose.com.co>"
+    "Jose Vera <hola@jose.com.co>",
+    "Sébastien Vidal <Psychopoulet@GitHub.com>"
   ],
   "license": "MIT",
   "bugs": {
