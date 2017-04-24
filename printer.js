@@ -290,11 +290,15 @@ Printer.prototype.hardware = function(hw){
  * @return printer instance
  */
 Printer.prototype.barcode = function(code, type, width, height, position, font){
-  if(width >= 1 || width <= 255){
-    this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH);
+  if(width >= 2 || width <= 6){
+    this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[width]);
+  }else{
+    this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
   }
-  if(height >=2  || height <= 6){
-    this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT);
+  if(height >=1  || height <= 255){
+    this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT(height));
+  }else{
+    this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
   }
   this.buffer.write(_.BARCODE_FORMAT[
     'BARCODE_FONT_' + (font || 'A').toUpperCase()
