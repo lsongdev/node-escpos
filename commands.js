@@ -134,8 +134,18 @@ _.BARCODE_FORMAT = {
   BARCODE_FONT_A  : '\x1d\x66\x00' , // Font type A for HRI barcode chars
   BARCODE_FONT_B  : '\x1d\x66\x01' , // Font type B for HRI barcode chars
 
-  BARCODE_HEIGHT  : '\x1d\x68\x64' , // Barcode Height [1-255]
-  BARCODE_WIDTH   : '\x1d\x77\x03' , // Barcode Width  [2-6]
+  BARCODE_HEIGHT  : function(height){ // Barcode Height [1-255]
+    return '\x1d\x68'+String.fromCharCode(height);
+  },
+  BARCODE_WIDTH  : {                  // Barcode Width  [2-6]
+                1: '\x1d\x77\x02',
+                2: '\x1d\x77\x03',
+                3: '\x1d\x77\x04',
+                4: '\x1d\x77\x05',
+                5: '\x1d\x77\x06'
+  },
+  BARCODE_HEIGHT_DEFAULT  : '\x1d\x77\x64', // Barcode height default:100
+  BARCODE_WIDTH_DEFAULT   : '\x1d\x77\x03', // Barcode width default:3
 
   BARCODE_UPC_A   : '\x1d\x6b\x00' , // Barcode type UPC-A
   BARCODE_UPC_E   : '\x1d\x6b\x01' , // Barcode type UPC-E
