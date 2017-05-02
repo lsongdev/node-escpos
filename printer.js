@@ -227,32 +227,21 @@ Printer.prototype.style = function(type){
  * @return {[Printer]} printer [description]
  */
 Printer.prototype.size = function(width, height) {
-
   if (2 >= width && 2 >= height) {
-
     this.buffer.write(_.TEXT_FORMAT.TXT_NORMAL);
-
     if (2 == width && 2 == height) {
       this.buffer.write(_.TEXT_FORMAT.TXT_4SQUARE);
-    }
-    else if (1 == width && 2 == height) {
+    } else if (1 == width && 2 == height) {
       this.buffer.write(_.TEXT_FORMAT.TXT_2HEIGHT);
-    }
-    else if (2 == width && 1 == height) {
+    } else if (2 == width && 1 == height) {
       this.buffer.write(_.TEXT_FORMAT.TXT_2WIDTH);
     }
-
-  }
-  else {
-
+  } else {
     this.buffer.write(_.TEXT_FORMAT.TXT_SIZE);
     this.buffer.write(_.TEXT_FORMAT.TXT_WIDTH[(8 >= width) ? width : 8]);
     this.buffer.write(_.TEXT_FORMAT.TXT_HEIGHT[(8 >= height) ? height : 8]);
-
   }
-
   return this;
-
 };
 
 /**

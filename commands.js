@@ -137,12 +137,13 @@ _.BARCODE_FORMAT = {
   BARCODE_HEIGHT  : function(height){ // Barcode Height [1-255]
     return '\x1d\x68'+String.fromCharCode(height);
   },
-  BARCODE_WIDTH  : {                  // Barcode Width  [2-6]
-                1: '\x1d\x77\x02',
-                2: '\x1d\x77\x03',
-                3: '\x1d\x77\x04',
-                4: '\x1d\x77\x05',
-                5: '\x1d\x77\x06'
+  // Barcode Width  [2-6]
+  BARCODE_WIDTH  : {
+    1: '\x1d\x77\x02',
+    2: '\x1d\x77\x03',
+    3: '\x1d\x77\x04',
+    4: '\x1d\x77\x05',
+    5: '\x1d\x77\x06',
   },
   BARCODE_HEIGHT_DEFAULT  : '\x1d\x77\x64', // Barcode height default:100
   BARCODE_WIDTH_DEFAULT   : '\x1d\x77\x03', // Barcode width default:3
