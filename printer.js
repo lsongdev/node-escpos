@@ -237,9 +237,7 @@ Printer.prototype.size = function(width, height) {
       this.buffer.write(_.TEXT_FORMAT.TXT_2WIDTH);
     }
   } else {
-    this.buffer.write(_.TEXT_FORMAT.TXT_SIZE);
-    this.buffer.write(_.TEXT_FORMAT.TXT_WIDTH[(8 >= width) ? width : 8]);
-    this.buffer.write(_.TEXT_FORMAT.TXT_HEIGHT[(8 >= height) ? height : 8]);
+    this.buffer.write(_.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height));
   }
   return this;
 };

@@ -82,7 +82,13 @@ _.TEXT_FORMAT = {
   TXT_2WIDTH      : '\x1b\x21\x20', // Double width text
   TXT_4SQUARE     : '\x1b\x21\x30', // Double width & height text
 
-  TXT_SIZE        : '\x1d\x21', // other sizes
+  TXT_CUSTOM_SIZE  : function(width, height){ // other sizes
+    var widthDec = (width - 1) * 16;
+    var heightDec = height - 1;
+    var sizeDec = widthDec+heightDec;
+    return '\x1d\x21'+String.fromCharCode(sizeDec);
+  },
+
   TXT_HEIGHT      : {
     1: '\x00',
     2: '\x01',
