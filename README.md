@@ -7,7 +7,7 @@ ESC/POS Printer driver for node
 ## Installation
 
 ````
-$ npm i escpos
+$ npm i escpos --save
 ````
 
 if you use usb as an adapter :
@@ -46,36 +46,24 @@ device.open(function(){
   });
 
 });
-
-
 ````
+
 ----
+
+
 ## USB Adapter methods
+
 ### open(function calback)
+
 Claims the current device USB, if the printer is already in use by other process this will fail.
 
-By default, the USB adapter will set the first printer found, if you have multiple printers use `setDevice` and `getDevices` to switch between printers.
+By default, the USB adapter will set the first printer found .
 
 Triggers the callback function when done.
 
-### openAll()
-Claims all the printers connected to the machine, one by one. When done, sets the first printer found as the default device and triggers the callback function.
-
-### getDevices()
-Returns the number (N) of printers connected, if open is called you must open each device in order to use it.
-
-The ID of the printer will be the number you want to set from 0 to N-1.
-
-### setDevice(N)
-Sets the index passed as the current device, N must be higher than 0 and lower than `getDevices()`.
-
-This must be called before printing if you want to swtich between multiple printers connected to the same device.
-
 ### close(function callback)
-Closes the current device and releases its USB interface.
 
-### closeAll(function callback)
-Similar to `close()` but loops through all the devices connected and closes them all.
+Closes the current device and releases its USB interface.
 
 ----
 
@@ -157,6 +145,8 @@ Cut paper.
 
 mode set a full or partial cut. Default: full
 Partial cut is not implemented in all printers.
+
+*** Don't foget this, because cut will flush buffer to printer ***
 
 ### cashdraw(pin)
 
