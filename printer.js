@@ -6,6 +6,7 @@ const getPixels    = require('get-pixels');
 const Buffer       = require('mutable-buffer');
 const EventEmitter = require('events');
 const Image        = require('./image');
+const Barcode      = require('./barcode');
 const _            = require('./commands');
 
 /**
@@ -277,6 +278,8 @@ Printer.prototype.hardware = function(hw){
  * @return printer instance
  */
 Printer.prototype.barcode = function(code, type, width, height, position, font){
+  var convertCode = String(code);
+  var parityBit = ''
   if(width >= 2 || width <= 6){
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[width]);
   }else{
@@ -296,7 +299,16 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   this.buffer.write(_.BARCODE_FORMAT[
     'BARCODE_' + ((type || 'EAN13').replace('-', '_').toUpperCase())
   ]);
-  this.buffer.write(code);
+  if ((!type || type === 'EAN13') && convertCode.length != 12) {
+    throw Error('EAN13 Barcode type requires code length 12');
+  }
+  if (type === 'EAN8' && convertCode.length != 7) {
+    throw Error('EAN8 Barcode type requires code length 7');
+  }
+  if (!type || type === 'EAN13' || type === 'EAN8') {
+    parityBit = Barcode.getParityBit(code, type || 'EAN13');
+  }
+  this.buffer.write(code + parityBit);
   return this;
 };
 
