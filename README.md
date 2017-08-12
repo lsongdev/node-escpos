@@ -157,9 +157,18 @@ Raises `CashDrawerError()``
 
 ----
 
+## Screencast
+
+![IMG_1031.JPG](./screencasts/IMG_1031.JPG)
+
+----
+
 ## Thanks
 
 + Part of code from [@taoyuan](https://github.com/taoyuan)
++ [Jose Vera](https://github.com/jor3l)
++ [Sébastien Vidal](https://github.com/Psychopoulet)
++ [Yu Yongwoo](https://github.com/uyu423)
 
 ----
 
