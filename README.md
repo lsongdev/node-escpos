@@ -165,7 +165,7 @@ Raises `CashDrawerError()``
 
 ## Thanks
 
-+ Part of code from [@taoyuan](https://github.com/taoyuan)
++ [Tao Yuan](https://github.com/taoyuan)
 + [Jose Vera](https://github.com/jor3l)
 + [Sébastien Vidal](https://github.com/Psychopoulet)
 + [Yu Yongwoo](https://github.com/uyu423)

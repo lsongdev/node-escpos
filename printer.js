@@ -278,7 +278,7 @@ Printer.prototype.hardware = function(hw){
  * @return printer instance
  */
 Printer.prototype.barcode = function(code, type, width, height, position, font){
-	type = type || 'EAN13'; // default type is EAN13, may a good choice ?
+  type = type || 'EAN13'; // default type is EAN13, may a good choice ?
   var convertCode = String(code), parityBit = '';
   if(typeof type === 'undefined' || type === null){
     throw new TypeError('barcode type is required');
