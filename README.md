@@ -6,9 +6,15 @@ ESC/POS Printer driver for node
 
 ## Installation
 
-````
+### npm
+```bash
 $ npm i escpos --save
-````
+```
+
+### yarn
+```bash
+$ yarn add escpos
+```
 
 if you use usb as an adapter :
 
@@ -31,7 +37,6 @@ const device  = new escpos.USB();
 const printer = new escpos.Printer(device);
 
 device.open(function(){
-
   printer
   .font('a')
   .align('ct')
@@ -39,41 +44,94 @@ device.open(function(){
   .size(1, 1)
   .text('The quick brown fox jumps over the lazy dog')
   .text('敏捷的棕色狐狸跳过懒狗')
-  .barcode('12345678', 'EAN8')
+  .barcode('1234567', 'EAN8')
   .qrimage('https://github.com/song940/node-escpos', function(err){
     this.cut();
     this.close();
   });
-
 });
 ````
+- See `./examples` for more examples.
 
 ----
+## Adapter
+
+### Constructors
+
+You can choose your adapter type as USB, Serial, Network, or Console.
+
+#### USB(vid, pid)
+```javascript
+const usbDevice = new escpos.USB(0x01, 0xff);
+```
+vid(Vendor Id) and pid (Product Id) can be checked with the `lsusb` command or `escpos.USB.findPrinter()` method.
+
+#### Serial("port", options)
+```javascript
+const serialDeviceOnWindows = new escpos.Serial('COM10');
+const serialDeviceOnLinux = new escpos.Serial('/dev/usb/lp0', {
+  bandRate: 14400,
+  stopBit: 2
+});
+```
+Check the [serialport package documentation](https://github.com/EmergingTechnologyAdvisors/node-serialport#serialportopenoptions--object) for more options.
 
 
-## USB Adapter methods
+#### Network(address, port = 9100)
+```javascript
+const networkDevice = new escpos.Network('localhost', 3000);
+```
+The default port number is 9100.
 
-### open(function callback)
+#### Console(handler = stdout)
+```javascript
+const debugDevice = new escpos.Console();
+```
 
-Claims the current device USB, if the printer is already in use by other process this will fail.
+### Methods
+
+#### open(function callback)
+
+Claims the current device USB (or other device type), if the printer is already in use by other process this will fail.
 
 By default, the USB adapter will set the first printer found .
 
 Triggers the callback function when done.
 
-### close(function callback)
+#### close(function callback)
 
 Closes the current device and releases its USB interface.
 
 ----
 
-## Printer methods
+## Printer
+
+### Constructors
+
+#### Printer(device)
+
+```javascript
+const usbDevice = new escpos.USB();
+const usbPrinter = new escpos.Printer(usbDevice);
+
+const serialDevice = new escpos.Serial('/dev/usb/lp0');
+const serialPrinter = new escpos.Printer(serialDevice);
+
+const networkDevice = new escpos.Network('localhost');
+const networkPrinter = new escpos.Printer(networkDevice);
+```
+
+### Methods
 
 Escpos inherits its methods to the printers. the following methods are defined:
 
-### text("text")
+### text("text", encodeType)
 
 Prints raw text. Raises TextError exception.
+
+For the encode type, see the [iconv-lite wiki document](https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings). Escpos uses `iconv-lite` for encoding.
+
+If the type is undefined, the default type is GB18030.
 
 ### control("align")
 
@@ -94,17 +152,22 @@ Set text properties.
 
 align set horizontal position for text, the possible values are:
 
-+ CENTER
-+ LEFT
-+ RIGHT
++ CT is the Center alignment
++ LT is the Left alignment
++ RT is the Right alignment
 
-Default: left
+Default: LT
 
+### font("type")
 font type could be A or B. Default: A
+
+### size(width, heigth)
+
 width is a numeric value, 1 is for regular size, and 2 is twice the standard size. Default: 1
+
 height is a numeric value, 1 is for regular size and 2 is twice the standard size. Default: 1
 
-### barcode("code", "barcode_type", width, height, "position", "font")
+### barcode("code", "barcodeType", width, height, "position", "font")
 
 Prints a barcode.
 
@@ -118,6 +181,8 @@ barcode_type must be one of the following type of codes:
 + CODE39
 + ITF
 + NW7
+
+The EAN type automatically calculates the last parity bit. For the EAN13 type, the length of the string is limited to 12, and EAN8 is limited to 7. (#57)
 
 width is a numeric value in the range between (1,255) Default: 64
 height is a numeric value in the range between (2,6) Default: 3
@@ -159,7 +224,7 @@ Raises `CashDrawerError()``
 
 ## Screencast
 
-![IMG_1031.JPG](./screencasts/IMG_1031.JPG)
+![img_1031](https://user-images.githubusercontent.com/8033320/29250339-d66ce470-807b-11e7-89ce-9962da88ca18.JPG)
 
 ----
 
