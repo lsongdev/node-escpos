@@ -53,7 +53,7 @@ device.open(function(){
 
 ## USB Adapter methods
 
-### open(function calback)
+### open(function callback)
 
 Claims the current device USB, if the printer is already in use by other process this will fail.
 
