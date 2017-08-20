@@ -1,4 +1,5 @@
 # ESCPOS [![npm version](https://badge.fury.io/js/escpos.svg)](https://www.npmjs.com/package/escpos )
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fsong940%2Fnode-escpos.svg?type=shield)](https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fsong940%2Fnode-escpos?ref=badge_shield)
 
 ESC/POS Printer driver for node
 
@@ -270,3 +271,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ---
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fsong940%2Fnode-escpos.svg?type=large)](https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fsong940%2Fnode-escpos?ref=badge_large)
