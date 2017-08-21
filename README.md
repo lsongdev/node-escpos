@@ -131,7 +131,7 @@ Prints raw text. Raises TextError exception.
 
 For the encode type, see the [iconv-lite wiki document](https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings). Escpos uses `iconv-lite` for encoding.
 
-If the type is undefined, the default type is GB18030.
+If the type is undefined, the default type is UTF8.
 
 ### control("align")
 
