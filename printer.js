@@ -99,7 +99,7 @@ Printer.prototype.println = function(content){
  * @return printer instance
  */
 Printer.prototype.text = function(content, encoding){
-  return this.print(iconv.encode(content + _.EOL, encoding || 'GB18030'));
+  return this.print(iconv.encode(content + _.EOL, encoding || 'utf8'));
 };
 
 /**
