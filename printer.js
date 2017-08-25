@@ -22,6 +22,7 @@ function Printer(adapter){
   EventEmitter.call(this);
   this.adapter = adapter;
   this.buffer = new Buffer();
+    this.codetable();
 };
 
 /**
@@ -98,8 +99,8 @@ Printer.prototype.println = function(content){
  * @param  {[String]}  encoding [description]
  * @return printer instance
  */
-Printer.prototype.text = function(content, encoding){
-  return this.print(iconv.encode(content + _.EOL, encoding || 'GB18030'));
+Printer.prototype.text = function (content, encoding) {
+  return this.print(iconv.encode(content + _.EOL, encoding || 'iso-8859-1'));
 };
 
 /**
@@ -335,6 +336,60 @@ Printer.prototype.qrcode = function(code, version, level, size){
   this.buffer.write(code);
   return this;
 };
+Printer.prototype.write = function (value, encoding) {
+  if (typeof value === "number") {
+    this.buffer.writeUInt8(value);
+  } else if (typeof value === "string") {
+    this.buffer.write(iconv.encode(value, (encoding || 'binary')));
+  } else {
+    this.buffer.write(value);
+  }
+  return this;
+}
+
+Printer.prototype.pdf417 = function (code) {
+  //cols
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.COLS);
+  this.buffer.write('\x0c');//12
+  //rows
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.ROWS);
+  this.buffer.write('\x0a');//30
+
+  //width
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.WIDTH);
+  this.buffer.write('\x02');
+  //height
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.HEIGHT);
+  this.buffer.write('\x02');
+  //correlation error
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.CORR_ERROR);
+  this.buffer.write(_.PDF417_FORMAT.CORRELATION_ERRORS.LEVEL_5);//level 5
+  //options
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.OPTIONS);
+  this.buffer.write(_.PDF417_FORMAT.OPTION_CODES.STANDARD);//standard
+  //set code length and data
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.writeUInt16LE(code.length + 3);
+  this.buffer.write(_.PDF417_FORMAT.DATA);
+  this.write(code);
+  //print
+  this.buffer.write(_.GS + _.PDF417_FORMAT.START);
+  this.buffer.write(_.PDF417_FORMAT.PRINT);
+
+  return this;
+}
+
+Printer.prototype.codetable = function (code) {
+  this.buffer.write(_.ESC + _.CODETABLE.SET + (code ? _.CODETABLE.CODES[code] : _.CODETABLE.CODES.LATIN1));
+  return this;
+}
+
 
 /**
  * [print qrcode image]
@@ -392,7 +447,7 @@ Printer.prototype.image = function(image, density){
  * @return {[type]}       [description]
  */
 Printer.prototype.raster = function (image, mode) {
-  if(!(image instanceof Image))
+  if (!(image instanceof Image))
     throw new TypeError('Only escpos.Image supported');
   mode = mode || 'normal';
   if (mode === 'dhdw' ||

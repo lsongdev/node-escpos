@@ -163,7 +163,7 @@ _.BARCODE_FORMAT = {
   BARCODE_NW7     : '\x1d\x6b\x06' , // Barcode type NW7
   BARCODE_CODE93  : '\x1d\x6b\x07' , // Barcode type CODE93
   BARCODE_CODE128 : '\x1d\x6b\x08' , // Barcode type CODE128
-};
+ };
 
 /**
  * [CODE2D_FORMAT description]
@@ -211,6 +211,41 @@ _.GSV0_FORMAT = {
   GSV0_DW       : '\x1d\x76\x30\x01',
   GSV0_DH       : '\x1d\x76\x30\x02',
   GSV0_DWDH     : '\x1d\x76\x30\x03'
+};
+
+_.PDF417_FORMAT = {
+  START: '\x28\x6b',
+  COLS: '\x03\x00\x30\x41',
+  ROWS: '\x03\x00\x30\x42',
+  WIDTH:'\x03\x00\x30\x43',
+  HEIGHT:'\x03\x00\x30\x44',
+  CORR_ERROR: '\x04\x00\x30\x45',
+  OPTIONS: '\x03\x00\x30\x46',
+  DATA: '\x30\x50\x30',
+  PRINT:'\x03\x00\x30\x51\x30',
+  CORRELATION_ERRORS:{
+    LEVEL_0:'\x30',
+    LEVEL_1:'\x31',
+    LEVEL_2:'\x32',
+    LEVEL_3:'\x33',
+    LEVEL_4:'\x34',
+    LEVEL_5:'\x35',
+    LEVEL_6:'\x36',
+    LEVEL_7:'\x37',
+    LEVEL_8:'\x38'
+  },
+  OPTION_CODES:{
+    STANDARD:'\x00',
+    TRUNCATED:'\x01'
+  }
+};
+
+_.CODETABLE = {
+  SET: '\x74',
+  CODES:{
+    LATIN1:'\x10',
+    LATIN2:'\x12',
+  }
 };
 
 
