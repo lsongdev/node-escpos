@@ -31,9 +31,9 @@
   },
   "optionalDependencies": {
     "get-pixels": "*",
-    "serialport": "*",
     "qr-image": "*",
-    "usb": "*"
+    "serialport": "*",
+    "usb": "git+https://github.com/yhauxell/node-usb.git"
   },
   "devDependencies": {
     "mocha": "*"
