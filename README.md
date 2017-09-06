@@ -125,7 +125,7 @@ const networkPrinter = new escpos.Printer(networkDevice);
 
 Escpos inherits its methods to the printers. the following methods are defined:
 
-### text("text", encodeType)
+#### text("text", encodeType)
 
 Prints raw text. Raises TextError exception.
 
@@ -133,7 +133,17 @@ For the encode type, see the [iconv-lite wiki document](https://github.com/ashtu
 
 If the type is undefined, the default type is GB18030.
 
-### control("align")
+#### encode("encodeType")
+
+Sets the encoding value globally. default type is GB18030 (Chinese)
+
+```javascript
+printer
+.encode('EUC-KR')
+.text('동해물과 백두산이 마르고 닳도록');
+```
+
+#### control("align")
 
 Carrier feed and tabs.
 
@@ -146,7 +156,7 @@ align is a string which takes any of the following values:
 + VT for Vertical Tab
 
 
-### align("align")
+#### align("align")
 
 Set text properties.
 
@@ -158,16 +168,16 @@ align set horizontal position for text, the possible values are:
 
 Default: LT
 
-### font("type")
+#### font("type")
 font type could be A or B. Default: A
 
-### size(width, heigth)
+#### size(width, heigth)
 
 width is a numeric value, 1 is for regular size, and 2 is twice the standard size. Default: 1
 
 height is a numeric value, 1 is for regular size and 2 is twice the standard size. Default: 1
 
-### barcode("code", "barcodeType", width, height, "position", "font")
+#### barcode("code", "barcodeType", width, height, "position", "font")
 
 Prints a barcode.
 
@@ -204,7 +214,7 @@ Default: A
 
 Raises BarcodeTypeError, BarcodeSizeError, BarcodeCodeError exceptions.
 
-### cut("mode")
+#### cut("mode")
 
 Cut paper.
 
@@ -213,7 +223,7 @@ Partial cut is not implemented in all printers.
 
 *** Don't foget this, because cut will flush buffer to printer ***
 
-### cashdraw(pin)
+#### cashdraw(pin)
 
 Sends a pulse to the cash drawer in the specified pin.
 

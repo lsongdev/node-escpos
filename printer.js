@@ -22,6 +22,7 @@ function Printer(adapter){
   EventEmitter.call(this);
   this.adapter = adapter;
   this.buffer = new Buffer();
+  this.encoding = 'GB18030';
 };
 
 /**
@@ -99,8 +100,18 @@ Printer.prototype.println = function(content){
  * @return printer instance
  */
 Printer.prototype.text = function(content, encoding){
-  return this.print(iconv.encode(content + _.EOL, encoding || 'GB18030'));
+  return this.print(iconv.encode(content + _.EOL, encoding || this.encoding));
 };
+
+/**
+ * [function encode text]
+ * @param  {[String]}  encoding [description]
+ * @return printer instance
+ */
+Printer.prototype.encode = function(encoding) {
+  this.encoding = encoding;
+  return this;
+}
 
 /**
  * [line feed]
