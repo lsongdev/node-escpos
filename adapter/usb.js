@@ -64,6 +64,18 @@ USB.findPrinter = function(){
     }
   });
 };
+/**
+ * getDevice
+ */
+USB.getDevice = function(vid, pid){
+  return new Promise((resolve, reject) => {
+    const device = new USB(vid, pid);
+    device.open(err => {
+      if(err) return reject(err);
+      resolve(device);
+    });
+  });
+};
 
 /**
  * make USB extends EventEmitter
@@ -123,8 +135,11 @@ USB.prototype.write = function(data, callback){
 };
 
 USB.prototype.close = function(callback){
-  this.emit('close', this.device);
-  this.device.close(callback);
+  if(this.device) {
+    this.emit('close', this.device);
+    this.device.close();
+    callback();
+  }
   return this;
 };
 

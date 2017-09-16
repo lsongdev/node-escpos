@@ -8,6 +8,7 @@ const EventEmitter = require('events');
 const Image        = require('./image');
 const utils        = require('./utils');
 const _            = require('./commands');
+const Promiseify   = require('./promiseify');
 
 /**
  * [function ESC/POS Printer]
@@ -23,6 +24,11 @@ function Printer(adapter){
   this.adapter = adapter;
   this.buffer = new Buffer();
   this.encoding = 'GB18030';
+};
+
+Printer.create = function(device){
+  const printer = new Printer(device);
+  return Promise.resolve(Promiseify(printer))
 };
 
 /**
@@ -63,16 +69,6 @@ Printer.prototype.marginRight = function(size){
   return this;
 };
 
-/**
- * Send data to hardware and flush buffer
- * @param  {Function} callback
- * @return printer instance
- */
-Printer.prototype.flush = function(callback){
-  var buf = this.buffer.flush();
-  this.adapter.write(buf, callback);
-  return this;
-};
 /**
  * [function print]
  * @param  {[String]}  content  [description]
@@ -419,6 +415,29 @@ Printer.prototype.raster = function (image, mode) {
 };
 
 /**
+ * [function Send pulse to kick the cash drawer]
+ * @param  {[type]} pin [description]
+ * @return printer instance
+ */
+Printer.prototype.cashdraw = function(pin){
+  this.buffer.write(_.CASH_DRAWER[
+    'CD_KICK_' + (pin || 2)
+  ]);
+  return this.flush();
+};
+
+/**
+ * Send data to hardware and flush buffer
+ * @param  {Function} callback
+ * @return printer instance
+ */
+Printer.prototype.flush = function(callback){
+  var buf = this.buffer.flush();
+  this.adapter.write(buf, callback);
+  return this;
+};
+
+/**
  * [function Cut paper]
  * @param  {[type]} part [description]
  * @return printer instance
@@ -427,18 +446,6 @@ Printer.prototype.cut = function(part, feed){
   this.feed(feed || 3);
   this.buffer.write(_.PAPER[
     part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
-  ]);
-  return this.flush();
-};
-
-/**
- * [function Send pulse to kick the cash drawer]
- * @param  {[type]} pin [description]
- * @return printer instance
- */
-Printer.prototype.cashdraw = function(pin){
-  this.buffer.write(_.CASH_DRAWER[
-    'CD_KICK_' + (pin || 2)
   ]);
   return this.flush();
 };
