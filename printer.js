@@ -323,7 +323,7 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
     parityBit = utils.getParityBit(code);
   }
   if(type == 'CODE128' || type == 'CODE93'){
-    codeLength = utils.getCodeLenght(code);
+    codeLength = utils.codeLength(code);
   }
   this.buffer.write(codeLength + code + parityBit + '\x00');
   return this;

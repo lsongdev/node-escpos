@@ -11,6 +11,6 @@ exports.getParityBit = function (str) {
 };
 
 exports.codeLength = function (str) {
-  let buff = Buffer.from((barcode.length).toString(16), 'hex');
+  let buff = Buffer.from((str.length).toString(16), 'hex');
   return buff.toString();
 }
