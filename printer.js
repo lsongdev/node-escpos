@@ -290,7 +290,7 @@ Printer.prototype.hardware = function(hw){
  */
 Printer.prototype.barcode = function(code, type, width, height, position, font){
   type = type || 'EAN13'; // default type is EAN13, may a good choice ?
-  var convertCode = String(code), parityBit = '';
+  var convertCode = String(code), parityBit = '', codeLength = '';
   if(typeof type === 'undefined' || type === null){
     throw new TypeError('barcode type is required');
   }
@@ -322,7 +322,10 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   if (type === 'EAN13' || type === 'EAN8') {
     parityBit = utils.getParityBit(code);
   }
-  this.buffer.write(code + parityBit);
+  if(type == 'CODE128' || type == 'CODE93'){
+    codeLength = utils.codeLength(code);
+  }
+  this.buffer.write(codeLength + code + parityBit + '\x00');
   return this;
 };
 

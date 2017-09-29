@@ -151,8 +151,8 @@ _.BARCODE_FORMAT = {
     4: '\x1d\x77\x05',
     5: '\x1d\x77\x06',
   },
-  BARCODE_HEIGHT_DEFAULT  : '\x1d\x77\x64', // Barcode height default:100
-  BARCODE_WIDTH_DEFAULT   : '\x1d\x77\x03', // Barcode width default:3
+  BARCODE_HEIGHT_DEFAULT  : '\x1d\x66\x64', // Barcode height default:100
+  BARCODE_WIDTH_DEFAULT   : '\x1d\x77\x01', // Barcode width default:1
 
   BARCODE_UPC_A   : '\x1d\x6b\x00' , // Barcode type UPC-A
   BARCODE_UPC_E   : '\x1d\x6b\x01' , // Barcode type UPC-E
@@ -161,8 +161,8 @@ _.BARCODE_FORMAT = {
   BARCODE_CODE39  : '\x1d\x6b\x04' , // Barcode type CODE39
   BARCODE_ITF     : '\x1d\x6b\x05' , // Barcode type ITF
   BARCODE_NW7     : '\x1d\x6b\x06' , // Barcode type NW7
-  BARCODE_CODE93  : '\x1d\x6b\x07' , // Barcode type CODE93
-  BARCODE_CODE128 : '\x1d\x6b\x08' , // Barcode type CODE128
+  BARCODE_CODE93  : '\x1d\x6b\x48' , // Barcode type CODE93
+  BARCODE_CODE128 : '\x1d\x6b\x49' , // Barcode type CODE128
 };
 
 /**
