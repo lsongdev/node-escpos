@@ -11,7 +11,7 @@ const SerialPort    = require('serialport');
 function Serial(port, options){
   var self = this;
   options = options || { 
-    baudrate: 9600,
+    baudRate: 9600,
     autoOpen: false
   };
   this.device = new SerialPort(port, options);
