@@ -71,8 +71,7 @@ Printer.prototype.marginRight = function(size){
 
 /**
  * [function print]
- * @param  {[String]}  content  [description]
- * @param  {[String]}  encoding [description]
+ * @param  {[String]}  content  [mandatory]
  * @return printer instance
  */
 Printer.prototype.print = function(content){
@@ -80,19 +79,18 @@ Printer.prototype.print = function(content){
   return this;
 };
 /**
- * [function println]
- * @param  {[String]}  content  [description]
- * @param  {[String]}  encoding [description]
+ * [function print pure content with End Of Line]
+ * @param  {[String]}  content  [mandatory]
  * @return printer instance
  */
 Printer.prototype.println = function(content){
-  return this.print([ content, _.EOL ].join(''));
+  return this.print(content + _.EOL);
 };
 
 /**
- * [function Print alpha-numeric text]
- * @param  {[String]}  content  [description]
- * @param  {[String]}  encoding [description]
+ * [function Print encoded alpha-numeric text with End Of Line]
+ * @param  {[String]}  content  [mandatory]
+ * @param  {[String]}  encoding [optional]
  * @return printer instance
  */
 Printer.prototype.text = function(content, encoding){
@@ -100,8 +98,18 @@ Printer.prototype.text = function(content, encoding){
 };
 
 /**
+ * [function Print encoded alpha-numeric text without End Of Line]
+ * @param  {[String]}  content  [mandatory]
+ * @param  {[String]}  encoding [optional]
+ * @return printer instance
+ */
+Printer.prototype.pureText = function(content, encoding){
+  return this.print(iconv.encode(content, encoding || this.encoding));
+};
+
+/**
  * [function encode text]
- * @param  {[String]}  encoding [description]
+ * @param  {[String]}  encoding [mandatory]
  * @return printer instance
  */
 Printer.prototype.encode = function(encoding) {
