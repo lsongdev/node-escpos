@@ -138,8 +138,8 @@ USB.prototype.close = function(callback){
   if(this.device) {
     this.emit('close', this.device);
     this.device.close();
-    callback();
   }
+  callback && callback();
   return this;
 };
 
