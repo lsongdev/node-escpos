@@ -389,9 +389,6 @@ Printer.prototype.qrcode = function(code, version, level, size){
     if(dataRaw.length < 1 && dataRaw.length > 2710){
       throw new Error('Invalid code length in byte. Must be between 1 and 2710');
     }
-    // Barcode mode on
-    this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.ON);
-    
     // Set pixel size
     if(!size || (size && typeof size !== 'number'))
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
@@ -428,9 +425,6 @@ Printer.prototype.qrcode = function(code, version, level, size){
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
-  
-    // Barcode mode off
-    this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.OFF);
   }
   return this;
 };
