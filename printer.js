@@ -24,6 +24,7 @@ function Printer(adapter){
   this.adapter = adapter;
   this.buffer = new Buffer();
   this.encoding = 'GB18030';
+  this._model = null;
 };
 
 Printer.create = function(device){
@@ -35,6 +36,21 @@ Printer.create = function(device){
  * Printer extends EventEmitter
  */
 util.inherits(Printer, EventEmitter);
+
+/**
+ * Set printer model to recognize model-specific commands.
+ * Supported models: [ null, 'qsprinter' ]
+ * 
+ * For generic printers, set model to null
+ * 
+ * [function set printer model]
+ * @param  {[String]}  model [mandatory]
+ * @return printer instance
+ */
+Printer.prototype.model = function(_model) {
+  this._model = _model;
+  return this;
+};
 
 /**
  * Fix bottom margin
@@ -304,7 +320,12 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   if (type === 'EAN8' && convertCode.length != 7) {
     throw new Error('EAN8 Barcode type requires code length 7');
   }
-  if(width >= 2 || width <= 6){
+  if(this._model === 'qsprinter'){
+    this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.ON);
+  }
+  if(this._model === 'qsprinter'){
+    // qsprinter has no BARCODE_WIDTH command (as of v7.5)
+  }else if(width >= 2 || width <= 6){
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[width]);
   }else{
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
@@ -312,11 +333,19 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   if(height >=1  || height <= 255){
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT(height));
   }else{
-    this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
+    if(this._model === 'qsprinter'){
+      this.buffer.write(_.MODEL.QSPRINTER.BARCODE_HEIGHT_DEFAULT);
+    }else{
+      this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
+    }
   }
-  this.buffer.write(_.BARCODE_FORMAT[
-    'BARCODE_FONT_' + (font || 'A').toUpperCase()
-  ]);
+  if(this._model === 'qsprinter'){
+    // Qsprinter has no barcode font
+  }else{
+    this.buffer.write(_.BARCODE_FORMAT[
+      'BARCODE_FONT_' + (font || 'A').toUpperCase()
+    ]);
+  }
   this.buffer.write(_.BARCODE_FORMAT[
     'BARCODE_TXT_' + (position || 'BLW').toUpperCase()
   ]);
@@ -330,6 +359,9 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
     codeLength = utils.codeLength(code);
   }
   this.buffer.write(codeLength + code + parityBit + '\x00');
+  if(this._model === 'qsprinter'){
+    this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.OFF);
+  }
   return this;
 };
 
@@ -342,15 +374,59 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
  * @return {[type]}         [description]
  */
 Printer.prototype.qrcode = function(code, version, level, size){
-  this.buffer.write(_.CODE2D_FORMAT.TYPE_QR);
-  this.buffer.write(_.CODE2D_FORMAT.CODE2D);
-  this.buffer.writeUInt8(version || 3);
-  this.buffer.write(_.CODE2D_FORMAT[
-    'QR_LEVEL_' + (level || 'L').toUpperCase()
-  ]);
-  this.buffer.writeUInt8(size || 6);
-  this.buffer.writeUInt16LE(code.length);
-  this.buffer.write(code);
+  if(this._model !== 'qsprinter'){
+    this.buffer.write(_.CODE2D_FORMAT.TYPE_QR);
+    this.buffer.write(_.CODE2D_FORMAT.CODE2D);
+    this.buffer.writeUInt8(version || 3);
+    this.buffer.write(_.CODE2D_FORMAT[
+      'QR_LEVEL_' + (level || 'L').toUpperCase()
+    ]);
+    this.buffer.writeUInt8(size || 6);
+    this.buffer.writeUInt16LE(code.length);
+    this.buffer.write(code);
+  }else{
+    const dataRaw = iconv.encode(code, 'utf8');
+    if(dataRaw.length < 1 && dataRaw.length > 2710){
+      throw new Error('Invalid code length in byte. Must be between 1 and 2710');
+    }
+    
+    // Set pixel size
+    if(!size || (size && typeof size !== 'number'))
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
+    else if(size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
+    else if(size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
+      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
+    this.buffer.writeUInt8(size);
+    
+    // Set version
+    if(!version || (version && typeof version !== 'number'))
+      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
+    else if(version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
+      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
+    else if(version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
+      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
+    this.buffer.writeUInt8(version);
+    
+    // Set level
+    if(!level || (level && typeof level !== 'string'))
+      level = _.CODE2D_FORMAT.QR_LEVEL_L;
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[level.toUpperCase()]);
+  
+    // Transfer data(code) to buffer
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
+    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
+    this.buffer.write(dataRaw);
+  
+    // Print from buffer
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
+    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
+  }
   return this;
 };
 

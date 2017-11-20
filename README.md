@@ -244,6 +244,7 @@ Raises `CashDrawerError()``
 + [Jose Vera](https://github.com/jor3l)
 + [Sébastien Vidal](https://github.com/Psychopoulet)
 + [Yu Yongwoo](https://github.com/uyu423)
++ [Attawit Kittikrairit](https://github.com/atton16)
 
 ----
 
