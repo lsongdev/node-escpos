@@ -1,6 +1,6 @@
 {
   "name": "escpos",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
   "scripts": {
