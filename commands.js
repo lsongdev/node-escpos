@@ -128,6 +128,57 @@ _.TEXT_FORMAT = {
 };
 
 /**
+ * Qsprinter-compatible
+ * Added by Attawit Kittikrairit
+ * [MODEL Model-specific commands]
+ * @type {Object}
+ */
+_.MODEL = {
+  QSPRINTER: {
+    BARCODE_MODE: {
+      ON  : '\x1d\x45\x43\x01' , // Barcode mode on
+      OFF : '\x1d\x45\x43\x00' , // Barcode mode off
+    },
+    BARCODE_HEIGHT_DEFAULT: '\x1d\x68\xA2', // Barcode height default:162
+    CODE2D_FORMAT: {
+      PIXEL_SIZE: {
+        CMD: '\x1b\x23\x23\x51\x50\x49\x58',
+        MIN: 1,
+        MAX: 24,
+        DEFAULT: 24,
+      },
+      VERSION: {
+        CMD: '\x1d\x28\x6b\x03\x00\x31\x43',
+        MIN: 1,
+        MAX: 16,
+        DEFAULT: 3,
+      },
+      LEVEL: {
+        CMD: '\x1d\x28\x6b\x03\x00\x31\x45',
+        OPTIONS: {
+          L: 48,
+          M: 49,
+          Q: 50,
+          H: 51,
+        }
+      },
+      LEN_OFFSET: 3,
+      SAVEBUF: {
+        // Format: CMD_P1{LEN_2BYTE}CMD_P2{DATA}
+        // DATA Max Length: 256*256 - 3 (65533)
+        CMD_P1: '\x1d\x28\x6b',
+        CMD_P2: '\x31\x50\x30',
+      },
+      PRINTBUF: {
+        // Format: CMD_P1{LEN_2BYTE}CMD_P2
+        CMD_P1: '\x1d\x28\x6b',
+        CMD_P2: '\x31\x51\x30',
+      }
+    },
+  },
+};
+
+/**
  * [BARCODE_FORMAT Barcode format]
  * @type {Object}
  */
@@ -151,7 +202,7 @@ _.BARCODE_FORMAT = {
     4: '\x1d\x77\x05',
     5: '\x1d\x77\x06',
   },
-  BARCODE_HEIGHT_DEFAULT  : '\x1d\x66\x64', // Barcode height default:100
+  BARCODE_HEIGHT_DEFAULT  : '\x1d\x68\x64', // Barcode height default:100
   BARCODE_WIDTH_DEFAULT   : '\x1d\x77\x01', // Barcode width default:1
 
   BARCODE_UPC_A   : '\x1d\x6b\x00' , // Barcode type UPC-A
