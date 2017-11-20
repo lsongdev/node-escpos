@@ -145,7 +145,7 @@ _.MODEL = {
         CMD: '\x1b\x23\x23\x51\x50\x49\x58',
         MIN: 1,
         MAX: 24,
-        DEFAULT: 24,
+        DEFAULT: 12,
       },
       VERSION: {
         CMD: '\x1d\x28\x6b\x03\x00\x31\x43',
