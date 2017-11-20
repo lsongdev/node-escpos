@@ -389,6 +389,7 @@ Printer.prototype.qrcode = function(code, version, level, size){
     if(dataRaw.length < 1 && dataRaw.length > 2710){
       throw new Error('Invalid code length in byte. Must be between 1 and 2710');
     }
+    
     // Set pixel size
     if(!size || (size && typeof size !== 'number'))
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
@@ -402,9 +403,9 @@ Printer.prototype.qrcode = function(code, version, level, size){
     // Set version
     if(!version || (version && typeof version !== 'number'))
       version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
-    else if(size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
+    else if(version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
       version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
-    else if(size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
+    else if(version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
       version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
     this.buffer.writeUInt8(version);
