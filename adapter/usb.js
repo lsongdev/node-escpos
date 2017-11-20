@@ -28,6 +28,8 @@ function USB(vid, pid){
   this.device = null;
   if(vid && pid){
     this.device = usb.findByIds(vid, pid);
+  }else if(vid){
+      this.device = vid;
   }else{
     var devices = USB.findPrinter();
     if(devices && devices.length)
