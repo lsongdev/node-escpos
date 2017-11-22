@@ -28,6 +28,14 @@ function USB(vid, pid){
   this.device = null;
   if(vid && pid){
     this.device = usb.findByIds(vid, pid);
+  }else if(vid){
+      // Set spesific USB device from devices array as coming from USB.findPrinter() function.
+      // for example
+      // let devices = escpos.USB.findPrinter();
+      // => devices [ Device1, Device2 ];
+      // And Then
+      // const device = new escpos.USB(Device1); OR device = new escpos.USB(Device2);
+      this.device = vid;
   }else{
     var devices = USB.findPrinter();
     if(devices && devices.length)
