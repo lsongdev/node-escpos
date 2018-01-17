@@ -4,4 +4,3 @@ node_modules
 psd
 thumb
 *.log
-package-lock.json
