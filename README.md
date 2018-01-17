@@ -70,7 +70,7 @@ vid(Vendor Id) and pid (Product Id) can be checked with the `lsusb` command or `
 ```javascript
 const serialDeviceOnWindows = new escpos.Serial('COM10');
 const serialDeviceOnLinux = new escpos.Serial('/dev/usb/lp0', {
-  bandRate: 14400,
+  baudRate: 14400,
   stopBit: 2
 });
 ```
