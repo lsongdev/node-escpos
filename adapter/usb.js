@@ -146,6 +146,7 @@ USB.prototype.close = function(callback){
   if(this.device) {
     this.emit('close', this.device);
     this.device.close();
+    usb.removeAllListeners('detach');
   }
   callback && callback();
   return this;
