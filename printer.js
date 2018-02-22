@@ -302,22 +302,35 @@ Printer.prototype.hardware = function(hw){
  * [barcode]
  * @param  {[type]}    code     [description]
  * @param  {[type]}    type     [description]
- * @param  {[type]}    width    [description]
- * @param  {[type]}    height   [description]
- * @param  {[type]}    position [description]
- * @param  {[type]}    font     [description]
+ * @param options
  * @return printer instance
  */
-Printer.prototype.barcode = function(code, type, width, height, position, font){
+Printer.prototype.barcode = function(code, type, options){
+  options = options || {};
+  var width, height, position, font, includeParity;
+
+  if (typeof width === 'string' || typeof width === 'number'){ // That's because we are not using the options.object
+    width = arguments[2];
+    height = arguments[3];
+    position = arguments[4];
+    font = arguments[5];
+  } else {
+    width = options.width;
+    height = options.height;
+    position = options.position;
+    font = options.font;
+    includeParity = options.includeParity !== false; // true by default
+  }
+
   type = type || 'EAN13'; // default type is EAN13, may a good choice ?
   var convertCode = String(code), parityBit = '', codeLength = '';
   if(typeof type === 'undefined' || type === null){
     throw new TypeError('barcode type is required');
   }
-  if (type === 'EAN13' && convertCode.length != 12) {
+  if (type === 'EAN13' && convertCode.length !== 12) {
     throw new Error('EAN13 Barcode type requires code length 12');
   }
-  if (type === 'EAN8' && convertCode.length != 7) {
+  if (type === 'EAN8' && convertCode.length !== 7) {
     throw new Error('EAN8 Barcode type requires code length 7');
   }
   if(this._model === 'qsprinter'){
@@ -358,7 +371,7 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   if(type == 'CODE128' || type == 'CODE93'){
     codeLength = utils.codeLength(code);
   }
-  this.buffer.write(codeLength + code + parityBit + '\x00');
+  this.buffer.write(codeLength + code + (  includeParity ?  parityBit : '' ) + '\x00'); // Allow to skip the parity byte
   if(this._model === 'qsprinter'){
     this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.OFF);
   }
