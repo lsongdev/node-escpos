@@ -15,7 +15,7 @@ const Promiseify   = require('./promiseify');
  * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-function Printer(adapter){
+function Printer(adapter,options){
   if (!(this instanceof Printer)) {
     return new Printer(adapter);
   }
@@ -23,7 +23,7 @@ function Printer(adapter){
   EventEmitter.call(this);
   this.adapter = adapter;
   this.buffer = new Buffer();
-  this.encoding = 'GB18030';
+  this.encoding = options && options.encoding || 'GB18030';
   this._model = null;
 };
 
