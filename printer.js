@@ -140,7 +140,7 @@ Printer.prototype.encode = function (encoding) {
  */
 Printer.prototype.feed = function (n) {
   this.buffer.write(new Array(n || 1).fill(_.EOL).join(''));
-  return this.flush();
+  return this;
 };
 
 /**
@@ -296,7 +296,7 @@ Printer.prototype.lineSpace = function (n) {
  */
 Printer.prototype.hardware = function (hw) {
   this.buffer.write(_.HARDWARE['HW_' + hw]);
-  return this.flush();
+  return this;
 };
 /**
  * [barcode]
@@ -522,7 +522,7 @@ Printer.prototype.cashdraw = function (pin) {
   this.buffer.write(_.CASH_DRAWER[
     'CD_KICK_' + (pin || 2)
   ]);
-  return this.flush();
+  return this;
 };
 
 /**
@@ -546,7 +546,7 @@ Printer.prototype.cut = function (part, feed) {
   this.buffer.write(_.PAPER[
     part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
   ]);
-  return this.flush();
+  return this;
 };
 
 /**
