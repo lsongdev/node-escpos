@@ -20,6 +20,7 @@ var _ = {
  */
 _.FEED_CONTROL_SEQUENCES = {
   CTL_LF  : '\x0a',   // Print and line feed
+  CTL_GLF : '\x4a\x00',   // Print and feed paper (without spaces between lines)
   CTL_FF  : '\x0c',   // Form feed
   CTL_CR  : '\x0d',   // Carriage return
   CTL_HT  : '\x09',   // Horizontal tab
