@@ -45,7 +45,7 @@ util.inherits(Printer, EventEmitter);
  * 
  * [function set printer model]
  * @param  {[String]}  model [mandatory]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.model = function (_model) {
   this._model = _model;
@@ -55,7 +55,7 @@ Printer.prototype.model = function (_model) {
 /**
  * Fix bottom margin
  * @param  {[String]} size
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.marginBottom = function (size) {
   this.buffer.write(_.MARGINS.BOTTOM);
@@ -66,7 +66,7 @@ Printer.prototype.marginBottom = function (size) {
 /**
  * Fix left margin
  * @param  {[String]} size
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.marginLeft = function (size) {
   this.buffer.write(_.MARGINS.LEFT);
@@ -77,7 +77,7 @@ Printer.prototype.marginLeft = function (size) {
 /**
  * Fix right margin
  * @param  {[String]} size
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.marginRight = function (size) {
   this.buffer.write(_.MARGINS.RIGHT);
@@ -88,7 +88,7 @@ Printer.prototype.marginRight = function (size) {
 /**
  * [function print]
  * @param  {[String]}  content  [mandatory]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.print = function (content) {
   this.buffer.write(content);
@@ -97,7 +97,7 @@ Printer.prototype.print = function (content) {
 /**
  * [function print pure content with End Of Line]
  * @param  {[String]}  content  [mandatory]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.println = function (content) {
   return this.print(content + _.EOL);
@@ -107,7 +107,7 @@ Printer.prototype.println = function (content) {
  * [function Print encoded alpha-numeric text with End Of Line]
  * @param  {[String]}  content  [mandatory]
  * @param  {[String]}  encoding [optional]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.text = function (content, encoding) {
   return this.print(iconv.encode(content + _.EOL, encoding || this.encoding));
@@ -117,7 +117,7 @@ Printer.prototype.text = function (content, encoding) {
  * [function Print encoded alpha-numeric text without End Of Line]
  * @param  {[String]}  content  [mandatory]
  * @param  {[String]}  encoding [optional]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.pureText = function (content, encoding) {
   return this.print(iconv.encode(content, encoding || this.encoding));
@@ -126,7 +126,7 @@ Printer.prototype.pureText = function (content, encoding) {
 /**
  * [function encode text]
  * @param  {[String]}  encoding [mandatory]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.encode = function (encoding) {
   this.encoding = encoding;
@@ -136,7 +136,7 @@ Printer.prototype.encode = function (encoding) {
 /**
  * [line feed]
  * @param  {[type]}    lines   [description]
- * @return {[Printer]} printer [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.feed = function (n) {
   this.buffer.write(new Array(n || 1).fill(_.EOL).join(''));
@@ -146,7 +146,7 @@ Printer.prototype.feed = function (n) {
 /**
  * [feed control sequences]
  * @param  {[type]}    ctrl     [description]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.control = function (ctrl) {
   this.buffer.write(_.FEED_CONTROL_SEQUENCES[
@@ -157,7 +157,7 @@ Printer.prototype.control = function (ctrl) {
 /**
  * [text align]
  * @param  {[type]}    align    [description]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.align = function (align) {
   this.buffer.write(_.TEXT_FORMAT[
@@ -168,7 +168,7 @@ Printer.prototype.align = function (align) {
 /**
  * [font family]
  * @param  {[type]}    family  [description]
- * @return {[Printer]} printer [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.font = function (family) {
   this.buffer.write(_.TEXT_FORMAT[
@@ -179,7 +179,7 @@ Printer.prototype.font = function (family) {
 /**
  * [font style]
  * @param  {[type]}    type     [description]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.style = function (type) {
   switch (type.toUpperCase()) {
@@ -256,7 +256,7 @@ Printer.prototype.style = function (type) {
  * [font size]
  * @param  {[String]}  width   [description]
  * @param  {[String]}  height  [description]
- * @return {[Printer]} printer [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.size = function (width, height) {
   if (2 >= width && 2 >= height) {
@@ -277,7 +277,7 @@ Printer.prototype.size = function (width, height) {
 /**
  * [set line spacing]
  * @param  {[type]} n [description]
- * @return {[type]}   [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.lineSpace = function (n) {
   if (n === undefined || n === null) {
@@ -292,18 +292,18 @@ Printer.prototype.lineSpace = function (n) {
 /**
  * [hardware]
  * @param  {[type]}    hw       [description]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.hardware = function (hw) {
-  this.buffer.write(_.HARDWARE['HW_' + hw]);
+  this.buffer.write(_.HARDWARE['HW_' + hw.toUpperCase()]);
   return this;
 };
 /**
  * [barcode]
  * @param  {[type]}    code     [description]
  * @param  {[type]}    type     [description]
- * @param options
- * @return printer instance
+ * @param  {[type]}    options  [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.barcode = function (code, type, options) {
   options = options || {};
@@ -384,7 +384,7 @@ Printer.prototype.barcode = function (code, type, options) {
  * @param  {[type]} version [description]
  * @param  {[type]} level   [description]
  * @param  {[type]} size    [description]
- * @return {[type]}         [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.qrcode = function (code, version, level, size) {
   if (this._model !== 'qsprinter') {
@@ -447,8 +447,8 @@ Printer.prototype.qrcode = function (code, version, level, size) {
  * [print qrcode image]
  * @param  {[type]}   content  [description]
  * @param  {[type]}   options  [description]
- * @param  {Function} callback [description]
- * @return {[type]}            [description]
+ * @param  {[Function]} callback [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.qrimage = function (content, options, callback) {
   var self = this;
@@ -471,7 +471,7 @@ Printer.prototype.qrimage = function (content, options, callback) {
  * [image description]
  * @param  {[type]} image   [description]
  * @param  {[type]} density [description]
- * @return {[type]}         [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.image = function (image, density) {
   if (!(image instanceof Image))
@@ -495,7 +495,7 @@ Printer.prototype.image = function (image, density) {
  * [raster description]
  * @param  {[type]} image [description]
  * @param  {[type]} mode  [description]
- * @return {[type]}       [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.raster = function (image, mode) {
   if (!(image instanceof Image))
@@ -516,7 +516,7 @@ Printer.prototype.raster = function (image, mode) {
 /**
  * [function Send pulse to kick the cash drawer]
  * @param  {[type]} pin [description]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.cashdraw = function (pin) {
   this.buffer.write(_.CASH_DRAWER[
@@ -528,7 +528,7 @@ Printer.prototype.cashdraw = function (pin) {
 /**
  * Send data to hardware and flush buffer
  * @param  {Function} callback
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.flush = function (callback) {
   var buf = this.buffer.flush();
@@ -539,7 +539,7 @@ Printer.prototype.flush = function (callback) {
 /**
  * [function Cut paper]
  * @param  {[type]} part [description]
- * @return printer instance
+ * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.cut = function (part, feed) {
   this.feed(feed || 3);
