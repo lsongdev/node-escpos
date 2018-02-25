@@ -485,7 +485,7 @@ Printer.prototype.image = function (image, density) {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
-    self.buffer.write(_.ESC+_.CTL_GLF);
+    self.buffer.write(_.ESC+_.FEED_CONTROL_SEQUENCES.CTL_GLF);
   });
 
   return this;
