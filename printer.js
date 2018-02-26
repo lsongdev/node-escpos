@@ -275,6 +275,21 @@ Printer.prototype.size = function (width, height) {
 };
 
 /**
+ * [set character spacing]
+ * @param  {[type]}    n     [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.spacing = function (n) {
+  if (n === undefined || n === null) {
+    this.buffer.write(_.CHARACTER_SPACING.CS_DEFAULT);
+  } else {
+    this.buffer.write(_.CHARACTER_SPACING.CS_SET);
+    this.buffer.writeUInt8(n);
+  }
+  return this;
+}
+
+/**
  * [set line spacing]
  * @param  {[type]} n [description]
  * @return {[Printer]} printer  [the escpos printer instance]
@@ -481,11 +496,17 @@ Printer.prototype.image = function (image, density) {
   var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
   var bitmap = image.toBitmap(n * 8);
   var self = this;
-  bitmap.data.forEach(function (line) {
+
+  // added a delay so the printer can process the graphical data
+  // when connected via slower connection ( e.g.: Serial)
+  bitmap.data.forEach(async (line) => {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
-    self.buffer.write(_.ESC+_.FEED_CONTROL_SEQUENCES.CTL_GLF);
+    self.buffer.write(_.ESC + _.FEED_CONTROL_SEQUENCES.CTL_GLF);
+    await new Promise((resolve, reject) => {
+      setTimeout(() => { resolve(true) }, 200);
+    });
   });
 
   return this;
