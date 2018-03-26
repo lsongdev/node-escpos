@@ -270,7 +270,14 @@ _.GSV0_FORMAT = {
   GSV0_DWDH: '\x1d\x76\x30\x03'
 };
 
-
+/**
+ * [COLOR description]
+ * @type {Object}
+ */
+_.COLOR = {
+  0: '\x1b\x72\x00', // black
+  1: '\x1b\x72\x01' // red
+}
 
 /**
  * [exports description]

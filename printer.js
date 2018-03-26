@@ -40,9 +40,9 @@ util.inherits(Printer, EventEmitter);
 /**
  * Set printer model to recognize model-specific commands.
  * Supported models: [ null, 'qsprinter' ]
- * 
+ *
  * For generic printers, set model to null
- * 
+ *
  * [function set printer model]
  * @param  {[String]}  model [mandatory]
  * @return {[Printer]} printer  [the escpos printer instance]
@@ -580,6 +580,18 @@ Printer.prototype.close = function (callback) {
   return this.flush(function () {
     self.adapter.close(callback);
   });
+};
+
+/**
+ * [color select between two print color modes, if your printer supports it]
+ * @param  {Number} color - 0 for primary color (black) 1 for secondary color (red)
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.color = function (color) {
+  this.buffer.write(_.COLOR[
+    color === 0 || color === 1 ? color: 0
+  ]);
+  return this;
 };
 
 /**
