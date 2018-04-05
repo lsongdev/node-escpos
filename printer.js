@@ -1,21 +1,21 @@
 'use strict';
-const util         = require('util');
-const qr           = require('qr-image');
-const iconv        = require('iconv-lite');
-const getPixels    = require('get-pixels');
-const Buffer       = require('mutable-buffer');
+const util = require('util');
+const qr = require('qr-image');
+const iconv = require('iconv-lite');
+const getPixels = require('get-pixels');
+const Buffer = require('mutable-buffer');
 const EventEmitter = require('events');
-const Image        = require('./image');
-const utils        = require('./utils');
-const _            = require('./commands');
-const Promiseify   = require('./promiseify');
+const Image = require('./image');
+const utils = require('./utils');
+const _ = require('./commands');
+const Promiseify = require('./promiseify');
 
 /**
  * [function ESC/POS Printer]
  * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-function Printer(adapter){
+function Printer(adapter) {
   if (!(this instanceof Printer)) {
     return new Printer(adapter);
   }
@@ -27,7 +27,7 @@ function Printer(adapter){
   this._model = null;
 };
 
-Printer.create = function(device){
+Printer.create = function (device) {
   const printer = new Printer(device);
   return Promise.resolve(Promiseify(printer))
 };
@@ -47,7 +47,7 @@ util.inherits(Printer, EventEmitter);
  * @param  {[String]}  model [mandatory]
  * @return printer instance
  */
-Printer.prototype.model = function(_model) {
+Printer.prototype.model = function (_model) {
   this._model = _model;
   return this;
 };
@@ -57,7 +57,7 @@ Printer.prototype.model = function(_model) {
  * @param  {[String]} size
  * @return printer instance
  */
-Printer.prototype.marginBottom = function(size){
+Printer.prototype.marginBottom = function (size) {
   this.buffer.write(_.MARGINS.BOTTOM);
   this.buffer.writeUInt8(size);
   return this;
@@ -68,7 +68,7 @@ Printer.prototype.marginBottom = function(size){
  * @param  {[String]} size
  * @return printer instance
  */
-Printer.prototype.marginLeft = function(size){
+Printer.prototype.marginLeft = function (size) {
   this.buffer.write(_.MARGINS.LEFT);
   this.buffer.writeUInt8(size);
   return this;
@@ -79,7 +79,7 @@ Printer.prototype.marginLeft = function(size){
  * @param  {[String]} size
  * @return printer instance
  */
-Printer.prototype.marginRight = function(size){
+Printer.prototype.marginRight = function (size) {
   this.buffer.write(_.MARGINS.RIGHT);
   this.buffer.writeUInt8(size);
   return this;
@@ -90,7 +90,7 @@ Printer.prototype.marginRight = function(size){
  * @param  {[String]}  content  [mandatory]
  * @return printer instance
  */
-Printer.prototype.print = function(content){
+Printer.prototype.print = function (content) {
   this.buffer.write(content);
   return this;
 };
@@ -99,7 +99,7 @@ Printer.prototype.print = function(content){
  * @param  {[String]}  content  [mandatory]
  * @return printer instance
  */
-Printer.prototype.println = function(content){
+Printer.prototype.println = function (content) {
   return this.print(content + _.EOL);
 };
 
@@ -109,7 +109,7 @@ Printer.prototype.println = function(content){
  * @param  {[String]}  encoding [optional]
  * @return printer instance
  */
-Printer.prototype.text = function(content, encoding){
+Printer.prototype.text = function (content, encoding) {
   return this.print(iconv.encode(content + _.EOL, encoding || this.encoding));
 };
 
@@ -119,7 +119,7 @@ Printer.prototype.text = function(content, encoding){
  * @param  {[String]}  encoding [optional]
  * @return printer instance
  */
-Printer.prototype.pureText = function(content, encoding){
+Printer.prototype.pureText = function (content, encoding) {
   return this.print(iconv.encode(content, encoding || this.encoding));
 };
 
@@ -128,7 +128,7 @@ Printer.prototype.pureText = function(content, encoding){
  * @param  {[String]}  encoding [mandatory]
  * @return printer instance
  */
-Printer.prototype.encode = function(encoding) {
+Printer.prototype.encode = function (encoding) {
   this.encoding = encoding;
   return this;
 }
@@ -148,7 +148,7 @@ Printer.prototype.feed = function (n) {
  * @param  {[type]}    ctrl     [description]
  * @return printer instance
  */
-Printer.prototype.control = function(ctrl){
+Printer.prototype.control = function (ctrl) {
   this.buffer.write(_.FEED_CONTROL_SEQUENCES[
     'CTL_' + ctrl.toUpperCase()
   ]);
@@ -159,7 +159,7 @@ Printer.prototype.control = function(ctrl){
  * @param  {[type]}    align    [description]
  * @return printer instance
  */
-Printer.prototype.align = function(align){
+Printer.prototype.align = function (align) {
   this.buffer.write(_.TEXT_FORMAT[
     'TXT_ALIGN_' + align.toUpperCase()
   ]);
@@ -170,7 +170,7 @@ Printer.prototype.align = function(align){
  * @param  {[type]}    family  [description]
  * @return {[Printer]} printer [description]
  */
-Printer.prototype.font = function(family){
+Printer.prototype.font = function (family) {
   this.buffer.write(_.TEXT_FORMAT[
     'TXT_FONT_' + family.toUpperCase()
   ]);
@@ -181,8 +181,8 @@ Printer.prototype.font = function(family){
  * @param  {[type]}    type     [description]
  * @return printer instance
  */
-Printer.prototype.style = function(type){
-  switch(type.toUpperCase()){
+Printer.prototype.style = function (type) {
+  switch (type.toUpperCase()) {
 
     case 'B':
       this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
@@ -258,7 +258,7 @@ Printer.prototype.style = function(type){
  * @param  {[String]}  height  [description]
  * @return {[Printer]} printer [description]
  */
-Printer.prototype.size = function(width, height) {
+Printer.prototype.size = function (width, height) {
   if (2 >= width && 2 >= height) {
     this.buffer.write(_.TEXT_FORMAT.TXT_NORMAL);
     if (2 == width && 2 == height) {
@@ -279,7 +279,7 @@ Printer.prototype.size = function(width, height) {
  * @param  {[type]} n [description]
  * @return {[type]}   [description]
  */
-Printer.prototype.lineSpace = function(n) {
+Printer.prototype.lineSpace = function (n) {
   if (n === undefined || n === null) {
     this.buffer.write(_.LINE_SPACING.LS_DEFAULT);
   } else {
@@ -294,8 +294,8 @@ Printer.prototype.lineSpace = function(n) {
  * @param  {[type]}    hw       [description]
  * @return printer instance
  */
-Printer.prototype.hardware = function(hw){
-  this.buffer.write(_.HARDWARE[ 'HW_'+ hw ]);
+Printer.prototype.hardware = function (hw) {
+  this.buffer.write(_.HARDWARE['HW_' + hw]);
   return this.flush();
 };
 /**
@@ -308,10 +308,10 @@ Printer.prototype.hardware = function(hw){
  * @param  {[type]}    font     [description]
  * @return printer instance
  */
-Printer.prototype.barcode = function(code, type, width, height, position, font){
+Printer.prototype.barcode = function (code, type, width, height, position, font) {
   type = type || 'EAN13'; // default type is EAN13, may a good choice ?
   var convertCode = String(code), parityBit = '', codeLength = '';
-  if(typeof type === 'undefined' || type === null){
+  if (typeof type === 'undefined' || type === null) {
     throw new TypeError('barcode type is required');
   }
   if (type === 'EAN13' && convertCode.length != 12) {
@@ -320,28 +320,28 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   if (type === 'EAN8' && convertCode.length != 7) {
     throw new Error('EAN8 Barcode type requires code length 7');
   }
-  if(this._model === 'qsprinter'){
+  if (this._model === 'qsprinter') {
     this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.ON);
   }
-  if(this._model === 'qsprinter'){
+  if (this._model === 'qsprinter') {
     // qsprinter has no BARCODE_WIDTH command (as of v7.5)
-  }else if(width >= 2 || width <= 6){
+  } else if (width >= 2 || width <= 6) {
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[width]);
-  }else{
+  } else {
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
   }
-  if(height >=1  || height <= 255){
+  if (height >= 1 || height <= 255) {
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT(height));
-  }else{
-    if(this._model === 'qsprinter'){
+  } else {
+    if (this._model === 'qsprinter') {
       this.buffer.write(_.MODEL.QSPRINTER.BARCODE_HEIGHT_DEFAULT);
-    }else{
+    } else {
       this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
     }
   }
-  if(this._model === 'qsprinter'){
+  if (this._model === 'qsprinter') {
     // Qsprinter has no barcode font
-  }else{
+  } else {
     this.buffer.write(_.BARCODE_FORMAT[
       'BARCODE_FONT_' + (font || 'A').toUpperCase()
     ]);
@@ -355,11 +355,11 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
   if (type === 'EAN13' || type === 'EAN8') {
     parityBit = utils.getParityBit(code);
   }
-  if(type == 'CODE128' || type == 'CODE93'){
+  if (type == 'CODE128' || type == 'CODE93') {
     codeLength = utils.codeLength(code);
   }
   this.buffer.write(codeLength + code + parityBit + '\x00');
-  if(this._model === 'qsprinter'){
+  if (this._model === 'qsprinter') {
     this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.OFF);
   }
   return this;
@@ -373,8 +373,8 @@ Printer.prototype.barcode = function(code, type, width, height, position, font){
  * @param  {[type]} size    [description]
  * @return {[type]}         [description]
  */
-Printer.prototype.qrcode = function(code, version, level, size){
-  if(this._model !== 'qsprinter'){
+Printer.prototype.qrcode = function (code, version, level, size) {
+  if (this._model !== 'qsprinter') {
     this.buffer.write(_.CODE2D_FORMAT.TYPE_QR);
     this.buffer.write(_.CODE2D_FORMAT.CODE2D);
     this.buffer.writeUInt8(version || 3);
@@ -384,44 +384,44 @@ Printer.prototype.qrcode = function(code, version, level, size){
     this.buffer.writeUInt8(size || 6);
     this.buffer.writeUInt16LE(code.length);
     this.buffer.write(code);
-  }else{
+  } else {
     const dataRaw = iconv.encode(code, 'utf8');
-    if(dataRaw.length < 1 && dataRaw.length > 2710){
+    if (dataRaw.length < 1 && dataRaw.length > 2710) {
       throw new Error('Invalid code length in byte. Must be between 1 and 2710');
     }
-    
+
     // Set pixel size
-    if(!size || (size && typeof size !== 'number'))
+    if (!size || (size && typeof size !== 'number'))
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
-    else if(size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
+    else if (size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
-    else if(size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
+    else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
       size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
     this.buffer.writeUInt8(size);
-    
+
     // Set version
-    if(!version || (version && typeof version !== 'number'))
+    if (!version || (version && typeof version !== 'number'))
       version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
-    else if(version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
+    else if (version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
       version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
-    else if(version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
+    else if (version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
       version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
     this.buffer.writeUInt8(version);
-    
+
     // Set level
-    if(!level || (level && typeof level !== 'string'))
+    if (!level || (level && typeof level !== 'string'))
       level = _.CODE2D_FORMAT.QR_LEVEL_L;
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[level.toUpperCase()]);
-  
+
     // Transfer data(code) to buffer
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
     this.buffer.write(dataRaw);
-  
+
     // Print from buffer
     this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
     this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
@@ -437,17 +437,17 @@ Printer.prototype.qrcode = function(code, version, level, size){
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
  */
-Printer.prototype.qrimage = function(content, options, callback){
+Printer.prototype.qrimage = function (content, options, callback) {
   var self = this;
-  if(typeof options == 'function'){
+  if (typeof options == 'function') {
     callback = options;
     options = null;
   }
   options = options || { type: 'png', mode: 'dhdw' };
   var buffer = qr.imageSync(content, options);
-  var type = [ 'image', options.type ].join('/');
+  var type = ['image', options.type].join('/');
   getPixels(buffer, type, function (err, pixels) {
-    if(err) return callback && callback(err);
+    if (err) return callback && callback(err);
     self.raster(new Image(pixels), options.mode);
     callback && callback.call(self, null, self);
   });
@@ -460,11 +460,11 @@ Printer.prototype.qrimage = function(content, options, callback){
  * @param  {[type]} density [description]
  * @return {[type]}         [description]
  */
-Printer.prototype.image = function(image, density){
-  if(!(image instanceof Image))
+Printer.prototype.image = function (image, density) {
+  if (!(image instanceof Image))
     throw new TypeError('Only escpos.Image supported');
   density = density || 'd24';
-  var n = !!~[ 'd8', 's8' ].indexOf(density) ? 1 : 3;
+  var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
   var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
   var bitmap = image.toBitmap(n * 8);
   var self = this;
@@ -486,12 +486,12 @@ Printer.prototype.image = function(image, density){
  * @return {[type]}       [description]
  */
 Printer.prototype.raster = function (image, mode) {
-  if(!(image instanceof Image))
+  if (!(image instanceof Image))
     throw new TypeError('Only escpos.Image supported');
   mode = mode || 'normal';
   if (mode === 'dhdw' ||
-      mode === 'dwh'  ||
-      mode === 'dhw') mode = 'dwdh';
+    mode === 'dwh' ||
+    mode === 'dhw') mode = 'dwdh';
   var raster = image.toRaster();
   var header = _.GSV0_FORMAT['GSV0_' + mode.toUpperCase()];
   this.buffer.write(header);
@@ -506,7 +506,7 @@ Printer.prototype.raster = function (image, mode) {
  * @param  {[type]} pin [description]
  * @return printer instance
  */
-Printer.prototype.cashdraw = function(pin){
+Printer.prototype.cashdraw = function (pin) {
   this.buffer.write(_.CASH_DRAWER[
     'CD_KICK_' + (pin || 2)
   ]);
@@ -514,11 +514,23 @@ Printer.prototype.cashdraw = function(pin){
 };
 
 /**
+ * Printer Buzzer (Beep sound)
+ * @param  {[String]} n Refers to the number of buzzer times
+ * @param  {[String]} t Refers to the buzzer sound length in (t * 100) milliseconds.
+ */
+Printer.prototype.beep = function (n, t) {
+  this.buffer.write(_.BEEP);
+  this.buffer.writeUInt8(n);
+  this.buffer.writeUInt8(t);
+  return this;
+};
+
+/**
  * Send data to hardware and flush buffer
  * @param  {Function} callback
  * @return printer instance
  */
-Printer.prototype.flush = function(callback){
+Printer.prototype.flush = function (callback) {
   var buf = this.buffer.flush();
   this.adapter.write(buf, callback);
   return this;
@@ -529,7 +541,7 @@ Printer.prototype.flush = function(callback){
  * @param  {[type]} part [description]
  * @return printer instance
  */
-Printer.prototype.cut = function(part, feed){
+Printer.prototype.cut = function (part, feed) {
   this.feed(feed || 3);
   this.buffer.write(_.PAPER[
     part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
@@ -542,9 +554,9 @@ Printer.prototype.cut = function(part, feed){
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
  */
-Printer.prototype.close = function(callback){
+Printer.prototype.close = function (callback) {
   var self = this;
-  return this.flush(function(){
+  return this.flush(function () {
     self.adapter.close(callback);
   });
 };

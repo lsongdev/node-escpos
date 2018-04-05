@@ -264,6 +264,11 @@ _.GSV0_FORMAT = {
   GSV0_DWDH     : '\x1d\x76\x30\x03'
 };
 
+/**
+ * [BEEP description]
+ * @type {string}
+ */
+_.BEEP = '\x1b\x42', // Printer Buzzer pre hex
 
 
 /**
