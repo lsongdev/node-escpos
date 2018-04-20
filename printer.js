@@ -320,10 +320,10 @@ Printer.prototype.hardware = function (hw) {
  * @param  {[type]}    options  [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
+
 Printer.prototype.barcode = function (code, type, options) {
   options = options || {};
   var width, height, position, font, includeParity;
-
   if (typeof width === 'string' || typeof width === 'number') { // That's because we are not using the options.object
     width = arguments[2];
     height = arguments[3];
@@ -543,6 +543,18 @@ Printer.prototype.cashdraw = function (pin) {
   this.buffer.write(_.CASH_DRAWER[
     'CD_KICK_' + (pin || 2)
   ]);
+  return this;
+};
+
+/**
+ * Printer Buzzer (Beep sound)
+ * @param  {[String]} n Refers to the number of buzzer times
+ * @param  {[String]} t Refers to the buzzer sound length in (t * 100) milliseconds.
+ */
+Printer.prototype.beep = function (n, t) {
+  this.buffer.write(_.BEEP);
+  this.buffer.writeUInt8(n);
+  this.buffer.writeUInt8(t);
   return this;
 };
 
