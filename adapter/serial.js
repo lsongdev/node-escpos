@@ -51,13 +51,24 @@ Serial.prototype.write = function(data, callback){
  * @return {[type]} [description]
  */
 Serial.prototype.close = function(callback) {
+
   var self = this;
-  this.device.drain(function(err) {
-    self.device.close();
-    self.device = null;
-    callback && callback(err, self.device);
+
+  this.device.drain(function() {
+
+    self.device.flush(function(err) {
+
+      return err ? callback && callback(err, self.device) : self.device.close(function(err) {
+        self.device = null;
+        return callback && callback(err, self.device);
+      });
+
+    });
+
   });
+
   return this;
+
 };
 
 /**

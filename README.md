@@ -34,7 +34,12 @@ const device  = new escpos.USB();
 // const device  = new escpos.Network('localhost');
 // const device  = new escpos.Serial('/dev/usb/lp0');
 
-const printer = new escpos.Printer(device);
+const options = { encoding: "GB18030" /* default */ }
+// encoding is optional
+
+const printer = new escpos.Printer(device, options });
+
+
 
 device.open(function(){
   printer
@@ -70,7 +75,7 @@ vid(Vendor Id) and pid (Product Id) can be checked with the `lsusb` command or `
 ```javascript
 const serialDeviceOnWindows = new escpos.Serial('COM10');
 const serialDeviceOnLinux = new escpos.Serial('/dev/usb/lp0', {
-  bandRate: 14400,
+  baudRate: 14400,
   stopBit: 2
 });
 ```
@@ -177,12 +182,14 @@ width is a numeric value, 1 is for regular size, and 2 is twice the standard siz
 
 height is a numeric value, 1 is for regular size and 2 is twice the standard size. Default: 1
 
-#### barcode("code", "barcodeType", width, height, "position", "font")
+
+
+#### barcode("code", "barcodeType", "options")
 
 Prints a barcode.
 
-code is an alphanumeric code to be printed as bar code
-barcode_type must be one of the following type of codes:
+"code" is an alphanumeric code to be printed as bar code
+"barcodeType" must be one of the following type of codes:
 
 + UPC-A
 + UPC-E
@@ -193,10 +200,17 @@ barcode_type must be one of the following type of codes:
 + NW7
 
 The EAN type automatically calculates the last parity bit. For the EAN13 type, the length of the string is limited to 12, and EAN8 is limited to 7. (#57)
+If you wish to disable the parity bit you must set `"includeParity": false` in the options provided to the command.
 
-width is a numeric value in the range between (1,255) Default: 64
-height is a numeric value in the range between (2,6) Default: 3
-position is where to place the code around the bars, could be one of the following values:
+**"options"**
+
+"options.width" is a numeric value in the range between (1,255) Default: 64
+
+"options.height" is a numeric value in the range between (2,6) Default: 3
+
+"options.includeParity" is a boolean that defined if the parityBit shall be calculated to EAN13/EAN8 printers. default: true
+
+"options.position" is where to place the code around the bars, could be one of the following values:
 
 + ABOVE
 + BELOW
@@ -213,6 +227,15 @@ font is one of the 2 type of fonts, values could be:
 Default: A
 
 Raises BarcodeTypeError, BarcodeSizeError, BarcodeCodeError exceptions.
+
+For backward compatibility the old method interface is still supported:
+
+ ```
+  barcode("code", "barcodeType", width, height, "position", "font")
+  ```
+
+
+
 
 #### cut("mode")
 
