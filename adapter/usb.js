@@ -28,6 +28,14 @@ function USB(vid, pid){
   this.device = null;
   if(vid && pid){
     this.device = usb.findByIds(vid, pid);
+  }else if(vid){
+      // Set spesific USB device from devices array as coming from USB.findPrinter() function.
+      // for example
+      // let devices = escpos.USB.findPrinter();
+      // => devices [ Device1, Device2 ];
+      // And Then
+      // const device = new escpos.USB(Device1); OR device = new escpos.USB(Device2);
+      this.device = vid;
   }else{
     var devices = USB.findPrinter();
     if(devices && devices.length)
@@ -62,6 +70,18 @@ USB.findPrinter = function(){
       // console.warn(e)
       return false;
     }
+  });
+};
+/**
+ * getDevice
+ */
+USB.getDevice = function(vid, pid){
+  return new Promise((resolve, reject) => {
+    const device = new USB(vid, pid);
+    device.open(err => {
+      if(err) return reject(err);
+      resolve(device);
+    });
   });
 };
 
@@ -123,8 +143,12 @@ USB.prototype.write = function(data, callback){
 };
 
 USB.prototype.close = function(callback){
-  this.emit('close', this.device);
-  this.device.close(callback);
+  if(this.device) {
+    this.emit('close', this.device);
+    this.device.close();
+    usb.removeAllListeners('detach');
+  }
+  callback && callback();
   return this;
 };
 

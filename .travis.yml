@@ -1,12 +1,11 @@
 language: node_js
 node_js:
-  - "v4.1.2"
-  - "v4.2.6"
-  - "v5.5.0"
+  - "6"
+  - "8"
 
 before_install:
   - sudo apt-get install build-essential libudev-dev -y
-
+  - npm i -g npm@latest
 
 install:
-  - npm install -g node-pre-gyp-github && npm i
+  - npm install -g node-pre-gyp-github && npm ci
