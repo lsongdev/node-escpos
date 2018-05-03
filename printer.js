@@ -3,7 +3,7 @@ const util = require('util');
 const qr = require('qr-image');
 const iconv = require('iconv-lite');
 const getPixels = require('get-pixels');
-const Buffer = require('mutable-buffer');
+const { MutableBuffer } = require('mutable-buffer');
 const EventEmitter = require('events');
 const Image = require('./image');
 const utils = require('./utils');
@@ -22,7 +22,7 @@ function Printer(adapter, options) {
   var self = this;
   EventEmitter.call(this);
   this.adapter = adapter;
-  this.buffer = new Buffer();
+  this.buffer = new MutableBuffer();
   this.encoding = options && options.encoding || 'GB18030';
   this._model = null;
 };
