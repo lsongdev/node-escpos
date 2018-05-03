@@ -22,7 +22,7 @@ function Printer(adapter, options) {
   var self = this;
   EventEmitter.call(this);
   this.adapter = adapter;
-  this.buffer = new Buffer();
+  this.buffer = Buffer.from();
   this.encoding = options && options.encoding || 'GB18030';
   this._model = null;
 };
