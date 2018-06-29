@@ -56,9 +56,9 @@ Serial.prototype.close = function(callback, timeout) {
 
   var self = this;
 
-  this.device.drain(function(err) {
+  this.device.drain(function() {
 
-    err ? callback && callback(err, self.device) : self.device.flush(function(err) {
+    self.device.flush(function(err) {
 
       setTimeout(function() {
 
