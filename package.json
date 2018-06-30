@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/song940/node-escpos#readme",
   "dependencies": {
+    "deep-assign": "^2.0.0",
     "iconv-lite": "*",
     "mutable-buffer": "^2.0.3"
   },

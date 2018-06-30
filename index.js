@@ -16,3 +16,9 @@ exports.Printer  = require('./printer');
 exports.Adapter  = require('./adapter');
 exports.command  = require('./commands');
 exports.Printer2 = require('./promiseify');
+
+/**
+ * Printers Implementations
+ */
+
+exports.DarumaGeneric = require('./implementations/daruma');
