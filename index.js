@@ -7,7 +7,7 @@
     exports.Serial  = require('./adapter/serial');
     exports.Network = require('./adapter/network');
     exports.Console = require('./adapter/console');
-} catch() {
+} catch (e) {
     //This enables react-native support;
 }
 
