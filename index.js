@@ -2,10 +2,14 @@
 /**
  * Adapters
  */
-exports.USB     = require('./adapter/usb');
-exports.Serial  = require('./adapter/serial');
-exports.Network = require('./adapter/network');
-exports.Console = require('./adapter/console');
+ try {
+    exports.USB     = require('./adapter/usb');
+    exports.Serial  = require('./adapter/serial');
+    exports.Network = require('./adapter/network');
+    exports.Console = require('./adapter/console');
+} catch() {
+    //This enables react-native support;
+}
 
 /**
  * Printer Supports
