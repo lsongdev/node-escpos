@@ -30,7 +30,8 @@
   "dependencies": {
     "deep-assign": "^2.0.0",
     "iconv-lite": "*",
-    "mutable-buffer": "^2.0.3"
+    "mutable-buffer": "^2.0.3",
+    "table": "^4.0.3"
   },
   "optionalDependencies": {
     "get-pixels": "*",
@@ -40,8 +41,5 @@
   },
   "devDependencies": {
     "mocha": "*"
-  },
-  "engines": {
-    "node": ">=8.x"
   }
 }
