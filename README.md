@@ -37,7 +37,7 @@ const device  = new escpos.USB();
 const options = { encoding: "GB18030" /* default */ }
 // encoding is optional
 
-const printer = new escpos.Printer({ device, options });
+const printer = new escpos.Printer(device, options);
 
 
 
