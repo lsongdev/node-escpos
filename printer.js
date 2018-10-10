@@ -602,7 +602,7 @@ Printer.prototype.close = function (callback, options) {
  */
 Printer.prototype.color = function (color) {
   this.buffer.write(_.COLOR[
-    color === 0 || color === 1 ? color: 0
+    color === 0 || color === 1 ? color : 0
   ]);
   return this;
 };
