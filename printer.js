@@ -500,7 +500,7 @@ Printer.prototype.image = function (image, density) {
   // added a delay so the printer can process the graphical data
   // when connected via slower connection ( e.g.: Serial)
 
-  for (var line of bitmap) {
+  for (var line of bitmap.data) {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
