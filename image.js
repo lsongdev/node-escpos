@@ -6,7 +6,7 @@ const getPixels = require('get-pixels');
  * @param {[type]} pixels [description]
  */
 function Image(pixels){
-  if(!(this instanceof Image))
+  if(!(this instanceof Image)) 
     return new Image(pixels);
   this.pixels = pixels;
 
@@ -31,7 +31,7 @@ function Image(pixels){
    if (pixel.a == 0) return 0;
    var shouldBeWhite = pixel.r > 200 && pixel.g > 200 && pixel.b > 200;
    return shouldBeWhite ? 0 : 1;
- });
+  });
 
 };
 
