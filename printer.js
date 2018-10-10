@@ -499,7 +499,8 @@ Printer.prototype.image = function (image, density) {
 
   // added a delay so the printer can process the graphical data
   // when connected via slower connection ( e.g.: Serial)
-  bitmap.data.forEach(async (line) => {
+
+  for (var line of bitmap) {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
@@ -507,7 +508,7 @@ Printer.prototype.image = function (image, density) {
     await new Promise((resolve, reject) => {
       setTimeout(() => { resolve(true) }, 200);
     });
-  });
+  }
 
   return this;
 };
