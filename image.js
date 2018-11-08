@@ -27,9 +27,10 @@ function Image(pixels){
     })));
   };
 
-  this.data = this.data.map(function(pixel){
-    if(pixel.a == 0) return 0;
-    return pixel.r !== 0xFF || pixel.g !== 0xFF || pixel.b !== 0xFF ? 1 : 0;
+  this.data = this.data.map(function(pixel) {
+   if (pixel.a == 0) return 0;
+   var shouldBeWhite = pixel.r > 200 && pixel.g > 200 && pixel.b > 200;
+   return shouldBeWhite ? 0 : 1;
   });
 
 };
