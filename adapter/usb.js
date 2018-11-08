@@ -1,8 +1,8 @@
 'use strict';
 const os           = require('os');
-const usb           = require('usb');
 const util          = require('util');
 const EventEmitter  = require('events');
+let usb = null;
 
 /**
  * [USB Class Codes ]
@@ -23,6 +23,11 @@ const IFACE_CLASS = {
  * @return {[type]}     [description]
  */
 function USB(vid, pid){
+
+  if (!usb) {
+    usb = require('usb');
+  }
+
   EventEmitter.call(this);
   var self = this;
   this.device = null;
@@ -51,7 +56,9 @@ function USB(vid, pid){
       self.device = null;
     }
   });
+
   return this;
+
 };
 
 /**
