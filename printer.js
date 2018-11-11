@@ -3,7 +3,7 @@ const util = require('util');
 const qr = require('qr-image');
 const iconv = require('iconv-lite');
 const getPixels = require('get-pixels');
-const Buffer = require('mutable-buffer');
+const { MutableBuffer } = require('mutable-buffer');
 const EventEmitter = require('events');
 const Image = require('./image');
 const utils = require('./utils');
@@ -22,7 +22,7 @@ function Printer(adapter, options) {
   var self = this;
   EventEmitter.call(this);
   this.adapter = adapter;
-  this.buffer = new Buffer();
+  this.buffer = new MutableBuffer();
   this.encoding = options && options.encoding || 'GB18030';
   this._model = null;
 };
@@ -499,7 +499,8 @@ Printer.prototype.image = function (image, density) {
 
   // added a delay so the printer can process the graphical data
   // when connected via slower connection ( e.g.: Serial)
-  bitmap.data.forEach(async (line) => {
+
+  for (var line of bitmap.data) {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
@@ -507,7 +508,7 @@ Printer.prototype.image = function (image, density) {
     await new Promise((resolve, reject) => {
       setTimeout(() => { resolve(true) }, 200);
     });
-  });
+  }
 
   return this;
 };
@@ -585,12 +586,13 @@ Printer.prototype.cut = function (part, feed) {
 /**
  * [close description]
  * @param  {Function} callback [description]
+ * @param  {[type]}   options  [description]
  * @return {[type]}            [description]
  */
-Printer.prototype.close = function (callback) {
+Printer.prototype.close = function (callback, options) {
   var self = this;
   return this.flush(function () {
-    self.adapter.close(callback);
+    self.adapter.close(callback, options);
   });
 };
 

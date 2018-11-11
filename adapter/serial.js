@@ -48,9 +48,11 @@ Serial.prototype.write = function(data, callback){
 
 /**
  * close device
+ * @param  {Function} callback  [description]
+ * @param  {int}      timeout   [allow manual timeout for emulated COM ports (bluetooth, ...)]
  * @return {[type]} [description]
  */
-Serial.prototype.close = function(callback) {
+Serial.prototype.close = function(callback, timeout) {
 
   var self = this;
 
@@ -58,10 +60,14 @@ Serial.prototype.close = function(callback) {
 
     self.device.flush(function(err) {
 
-      return err ? callback && callback(err, self.device) : self.device.close(function(err) {
-        self.device = null;
-        return callback && callback(err, self.device);
-      });
+      setTimeout(function() {
+
+        err ? callback && callback(err, self.device) : self.device.close(function(err) {
+          self.device = null;
+          return callback && callback(err, self.device);
+        });
+
+      }, "number" === typeof timeout && 0 < timeout ? timeout : 0);
 
     });
 
