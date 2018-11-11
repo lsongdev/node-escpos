@@ -500,7 +500,7 @@ Printer.prototype.image = function (image, density) {
   // added a delay so the printer can process the graphical data
   // when connected via slower connection ( e.g.: Serial)
 
-  for (var line of bitmap.data) {
+  bitmap.data.forEach(async (line) => {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
@@ -508,7 +508,7 @@ Printer.prototype.image = function (image, density) {
     await new Promise((resolve, reject) => {
       setTimeout(() => { resolve(true) }, 200);
     });
-  }
+  });
 
   return this;
 };
@@ -603,7 +603,7 @@ Printer.prototype.close = function (callback, options) {
  */
 Printer.prototype.color = function (color) {
   this.buffer.write(_.COLOR[
-    color === 0 || color === 1 ? color: 0
+    color === 0 || color === 1 ? color : 0
   ]);
   return this;
 };
