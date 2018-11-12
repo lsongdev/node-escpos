@@ -255,6 +255,15 @@ Raises `CashDrawerError()``
 
 ----
 
+#### beep(n,t)
+
+Printer Buzzer (Beep sound)
+
+n Refers to the number of buzzer times
+t Refers to the buzzer sound length in (t * 100) milliseconds.
+
+----
+
 ## Screencast
 
 ![img_1031](https://user-images.githubusercontent.com/8033320/29250339-d66ce470-807b-11e7-89ce-9962da88ca18.JPG)
