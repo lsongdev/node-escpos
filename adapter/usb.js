@@ -66,6 +66,11 @@ function USB(vid, pid){
  * @return {[type]} [description]
  */
 USB.findPrinter = function(){
+
+  if (!usb) {
+    usb = require('usb');
+  }
+
   return usb.getDeviceList().filter(function(device){
     try{
       return device.configDescriptor.interfaces.filter(function(iface){
@@ -150,13 +155,24 @@ USB.prototype.write = function(data, callback){
 };
 
 USB.prototype.close = function(callback){
+
   if(this.device) {
+
     this.emit('close', this.device);
     this.device.close();
+
+    if (!usb) {
+      usb = require('usb');
+    }
+
     usb.removeAllListeners('detach');
+
   }
+
   callback && callback();
+
   return this;
+
 };
 
 /**
