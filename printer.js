@@ -499,18 +499,17 @@ Printer.prototype.image = async function (image, density) {
 
   // added a delay so the printer can process the graphical data
   // when connected via slower connection ( e.g.: Serial)
-
+  this.lineSpace(0); // set line spacing to 0
   bitmap.data.forEach(async (line) => {
     self.buffer.write(header);
     self.buffer.writeUInt16LE(line.length / n);
     self.buffer.write(line);
-    self.buffer.write(_.ESC + _.FEED_CONTROL_SEQUENCES.CTL_GLF);
+    self.buffer.write(_.EOL);
     await new Promise((resolve, reject) => {
       setTimeout(() => { resolve(true) }, 200);
     });
   });
-
-  return this;
+  return this.lineSpace();
 };
 
 /**
@@ -549,8 +548,8 @@ Printer.prototype.cashdraw = function (pin) {
 
 /**
  * Printer Buzzer (Beep sound)
- * @param  {[String]} n Refers to the number of buzzer times
- * @param  {[String]} t Refers to the buzzer sound length in (t * 100) milliseconds.
+ * @param  {[Number]} n Refers to the number of buzzer times
+ * @param  {[Number]} t Refers to the buzzer sound length in (t * 100) milliseconds.
  */
 Printer.prototype.beep = function (n, t) {
   this.buffer.write(_.BEEP);
