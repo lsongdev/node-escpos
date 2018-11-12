@@ -253,14 +253,12 @@ Sends a pulse to the cash drawer in the specified pin.
 pin is a numeric value which defines the pin to be used to send the pulse, it could be 2 or 5.
 Raises `CashDrawerError()``
 
-----
-
 #### beep(n,t)
 
-Printer Buzzer (Beep sound)
+Printer Buzzer (Beep sound).
 
-n Refers to the number of buzzer times
-t Refers to the buzzer sound length in (t * 100) milliseconds.
+"n" Refers to the number of buzzer times.
+"t" Refers to the buzzer sound length in (t * 100) milliseconds.
 
 ----
 
