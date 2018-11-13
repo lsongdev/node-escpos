@@ -488,7 +488,7 @@ Printer.prototype.qrimage = function (content, options, callback) {
  * @param  {[type]} density [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-Printer.prototype.image = async function (image, density, use_glf) {
+Printer.prototype.image = function (image, density, use_glf) {
   if (!(image instanceof Image))
     throw new TypeError('Only escpos.Image supported');
   density = density || 'd24';
