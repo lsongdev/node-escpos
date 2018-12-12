@@ -27,6 +27,8 @@ Network.prototype.open = function(callback){
   //connect to net printer by socket (port,ip)
   this.device.on("error", (err) => {
     callback && callback(err, self.device);
+  }).on('data', buf => {
+    // console.log('printer say:', buf);
   }).connect(this.port, this.address, function(err){
     self.emit('connect', self.device);
     callback && callback(err, self.device);
