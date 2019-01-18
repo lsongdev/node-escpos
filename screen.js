@@ -39,7 +39,7 @@ util.inherits(Screen, EventEmitter);
  * @return {[Screen]} Screen  [the escpos Screen instance]
  */
 Screen.prototype.clear = function (callback) {
-  this.buffer.write(_.SCREEN.CLS, callback);
+  this.buffer.write(_.SCREEN.CLR, callback);
   return this;
 };
 
@@ -69,7 +69,7 @@ Screen.prototype.moveUp = function (callback) {
  * @return {[Screen]} Screen  [the escpos Screen instance]
  */
 Screen.prototype.moveLeft = function (callback) {
-  this.buffer.write(_.SCREEN.LF, callback);
+  this.buffer.write(_.SCREEN.BS, callback);
   return this;
 };
 
@@ -89,7 +89,7 @@ Screen.prototype.moveRight = function (callback) {
  * @return {[Screen]} Screen  [the escpos Screen instance]
  */
 Screen.prototype.moveDown = function (callback) {
-  this.buffer.write(_.SCREEN.BS, callback);
+  this.buffer.write(_.SCREEN.LF, callback);
   return this;
 };
 
@@ -119,7 +119,7 @@ Screen.prototype.moveMaxRight = function (callback) {
  * @return {[Screen]} Screen  [the escpos Screen instance]
  */
 Screen.prototype.moveMaxLeft = function (callback) {
-  this.buffer.write(_.SCREEN.US_CR, callback);
+  this.buffer.write(_.SCREEN.CR, callback);
   return this;
 };
 
@@ -143,16 +143,6 @@ Screen.prototype.move = function (n, m) {
   this.buffer.write(_.SCREEN.US_$);
   this.buffer.writeUInt8(n);
   this.buffer.writeUInt8(m);
-  return this;
-};
-
-/**
- * Selects overwrite mode as the screen display mode
- * @param  {Function} callback
- * @return {[Screen]} Screen  [the escpos Screen instance]
- */
-Screen.prototype.overwrite = function (callback) {
-  this.buffer.write(_.SCREEN.US_MD1, callback);
   return this;
 };
 
@@ -289,16 +279,6 @@ Screen.prototype.print = function (content) {
  * @return {[Screen]} Screen  [the escpos Screen instance]
  */
 Screen.prototype.text = function (content, encoding) {
-  return this.print(iconv.encode(content + _.SCREEN.LF, encoding || this.encoding));
-};
-
-/**
- * [function Print encoded alpha-numeric text without End Of Line]
- * @param  {[String]}  content  [mandatory]
- * @param  {[String]}  encoding [optional]
- * @return {[Screen]} Screen  [the escpos Screen instance]
- */
-Screen.prototype.pureText = function (content, encoding) {
   return this.print(iconv.encode(content, encoding || this.encoding));
 };
 
@@ -319,6 +299,17 @@ Screen.prototype.encode = function (encoding) {
  */
 Screen.prototype.hardware = function (hw) {
   this.buffer.write(_.HARDWARE['HW_' + hw.toUpperCase()]);
+  return this;
+};
+
+/**
+ * Send data to hardware and flush buffer
+ * @param  {Function} callback
+ * @return {[Screen]} printer  [the escpos printer instance]
+ */
+Screen.prototype.flush = function (callback) {
+  var buf = this.buffer.flush();
+  this.adapter.write(buf, callback);
   return this;
 };
 
