@@ -243,7 +243,11 @@ Screen.prototype.brightness = function (level) {
  */
 Screen.prototype.reverse = function (n) {
   this.buffer.write(_.SCREEN.US_r);
-  this.buffer.writeUInt8(n);
+  if (n) {
+    this.buffer.writeUInt8(1);
+  } else {
+    this.buffer.writeUInt8(0);
+  }
   return this;
 };
 
@@ -289,16 +293,6 @@ Screen.prototype.text = function (content, encoding) {
  */
 Screen.prototype.encode = function (encoding) {
   this.encoding = encoding;
-  return this;
-};
-
-/**
- * [hardware]
- * @param  {[type]}    hw       [description]
- * @return {[Screen]} Screen  [the escpos Screen instance]
- */
-Screen.prototype.hardware = function (hw) {
-  this.buffer.write(_.HARDWARE['HW_' + hw.toUpperCase()]);
   return this;
 };
 
