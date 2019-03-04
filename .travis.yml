@@ -5,7 +5,6 @@ node_js:
 
 before_install:
   - sudo apt-get install build-essential libudev-dev -y
-  - npm i -g npm@latest
 
 install:
-  - npm install -g node-pre-gyp-github && npm ci
+  - yarn global add node-pre-gyp-github && yarn install
