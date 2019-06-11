@@ -24,29 +24,46 @@ function Bluetooth(address, channel){
 util.inherits(Bluetooth, EventEmitter);
 
 /**
- * Prints all available bluetooth devices with a serial port to the console
+ * Returns an array of all available bluetooth devices with a serial port
+ * @return {Promise<any[]>} Device objects with address, name, channel
  */
-Bluetooth.findPrinter = function(){
+Bluetooth.findPrinters = async function(){
   if (device === null) {
     device = new bluetooth.DeviceINQ();
   }
-  console.log('Searching for available bluetooth devices with a serial port...');
-  let allFound = false;
-  let openQueries = 0;
-  device.on('finished', function finished(){
-    allFound = true;
-  });
-  device.on('found', function found(address, name){
-    openQueries++;
-    device.findSerialPortChannel(address, function(channel){
-      console.log('Found: ' + name + ' - address: [' + address + '], channel [' + channel + ']');
-      openQueries--;
-      if (allFound && openQueries <= 0) {
-        console.log('finished');
-      }
+  let devices = await device.scan();
+  let printers = await Promise.all(devices.map(({address, name}) => {
+    return new Promise((resolve, reject) => {
+      device.findSerialPortChannel(address, function(channel){
+        if (channel === -1) {
+          resolve(undefined);
+        } else {
+          resolve({
+            address,
+            name,
+            channel
+          })
+        }
+      });
+    });
+  }));
+  return printers;
+};
+
+/**
+ * Returns a connected Blueetooth device
+ * @param {string} address Bluetooth Address
+ * @param {number} channel Bluetooth channel
+ * @return {Promise<any>} connected device if everything is ok, error otherwise
+ */
+Bluetooth.getDevice = async function(address, channel){
+  return new Promise((resolve, reject) => {
+    const device = new Bluetooth(address, channel);
+    device.open(err => {
+      if(err) return reject(err);
+      resolve(device);
     });
   });
-  device.scan();
 };
 
 /**
