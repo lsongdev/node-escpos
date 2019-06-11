@@ -4,7 +4,11 @@ const { Bluetooth, Printer } = require('..');
 
   try {
     const availablePrinters = await Bluetooth.findPrinters();
-    const btPrinter = availablePrinters.filter(p => p && p.name === 'MHT-P5801')[0];
+    // Uncomment if you want to use a specific printer instead of the first bt device that responds:
+    // const preferredPrinterName = 'MHT-P5801';
+    // const btPrinter = availablePrinters.filter(p => p && p.name === preferredPrinterName)[0];
+    const btPrinter = availablePrinters[0];
+    console.log('Connect to ' + btPrinter.name);
     const device = await Bluetooth.getDevice(btPrinter.address, btPrinter.channel);
     const printer = await Printer.create(device);
 
