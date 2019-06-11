@@ -1,8 +1,8 @@
 'use strict';
 const EventEmitter  = require('events');
-const bluetooth     = require('node-bluetooth');
 const util          = require('util');
 
+let bluetooth = null;
 let device = null;
 let connection = null;
 
@@ -17,6 +17,7 @@ function Bluetooth(address, channel){
   EventEmitter.call(this);
   this.address = address;
   this.channel = channel;
+  loadBluetoothDependency();
   device = new bluetooth.DeviceINQ();
   return this;
 };
@@ -24,10 +25,20 @@ function Bluetooth(address, channel){
 util.inherits(Bluetooth, EventEmitter);
 
 /**
+ * Load bluetooth dependency only if actually needed
+ */
+function loadBluetoothDependency(){
+  if (!bluetooth) {
+    bluetooth = require('node-bluetooth');
+  }
+}
+
+/**
  * Returns an array of all available bluetooth devices with a serial port
  * @return {Promise<any[]>} Device objects with address, name, channel
  */
 Bluetooth.findPrinters = async function(){
+  loadBluetoothDependency();
   if (device === null) {
     device = new bluetooth.DeviceINQ();
   }
