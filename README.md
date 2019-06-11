@@ -63,7 +63,7 @@ device.open(function(){
 
 ### Constructors
 
-You can choose your adapter type as USB, Serial, Network, or Console.
+You can choose your adapter type as USB, Serial, Bluetooth, Network, or Console.
 
 #### USB(vid, pid)
 ```javascript
@@ -81,6 +81,13 @@ const serialDeviceOnLinux = new escpos.Serial('/dev/usb/lp0', {
 ```
 Check the [serialport package documentation](https://github.com/EmergingTechnologyAdvisors/node-serialport#serialportopenoptions--object) for more options.
 
+#### Bluetooth(address, channel)
+```javascript
+const address = '01:23:45:67:89:AB';
+const channel = 1;
+const bluetoothDevice = new escpos.Bluetooth(address, channel);
+```
+You can scan for printers using the `escpos.Bluetooth.findPrinters()` method. Check out the examples (bt_promise and bt_find_printer) for more information.
 
 #### Network(address, port = 9100)
 ```javascript
@@ -121,6 +128,9 @@ const usbPrinter = new escpos.Printer(usbDevice);
 
 const serialDevice = new escpos.Serial('/dev/usb/lp0');
 const serialPrinter = new escpos.Printer(serialDevice);
+
+const bluetoothDevice = new escpos.Bluetooth('01:23:45:67:89:AB', 1);
+const bluetoothPrinter = new escpos.Printer(bluetoothDevice);
 
 const networkDevice = new escpos.Network('localhost');
 const networkPrinter = new escpos.Printer(networkDevice);
@@ -274,6 +284,9 @@ const usbScreen = new escpos.Screen(usbDevice);
 
 const serialDevice = new escpos.Serial('/dev/ttyUSB0');
 const serialScreen = new escpos.Screen(serialDevice);
+
+const bluetoothDevice = new escpos.Bluetooth('01:23:45:67:89:AB', 1);
+const bluetoothScreen = new escpos.Screen(bluetoothDevice);
 
 const networkDevice = new escpos.Network('localhost');
 const networkScreen = new escpos.Screen(networkDevice);
