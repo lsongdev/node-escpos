@@ -82,14 +82,13 @@ Bluetooth.getDevice = async function(address, channel){
  * @param callback
  */
 Bluetooth.prototype.open = function(callback){
-  const self = this;
-  bluetooth.connect(this.address, this.channel, function(err, conn){
+  bluetooth.connect(this.address, this.channel, (err, conn) => {
     if(err) {
       callback && callback(err);
     } else {
       connection = conn;
-      self.emit('connect', connection);
-      callback();
+      this.emit('connect', connection);
+      callback && callback();
     }
   });
   return this;
@@ -103,14 +102,13 @@ Bluetooth.prototype.close = function(callback){
   if (connection === null) {
     callback && callback();
   } else {
-    const self = this;
-    connection.close(function(err){
+    connection.close((err) => {
       if(err) {
         callback && callback(err);
       } else {
-        self.emit('disconnect', connection);
+        this.emit('disconnect', connection);
         connection = null;
-        callback();
+        callback && callback();
       }
     });
   }
@@ -126,10 +124,9 @@ Bluetooth.prototype.write = function(data, callback) {
   if (connection === null) {
     callback && callback(new Error('No open bluetooth connection.'));
   } else {
-    const self = this;
-    connection.write(data, function(){
-      self.emit('write', data);
-      callback();
+    connection.write(data, () => {
+      this.emit('write', data);
+      callback && callback();
     });
   }
   return this;
