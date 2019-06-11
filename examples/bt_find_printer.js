@@ -1,3 +1,8 @@
 const { Bluetooth } = require('..');
 
-Bluetooth.findPrinter();
+(async () => {
+
+  const printers = await Bluetooth.findPrinters();
+  console.log(printers);
+
+})();
