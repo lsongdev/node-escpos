@@ -31,8 +31,8 @@ Bluetooth.findPrinters = async function(){
   if (device === null) {
     device = new bluetooth.DeviceINQ();
   }
-  let devices = await device.scan();
-  let printers = await Promise.all(devices.map(({address, name}) => {
+  const devices = await device.scan();
+  const printers = await Promise.all(devices.map(({address, name}) => {
     return new Promise((resolve, reject) => {
       device.findSerialPortChannel(address, function(channel){
         if (channel === -1) {
@@ -71,7 +71,7 @@ Bluetooth.getDevice = async function(address, channel){
  * @param callback
  */
 Bluetooth.prototype.open = function(callback){
-  var self = this;
+  const self = this;
   bluetooth.connect(this.address, this.channel, function(err, conn){
     if(err) {
       callback && callback(err);
@@ -89,17 +89,19 @@ Bluetooth.prototype.open = function(callback){
  */
 Bluetooth.prototype.close = function(callback){
   if (connection === null) {
-    return callback();
+    callback && callback();
+  } else {
+    const self = this;
+    connection.close(function(err){
+      if(err) {
+        callback && callback(err);
+      } else {
+        self.emit('disconnect', connection);
+        connection = null;
+        callback();
+      }
+    });
   }
-  var self = this;
-  connection.close(function(error){
-    if (error) {
-      return callback(error);
-    }
-    self.emit('disconnect', connection);
-    connection = null;
-    callback();
-  });
 };
 
 /**
@@ -109,13 +111,14 @@ Bluetooth.prototype.close = function(callback){
  */
 Bluetooth.prototype.write = function(data, callback) {
   if (connection === null) {
-    return callback(new Error('No open bluetooth connection.'));
+    callback && callback(new Error('No open bluetooth connection.'));
+  } else {
+    const self = this;
+    connection.write(data, function(){
+      self.emit('write', data);
+      callback();
+    });
   }
-  var self = this;
-  connection.write(data, function(){
-    self.emit('write', data);
-    callback();
-  });
 };
 
 /**
