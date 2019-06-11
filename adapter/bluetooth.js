@@ -92,6 +92,7 @@ Bluetooth.prototype.open = function(callback){
       callback();
     }
   });
+  return this;
 };
 
 /**
@@ -113,6 +114,7 @@ Bluetooth.prototype.close = function(callback){
       }
     });
   }
+  return this;
 };
 
 /**
@@ -130,6 +132,7 @@ Bluetooth.prototype.write = function(data, callback) {
       callback();
     });
   }
+  return this;
 };
 
 /**
