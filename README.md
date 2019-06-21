@@ -412,6 +412,7 @@ Flush buffer and closes the current device.
 + [Sébastien Vidal](https://github.com/Psychopoulet)
 + [Yu Yongwoo](https://github.com/uyu423)
 + [Attawit Kittikrairit](https://github.com/atton16)
++ [Michael Kuenzli](https://github.com/pfirpfel)
 
 ----
 
