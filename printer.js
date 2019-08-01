@@ -104,6 +104,15 @@ Printer.prototype.println = function (content) {
 };
 
 /**
+ * [function print pure content with End Of Line]
+ * @param  {[String]}  content  [mandatory]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.newLine = function () {
+  return this.print( _.EOL);
+};
+
+/**
  * [function Print encoded alpha-numeric text with End Of Line]
  * @param  {[String]}  content  [mandatory]
  * @param  {[String]}  encoding [optional]
@@ -112,6 +121,146 @@ Printer.prototype.println = function (content) {
 Printer.prototype.text = function (content, encoding) {
   return this.print(iconv.encode(content + _.EOL, encoding || this.encoding));
 };
+
+
+/**
+ * [function Print draw line End Of Line]
+ 
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.drawLine = function () {
+
+
+    // this.newLine();
+    for (var i = 0; i < 48; i++) {
+      this.buffer.write(Buffer.from("-"));
+    }
+    this.newLine();
+
+    return this;
+};
+
+
+
+/**
+ * [function Print  table   with End Of Line]
+ * @param  {[List]}  data  [mandatory]
+ * @param  {[String]}  encoding [optional]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.table = function (data, encoding) {
+
+
+  var cellWidth = 48 / data.length;
+  var lineTxt = "";
+  
+  for (var i = 0; i < data.length; i++) {
+    
+      lineTxt += data[i].toString();
+
+    var spaces = cellWidth - data[i].toString().length;
+    for (var j = 0; j < spaces; j++) {
+      lineTxt += " ";
+
+    }
+
+  }
+  this.buffer.write(iconv.encode(lineTxt+_.EOL , encoding || this.encoding));
+
+   return this;
+
+
+
+ };
+
+
+ 
+/**
+ * [function Print  custom table  with End Of Line]
+ * @param  {[List]}  data  [mandatory]
+ * @param  {[String]}  encoding [optional]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.tableCustom = function (data, encoding) {
+
+    var cellWidth = 48 / data.length;
+    var secondLine = [];
+    var secondLineEnabled = false;
+    var lineStr="";
+    for (var i = 0; i < data.length; i++) {
+      var tooLong = false;
+      var obj = data[i];
+      obj.text = obj.text.toString();
+
+      if (obj.width) {
+        cellWidth = 48 * obj.width;
+      } else if (obj.cols) {
+        cellWidth = obj.cols
+      }
+
+     
+      // If text is too wide go to next line
+      if (cellWidth < obj.text.length) {
+        tooLong = true;
+        obj.originalText = obj.text;
+        obj.text = obj.text.substring(0, cellWidth - 1);
+      }
+
+      if (obj.align == "CENTER") {
+        var spaces = (cellWidth - obj.text.toString().length) / 2;
+        for (var j = 0; j < spaces; j++) {
+           lineStr +=" ";
+        }
+        if (obj.text != '') 
+          lineStr +=obj.text;
+
+        for (var j = 0; j < spaces - 1; j++) {
+          lineStr +=" ";
+        }
+
+      } else if (obj.align == "RIGHT") {
+        var spaces = cellWidth - obj.text.toString().length;
+        for (var j = 0; j < spaces; j++) {
+          lineStr +=" ";
+        }
+        if (obj.text != '') 
+        lineStr +=obj.text;
+
+      } else {
+        if (obj.text != '') 
+         lineStr +=obj.text;
+
+        var spaces = cellWidth - obj.text.toString().length;
+        for (var j = 0; j < spaces; j++) {
+          lineStr +=" ";
+        }
+
+      }
+
+     
+
+      if (tooLong) {
+        secondLineEnabled = true;
+        obj.text = obj.originalText.substring(cellWidth - 1);
+        secondLine.push(obj);
+      } else {
+        obj.text = "";
+        secondLine.push(obj);
+      }
+    }
+    this.buffer.write(iconv.encode(lineStr+_.EOL , encoding || this.encoding));
+
+    // Print the second line
+    if (secondLineEnabled) {
+      this.tableCustom(secondLine);
+    }
+    else{
+    return this;
+    }
+
+ };
+
+
 
 /**
  * [function Print encoded alpha-numeric text without End Of Line]
