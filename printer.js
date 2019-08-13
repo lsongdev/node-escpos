@@ -757,6 +757,16 @@ Printer.prototype.color = function (color) {
 };
 
 /**
+ * [reverse colors, if your printer supports it]
+ * @param {Boolean} bool - True for reverse, false otherwise
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.setReverseColors = function (bool) {
+  this.buffer.write(bool ? _.COLOR.REVERSE : _.COLOR.UNREVERSE);
+  return this;
+};
+
+/**
  * [exports description]
  * @type {[type]}
  */

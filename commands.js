@@ -282,7 +282,9 @@ _.BEEP = '\x1b\x42', // Printer Buzzer pre hex
  */
 _.COLOR = {
   0: '\x1b\x72\x00', // black
-  1: '\x1b\x72\x01' // red
+  1: '\x1b\x72\x01', // red
+  REVERSE: '\x1dB1', // Reverses the colors - white text on black background
+  UNREVERSE: '\x1dB0' // Default: undo the reverse - black text on white background
 };
 
 /**
