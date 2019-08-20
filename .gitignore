@@ -1,7 +1,7 @@
-.DS_*
-node_modules
-*.sublime*
-psd
-thumb
+
+
 *.log
+yarn.lock
 package-lock.json
+
+node_modules/

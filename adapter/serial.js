@@ -1,7 +1,6 @@
 'use strict';
 const util          = require('util');
 const EventEmitter  = require('events');
-const SerialPort    = require('serialport');
 
 /**
  * SerialPort device
@@ -14,6 +13,7 @@ function Serial(port, options){
     baudRate: 9600,
     autoOpen: false
   };
+  const SerialPort = require('serialport');
   this.device = new SerialPort(port, options);
   this.device.on('close', function() {
     self.emit('disconnect', self.device);

@@ -4,7 +4,8 @@
   "description": "ESC/POS Printer driver for nodejs",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -14,11 +15,7 @@
     "escpos",
     "printer"
   ],
-  "author": {
-    "name": "Lsong",
-    "email": "hi@lsong.org",
-    "url": "https://lsong.org"
-  },
+  "author": "Lsong <hi@lsong.org> (https://lsong.org)",
   "contributors": [
     "Jose Vera <hola@jose.com.co>",
     "Sébastien Vidal <Psychopoulet@GitHub.com>",
@@ -33,14 +30,14 @@
   },
   "homepage": "https://github.com/song940/node-escpos#readme",
   "dependencies": {
+    "qr-image": "*",
+    "get-pixels": "*",
     "iconv-lite": "*",
     "mutable-buffer": "^2.0.3"
   },
   "optionalDependencies": {
-    "get-pixels": "*",
-    "serialport": "*",
-    "qr-image": "*",
     "usb": "*",
+    "serialport": "*",
     "node-bluetooth": "*"
   },
   "devDependencies": {
@@ -48,5 +45,10 @@
   },
   "engines": {
     "node": ">=8.x"
+  },
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
   }
 }
