@@ -24,6 +24,7 @@ function Printer(adapter, options) {
   this.adapter = adapter;
   this.buffer = new MutableBuffer();
   this.encoding = options && options.encoding || 'GB18030';
+  this.width = options && options.width || 48;
   this._model = null;
 };
 
@@ -132,7 +133,7 @@ Printer.prototype.drawLine = function () {
 
 
     // this.newLine();
-    for (var i = 0; i < 48; i++) {
+    for (var i = 0; i < this.width; i++) {
       this.buffer.write(Buffer.from("-"));
     }
     this.newLine();
@@ -151,7 +152,7 @@ Printer.prototype.drawLine = function () {
 Printer.prototype.table = function (data, encoding) {
 
 
-  var cellWidth = 48 / data.length;
+  var cellWidth = this.width / data.length;
   var lineTxt = "";
   
   for (var i = 0; i < data.length; i++) {
@@ -183,7 +184,7 @@ Printer.prototype.table = function (data, encoding) {
  */
 Printer.prototype.tableCustom = function (data, encoding) {
 
-    var cellWidth = 48 / data.length;
+    var cellWidth = this.width / data.length;
     var secondLine = [];
     var secondLineEnabled = false;
     var lineStr="";
@@ -193,7 +194,7 @@ Printer.prototype.tableCustom = function (data, encoding) {
       obj.text = obj.text.toString();
 
       if (obj.width) {
-        cellWidth = 48 * obj.width;
+        cellWidth = this.width * obj.width;
       } else if (obj.cols) {
         cellWidth = obj.cols
       }
@@ -323,6 +324,10 @@ Printer.prototype.font = function (family) {
   this.buffer.write(_.TEXT_FORMAT[
     'TXT_FONT_' + family.toUpperCase()
   ]);
+  if (family.toUpperCase() === a)
+    this.width = 42;
+  else
+    this.width = 56;
   return this;
 };
 /**
