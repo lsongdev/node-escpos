@@ -324,7 +324,7 @@ Printer.prototype.font = function (family) {
   this.buffer.write(_.TEXT_FORMAT[
     'TXT_FONT_' + family.toUpperCase()
   ]);
-  if (family.toUpperCase() === 'a')
+  if (family.toUpperCase() === 'A')
     this.width = 42;
   else
     this.width = 56;
