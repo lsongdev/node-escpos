@@ -1,8 +1,11 @@
-# ESCPOS [![npm version](https://badge.fury.io/js/escpos.svg)](https://www.npmjs.com/package/escpos )
+# ESCPOS
 
 ESC/POS Printer driver for node
 
 [![NPM](https://nodei.co/npm/escpos.png?downloads=true&downloadRank=true&stars=true)](https://npmjs.org/escpos )
+
+[![npm version](https://badge.fury.io/js/escpos.svg)](https://www.npmjs.com/package/escpos )
+[![Build Status](https://travis-ci.org/song940/node-escpos.svg?branch=master)](https://travis-ci.org/song940/node-escpos)
 
 ## Installation
 
@@ -411,17 +414,6 @@ Flush buffer and closes the current device.
 
 ----
 
-## Thanks
-
-+ [Tao Yuan](https://github.com/taoyuan)
-+ [Jose Vera](https://github.com/jor3l)
-+ [Sébastien Vidal](https://github.com/Psychopoulet)
-+ [Yu Yongwoo](https://github.com/uyu423)
-+ [Attawit Kittikrairit](https://github.com/atton16)
-+ [Michael Kuenzli](https://github.com/pfirpfel)
-
-----
-
 ## Contributing
 - Fork this repo
 - Clone your repo
@@ -430,6 +422,21 @@ Flush buffer and closes the current device.
 - Feel free to add your features
 - Make sure your features are fully tested
 - Open a pull request, and enjoy <3
+
+----
+
+## Contributors
+
+Thanks to our [contributors][contributors-href] 🎉👏
+
++ [Tao Yuan](https://github.com/taoyuan)
++ [Jose Vera](https://github.com/jor3l)
++ [Sébastien Vidal](https://github.com/Psychopoulet)
++ [Yu Yongwoo](https://github.com/uyu423)
++ [Attawit Kittikrairit](https://github.com/atton16)
++ [Michael Kuenzli](https://github.com/pfirpfel)
+
+[![](https://opencollective.com/node-escpos/contributors.svg?width=890&button=false)][contributors-href]
 
 ----
 
@@ -455,3 +462,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ---
+
+[contributors-href]: https://github.com/song940/node-escpos/graphs/contributors
