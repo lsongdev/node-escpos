@@ -15,6 +15,5 @@ device.open(function() {
   .barcode('109876543210') // default type 'EAN13'
   .barcode('7654321', 'EAN8') // The EAN parity bit is automatically added.
   .cut()
-  .cut()
   .close();
 });
