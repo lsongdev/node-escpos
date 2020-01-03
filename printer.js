@@ -54,6 +54,18 @@ Printer.prototype.model = function (_model) {
 };
 
 /**
+ * Set character code table
+ * @param  {[Number]} codeTable
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype.setCharacterCodeTable = function (codeTable) {
+  this.buffer.write(_.ESC);
+  this.buffer.write(_.TAB);
+  this.buffer.writeUInt8(codeTable);
+  return this;
+};
+
+/**
  * Fix bottom margin
  * @param  {[String]} size
  * @return {[Printer]} printer  [the escpos printer instance]
