@@ -10,6 +10,7 @@ var _ = {
   EOT: '\x04',
   NUL: '\x00',
   ESC: '\x1b',
+  TAB: '\x74',
   EOL: '\n'
 };
 
