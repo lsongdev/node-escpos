@@ -265,12 +265,10 @@ Printer.prototype.tableCustom = function (data, encoding) {
 
     // Print the second line
     if (secondLineEnabled) {
-      this.tableCustom(secondLine);
+      return this.tableCustom(secondLine);
+    } else {
+      return this;
     }
-    else{
-    return this;
-    }
-
  };
 
 
