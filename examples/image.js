@@ -1,10 +1,13 @@
 'use strict';
+const path = require('path');
 const escpos = require('../');
 
 const device  = new escpos.USB();
 const printer = new escpos.Printer(device);
 
-escpos.Image.load(__dirname + '/tux.png', function(image){
+
+const tux = path.join(__dirname, 'tux.png');
+escpos.Image.load(tux, function(image){
 
   device.open(function(){
 
@@ -21,7 +24,8 @@ escpos.Image.load(__dirname + '/tux.png', function(image){
     .raster(image, 'dh')
     .raster(image, 'dwdh')
 
-    .cut();
+    .cut()
+    .close();
   
   });
 

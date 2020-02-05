@@ -8,16 +8,15 @@ describe('ESC/POS printing test', function() {
       assert.equal(data.length, 3);
       done();
     });
-    device.write(new Buffer(3));
+    device.write(Buffer.alloc(3));
   })
 
   it('printer#print', function(done){
     var device = new escpos.Console(function(data){
-      assert.deepEqual(data, new Buffer('hello world'));
+      assert.deepEqual(data, Buffer.from('hello world'));
       done();
     });
     var printer = new escpos.Printer(device);
     printer.print('hello world').flush();
   })
-
 });
