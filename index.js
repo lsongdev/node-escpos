@@ -5,19 +5,27 @@
 
  try {
     exports.USB     = require('./adapter/usb');
+} catch(e) {}
+
+ try {
     exports.Serial  = require('./adapter/serial');
+} catch(e) {}
+
+ try {
     exports.Network = require('./adapter/network');
-    exports.Console = require('./adapter/console');
     exports.Bluetooth = require('./adapter/bluetooth');
     exports.RawBT   = require('./adapter/rawbt');
-} catch (e) {
-    //This enables react-native support;
-}
+} catch (e) {}
+
+exports.Console = require('./adapter/console');
 
 /**
  * Printer Supports
  */
-exports.Image    = require('./image');
+try {
+    exports.Image    = require('./image');
+} catch(e) {}
+
 exports.Server   = require('./server');
 exports.Printer  = require('./printer');
 exports.Screen  = require('./screen');
