@@ -7,7 +7,9 @@ class Server extends tcp.Server {
     this.on('connection', this.request);
   }
   request(client){
-    client.pipe(this.device);
+    client.pipe(this.device, {
+      end: false
+    });
   }
 }
 

@@ -24,6 +24,7 @@ function Printer(adapter, options, printerCommands) {
     this.adapter = adapter;
     this.buffer = new MutableBuffer();
     this.encoding = options && options.encoding || 'GB18030';
+    this.width = options && options.width || 48;
     this._model = null;
 
     this.printerCommands = printerCommands || _;
@@ -55,10 +56,23 @@ Printer.prototype.model = function (_model) {
 };
 
 /**
+* Set character code table
+* @param  {[Number]} codeTable
+* @return {[Printer]} printer  [the escpos printer instance]
+*/
+Printer.prototype.setCharacterCodeTable = function (codeTable) {
+    this.buffer.write(this.printerCommands.ESC);
+    this.buffer.write(this.printerCommands.TAB);
+    this.buffer.writeUInt8(codeTable);
+    return this;
+};
+
+/**
 * Fix bottom margin
 * @param  {[String]} size
 * @return {[Printer]} printer  [the escpos printer instance]
 */
+
 Printer.prototype.marginBottom = function (size) {
     this.buffer.write(this.printerCommands.MARGINS.BOTTOM);
     this.buffer.writeUInt8(size);
@@ -106,14 +120,165 @@ Printer.prototype.println = function (content) {
 };
 
 /**
+
+* [function print pure content with End Of Line]
+* @param  {[String]}  content  [mandatory]
+* @return {[Printer]} printer  [the escpos printer instance]
+*/
+Printer.prototype.newLine = function () {
+    return this.print(this.printerCommands.EOL);
+};
+
+/**
 * [function Print encoded alpha-numeric text with End Of Line]
 * @param  {[String]}  content  [mandatory]
 * @param  {[String]}  encoding [optional]
 * @return {[Printer]} printer  [the escpos printer instance]
 */
+
 Printer.prototype.text = function (content, encoding) {
     return this.print(iconv.encode(content + this.printerCommands.EOL, encoding || this.encoding));
 };
+
+
+/**
+* [function Print draw line End Of Line]
+
+* @return {[Printer]} printer  [the escpos printer instance]
+*/
+Printer.prototype.drawLine = function () {
+
+
+    // this.newLine();
+    for (var i = 0; i < this.width; i++) {
+        this.buffer.write(Buffer.from("-"));
+    }
+    this.newLine();
+
+    return this;
+};
+
+
+
+/**
+* [function Print  table   with End Of Line]
+* @param  {[List]}  data  [mandatory]
+* @param  {[String]}  encoding [optional]
+* @return {[Printer]} printer  [the escpos printer instance]
+*/
+Printer.prototype.table = function (data, encoding) {
+
+
+    var cellWidth = this.width / data.length;
+    var lineTxt = "";
+
+    for (var i = 0; i < data.length; i++) {
+
+        lineTxt += data[i].toString();
+
+        var spaces = cellWidth - data[i].toString().length;
+        for (var j = 0; j < spaces; j++) {
+            lineTxt += " ";
+
+        }
+
+    }
+    this.buffer.write(iconv.encode(lineTxt+this.printerCommands.EOL , encoding || this.encoding));
+
+    return this;
+
+
+
+};
+
+
+
+/**
+* [function Print  custom table  with End Of Line]
+* @param  {[List]}  data  [mandatory]
+* @param  {[String]}  encoding [optional]
+* @return {[Printer]} printer  [the escpos printer instance]
+*/
+Printer.prototype.tableCustom = function (data, encoding) {
+
+    var cellWidth = this.width / data.length;
+    var secondLine = [];
+    var secondLineEnabled = false;
+    var lineStr="";
+    for (var i = 0; i < data.length; i++) {
+        var tooLong = false;
+        var obj = data[i];
+        obj.text = obj.text.toString();
+
+        if (obj.width) {
+            cellWidth = this.width * obj.width;
+        } else if (obj.cols) {
+            cellWidth = obj.cols
+        }
+
+
+        // If text is too wide go to next line
+        if (cellWidth < obj.text.length) {
+            tooLong = true;
+            obj.originalText = obj.text;
+            obj.text = obj.text.substring(0, cellWidth - 1);
+        }
+
+        if (obj.align == "CENTER") {
+            var spaces = (cellWidth - obj.text.toString().length) / 2;
+            for (var j = 0; j < spaces; j++) {
+                lineStr +=" ";
+            }
+            if (obj.text != '')
+            lineStr +=obj.text;
+
+            for (var j = 0; j < spaces - 1; j++) {
+                lineStr +=" ";
+            }
+
+        } else if (obj.align == "RIGHT") {
+            var spaces = cellWidth - obj.text.toString().length;
+            for (var j = 0; j < spaces; j++) {
+                lineStr +=" ";
+            }
+            if (obj.text != '')
+            lineStr +=obj.text;
+
+        } else {
+            if (obj.text != '')
+            lineStr +=obj.text;
+
+            var spaces = cellWidth - obj.text.toString().length;
+            for (var j = 0; j < spaces; j++) {
+                lineStr +=" ";
+            }
+
+        }
+
+
+
+        if (tooLong) {
+            secondLineEnabled = true;
+            obj.text = obj.originalText.substring(cellWidth - 1);
+            secondLine.push(obj);
+        } else {
+            obj.text = "";
+            secondLine.push(obj);
+        }
+    }
+    this.buffer.write(iconv.encode(lineStr+this.printerCommands.EOL , encoding || this.encoding));
+
+    // Print the second line
+    if (secondLineEnabled) {
+        this.tableCustom(secondLine);
+    }
+    else{
+        return this;
+    }
+
+};
+
+
 
 /**
 * [function Print encoded alpha-numeric text without End Of Line]
@@ -176,6 +341,14 @@ Printer.prototype.font = function (family) {
     this.buffer.write(this.printerCommands.TEXT_FORMAT[
         'TXT_FONT_' + family.toUpperCase()
     ]);
+
+    if (family.toUpperCase() === 'A') {
+        this.width = 42;
+    }
+    else {
+        this.width = 56;
+    }
+
     return this;
 };
 /**
@@ -186,69 +359,81 @@ Printer.prototype.font = function (family) {
 Printer.prototype.style = function (type) {
     switch (type.toUpperCase()) {
 
-        case 'B':
+        case 'B': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_OFF);
-        break;
-        case 'I':
+            break;
+        }
+        case 'I': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_OFF);
-        break;
-        case 'U':
+            break;
+        }
+        case 'U': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_ON);
-        break;
-        case 'U2':
+            break;
+        }
+        case 'U2': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL2_ON);
-        break;
+            break;
+        }
 
-        case 'BI':
+        case 'BI': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_OFF);
-        break;
-        case 'BIU':
+            break;
+        }
+        case 'BIU': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_ON);
-        break;
-        case 'BIU2':
+            break;
+        }
+        case 'BIU2': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL2_ON);
-        break;
-        case 'BU':
+            break;
+        }
+        case 'BU': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_ON);
-        break;
-        case 'BU2':
+            break;
+        }
+        case 'BU2': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL2_ON);
-        break;
-        case 'IU':
+            break;
+        }
+        case 'IU': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_ON);
-        break;
-        case 'IU2':
+            break;
+        }
+        case 'IU2': {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_ON);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL2_ON);
-        break;
+            break;
+        }
 
         case 'NORMAL':
-        default:
+        default: {
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_BOLD_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_ITALIC_OFF);
             this.buffer.write(this.printerCommands.TEXT_FORMAT.TXT_UNDERL_OFF);
-        break;
+            break;
+        }
 
     }
     return this;
@@ -421,30 +606,37 @@ Printer.prototype.qrcode = function (code, version, level, size) {
         }
 
         // Set pixel size
-        if (!size || (size && typeof size !== 'number'))
+        if (!size || (size && typeof size !== 'number')) {
             size = this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
-        else if (size && size < this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
+        }
+        else if (size && size < this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN) {
             size = this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
-        else if (size && size > this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
+        }
+        else if (size && size > this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX) {
             size = this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
+        }
 
         this.buffer.write(this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
         this.buffer.writeUInt8(size);
 
         // Set version
-        if (!version || (version && typeof version !== 'number'))
+        if (!version || (version && typeof version !== 'number')) {
             version = this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
-        else if (version && version < this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
+        }
+        else if (version && version < this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN) {
             version = this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
-        else if (version && version > this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
+        }
+        else if (version && version > this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX) {
             version = this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
+        }
 
         this.buffer.write(this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
         this.buffer.writeUInt8(version);
 
         // Set level
-        if (!level || (level && typeof level !== 'string'))
+        if (!level || (level && typeof level !== 'string')) {
             level = this.printerCommands.CODE2D_FORMAT.QR_LEVEL_L;
+        }
 
         this.buffer.write(this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
         this.buffer.write(this.printerCommands.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[level.toUpperCase()]);
@@ -493,9 +685,11 @@ Printer.prototype.qrimage = function (content, options, callback) {
 * @param  {[type]} density [description]
 * @return {[Printer]} printer  [the escpos printer instance]
 */
-Printer.prototype.image = function (image, density) {
-    if (!(image instanceof Image))
-    throw new TypeError('Only escpos.Image supported');
+Printer.prototype.image = async function (image, density) {
+    if (!(image instanceof Image)) {
+        throw new TypeError('Only escpos.Image supported');
+    }
+
     density = density || 'd24';
     var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
     var header = this.printerCommands.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
@@ -504,17 +698,17 @@ Printer.prototype.image = function (image, density) {
 
     // added a delay so the printer can process the graphical data
     // when connected via slower connection ( e.g.: Serial)
+    this.lineSpace(0); // set line spacing to 0
     bitmap.data.forEach(async (line) => {
         self.buffer.write(header);
         self.buffer.writeUInt16LE(line.length / n);
         self.buffer.write(line);
-        self.buffer.write(this.printerCommands.ESC + this.printerCommands.FEED_CONTROL_SEQUENCES.CTL_GLF);
+        self.buffer.write(this.printerCommands.EOL);
         await new Promise((resolve, reject) => {
             setTimeout(() => { resolve(true) }, 200);
         });
     });
-
-    return this;
+    return this.lineSpace();
 };
 
 /**
@@ -524,15 +718,17 @@ Printer.prototype.image = function (image, density) {
 * @return {[Printer]} printer  [the escpos printer instance]
 */
 Printer.prototype.raster = function (image, mode) {
-    if (!(image instanceof Image))
-    throw new TypeError('Only escpos.Image supported');
+    if (!(image instanceof Image)) {
+        throw new TypeError('Only escpos.Image supported');
+    }
     mode = mode || 'normal';
-    if (mode === 'dhdw' ||
-    mode === 'dwh' ||
-    mode === 'dhw') mode = 'dwdh';
+
+    if (mode === 'dhdw' || mode === 'dwh' || mode === 'dhw') {
+        mode = 'dwdh';
+    }
     var raster = image.toRaster();
     var header = this.printerCommands.GSV0_FORMAT['GSV0_' + mode.toUpperCase()];
-    this.buffer.write(header);    
+    this.buffer.write(header);
     this.buffer.writeUInt16LE(raster.width);
     this.buffer.writeUInt16LE(raster.height);
     this.buffer.write(raster.data);
@@ -553,8 +749,8 @@ Printer.prototype.cashdraw = function (pin) {
 
 /**
 * Printer Buzzer (Beep sound)
-* @param  {[String]} n Refers to the number of buzzer times
-* @param  {[String]} t Refers to the buzzer sound length in (t * 100) milliseconds.
+* @param  {[Number]} n Refers to the number of buzzer times
+* @param  {[Number]} t Refers to the buzzer sound length in (t * 100) milliseconds.
 */
 Printer.prototype.beep = function (n, t) {
     this.buffer.write(this.printerCommands.BEEP);
@@ -613,7 +809,18 @@ Printer.prototype.color = function (color) {
 };
 
 /**
+* [reverse colors, if your printer supports it]
+* @param {Boolean} bool - True for reverse, false otherwise
+* @return {[Printer]} printer  [the escpos printer instance]
+*/
+Printer.prototype.setReverseColors = function (bool) {
+    this.buffer.write(bool ? this.printerCommands.COLOR.REVERSE : this.printerCommands.COLOR.UNREVERSE);
+    return this;
+};
+
+/**
 * [exports description]
 * @type {[type]}
 */
+
 module.exports = Printer;

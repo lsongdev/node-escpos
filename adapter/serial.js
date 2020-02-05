@@ -1,7 +1,6 @@
 'use strict';
 const util          = require('util');
 const EventEmitter  = require('events');
-const SerialPort    = require('serialport');
 
 /**
  * SerialPort device
@@ -14,6 +13,7 @@ function Serial(port, options){
     baudRate: 9600,
     autoOpen: false
   };
+  const SerialPort = require('serialport');
   this.device = new SerialPort(port, options);
   this.device.on('close', function() {
     self.emit('disconnect', self.device);
@@ -56,9 +56,9 @@ Serial.prototype.close = function(callback, timeout) {
 
   var self = this;
 
-  this.device.drain(function(err) {
+  this.device.drain(function() {
 
-    err ? callback && callback(err, self.device) : self.device.flush(function(err) {
+    self.device.flush(function(err) {
 
       setTimeout(function() {
 
