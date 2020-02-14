@@ -22,6 +22,7 @@ function Printer(adapter, options) {
   var self = this;
   EventEmitter.call(this);
   this.adapter = adapter;
+  this.options = options;
   this.buffer = new MutableBuffer();
   this.encoding = options && options.encoding || 'GB18030';
   this.width = options && options.width || 48;
@@ -335,9 +336,9 @@ Printer.prototype.font = function (family) {
     'TXT_FONT_' + family.toUpperCase()
   ]);
   if (family.toUpperCase() === 'A')
-    this.width = 42;
+    this.width = this.options && this.options.width || 42;
   else
-    this.width = 56;
+    this.width = this.options && this.options.width || 56;
   return this;
 };
 /**
