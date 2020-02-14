@@ -138,7 +138,7 @@ Printer.prototype.text = function (content, encoding) {
 
 /**
  * [function Print draw line End Of Line]
- 
+
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.drawLine = function () {
@@ -166,9 +166,9 @@ Printer.prototype.table = function (data, encoding) {
 
   var cellWidth = this.width / data.length;
   var lineTxt = "";
-  
+
   for (var i = 0; i < data.length; i++) {
-    
+
       lineTxt += data[i].toString();
 
     var spaces = cellWidth - data[i].toString().length;
@@ -187,7 +187,7 @@ Printer.prototype.table = function (data, encoding) {
  };
 
 
- 
+
 /**
  * [function Print  custom table  with End Of Line]
  * @param  {[List]}  data  [mandatory]
@@ -211,7 +211,7 @@ Printer.prototype.tableCustom = function (data, encoding) {
         cellWidth = obj.cols
       }
 
-     
+
       // If text is too wide go to next line
       if (cellWidth < obj.text.length) {
         tooLong = true;
@@ -224,7 +224,7 @@ Printer.prototype.tableCustom = function (data, encoding) {
         for (var j = 0; j < spaces; j++) {
            lineStr +=" ";
         }
-        if (obj.text != '') 
+        if (obj.text != '')
           lineStr +=obj.text;
 
         for (var j = 0; j < spaces - 1; j++) {
@@ -236,11 +236,11 @@ Printer.prototype.tableCustom = function (data, encoding) {
         for (var j = 0; j < spaces; j++) {
           lineStr +=" ";
         }
-        if (obj.text != '') 
+        if (obj.text != '')
         lineStr +=obj.text;
 
       } else {
-        if (obj.text != '') 
+        if (obj.text != '')
          lineStr +=obj.text;
 
         var spaces = cellWidth - obj.text.toString().length;
@@ -250,7 +250,7 @@ Printer.prototype.tableCustom = function (data, encoding) {
 
       }
 
-     
+
 
       if (tooLong) {
         secondLineEnabled = true;
@@ -486,11 +486,12 @@ Printer.prototype.hardware = function (hw) {
  * @param  {[type]}    options  [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-
 Printer.prototype.barcode = function (code, type, options) {
   options = options || {};
   var width, height, position, font, includeParity;
-  if (typeof width === 'string' || typeof width === 'number') { // That's because we are not using the options.object
+  // Backward compatibility
+  width = arguments[2];
+  if (typeof width === 'string' || typeof width === 'number') {
     width = arguments[2];
     height = arguments[3];
     position = arguments[4];
@@ -519,12 +520,12 @@ Printer.prototype.barcode = function (code, type, options) {
   }
   if (this._model === 'qsprinter') {
     // qsprinter has no BARCODE_WIDTH command (as of v7.5)
-  } else if (width >= 2 || width <= 6) {
+  } else if (width >= 1 && width <= 5) {
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[width]);
   } else {
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
   }
-  if (height >= 1 || height <= 255) {
+  if (height >= 1 && height <= 255) {
     this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT(height));
   } else {
     if (this._model === 'qsprinter') {
@@ -546,8 +547,10 @@ Printer.prototype.barcode = function (code, type, options) {
   this.buffer.write(_.BARCODE_FORMAT[
     'BARCODE_' + ((type || 'EAN13').replace('-', '_').toUpperCase())
   ]);
-  if (type === 'EAN13' || type === 'EAN8') {
-    parityBit = utils.getParityBit(code);
+  if (includeParity) {
+    if (type === 'EAN13' || type === 'EAN8') {
+      parityBit = utils.getParityBit(code);
+    }
   }
   if (type == 'CODE128' || type == 'CODE93') {
     codeLength = utils.codeLength(code);

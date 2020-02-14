@@ -54,11 +54,11 @@ device.open(function(){
   .text('敏捷的棕色狐狸跳过懒狗')
   .barcode('1234567', 'EAN8')
   .table(["One", "Two", "Three"])
-  .tableCustom([ 
+  .tableCustom([
     { text:"Left", align:"LEFT", width:0.33 },
     { text:"Center", align:"CENTER", width:0.33},
     { text:"Right", align:"RIGHT", width:0.33 }
-  ]) 
+  ])
   .qrimage('https://github.com/song940/node-escpos', function(err){
     this.cut();
     this.close();
@@ -223,35 +223,26 @@ If you wish to disable the parity bit you must set `"includeParity": false` in t
 
 **"options"**
 
-"options.width" is a numeric value in the range between (1,255) Default: 64
+- "options.width" (default=100) is a numeric value ranging between 1 up to 255.
+- "options.height" (default=1) is a numeric value ranging between 1 up to 5.
+- "options.includeParity" (default=true) When true parity bit is calculated for EAN13/EAN8 bar code
+- "options.position" (default=BLW) where to place the barcode numeric value: OFF|ABV|BLW|BTH
 
-"options.height" is a numeric value in the range between (2,6) Default: 3
+  + ABV = ABOVE
+  + BLW = BELOW
+  + BTH = BOTH
+  + OFF = OFF
 
-"options.includeParity" is a boolean that defined if the parityBit shall be calculated to EAN13/EAN8 printers. default: true
+- "options.font" (default=A) the font size: A|B
 
-"options.position" is where to place the code around the bars, could be one of the following values:
-
-+ ABOVE
-+ BELOW
-+ BOTH
-+ OFF
-
-Default: BELOW
-
-font is one of the 2 type of fonts, values could be:
-
-+ A
-+ B
-
-Default: A
 
 Raises BarcodeTypeError, BarcodeSizeError, BarcodeCodeError exceptions.
 
 For backward compatibility the old method interface is still supported:
 
- ```
+
   barcode("code", "barcodeType", width, height, "position", "font")
-  ```
+
 
 
 
