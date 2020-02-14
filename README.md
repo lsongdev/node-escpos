@@ -44,7 +44,7 @@ const printer = new escpos.Printer(device, options);
 
 
 
-device.open(function(){
+device.open(function(error){
   printer
   .font('a')
   .align('ct')
@@ -111,9 +111,9 @@ const debugDevice = new escpos.Console();
 
 ### Methods
 
-#### open(function callback)
+#### open(function callback[err])
 
-Claims the current device USB (or other device type), if the printer is already in use by other process this will fail.
+Claims the current device USB (or other device type), if the printer is already in use by other process this will fail and return the error parameter.
 
 By default, the USB adapter will set the first printer found .
 
@@ -156,6 +156,21 @@ Prints raw text. Raises TextError exception.
 For the encode type, see the [iconv-lite wiki document](https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings). Escpos uses `iconv-lite` for encoding.
 
 If the type is undefined, the default type is GB18030.
+
+#### async image(imagePath, "density")
+
+Prints an image at a set density.
+
+Density consists of a character signaling the base density setting, `s` for single, `d` for double, followed by an integer for image sampling - `8` (8-bit) or `24`.
+
+```javascript
+printer.align('ct')
+       .image(image, 's8')
+       .then(() => { 
+          printer.cut()
+                 .close(); 
+       });
+```
 
 #### encode("encodeType")
 
