@@ -39,7 +39,7 @@ Network.prototype.open = function(callback){
 /**
  * write data to printer
  * @param {[type]} data -- byte data
- * @return 
+ * @return
  */
 Network.prototype.write = function(data, callback){
   this.device.write(data, callback);
