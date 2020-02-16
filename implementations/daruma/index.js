@@ -2,9 +2,10 @@
 
 const genericCommands = require('../../commands');
 const Printer = require('../../printer');
-const deepAssign = require('deep-assign');
+const Promiseify = require('../../promiseify');
+const mergeOptions = require('merge-options');
 
-const darumaCommands = deepAssign(genericCommands, {
+const darumaCommands = mergeOptions(genericCommands, {
     BEEP: '\x1b\x07',
     RESET: '\x1b\x40',
     TEXT_FORMAT: {
