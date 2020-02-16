@@ -30,11 +30,11 @@
   },
   "homepage": "https://github.com/song940/node-escpos#readme",
   "dependencies": {
-    "deep-assign": "^2.0.0",
-    "qr-image": "*",
     "get-pixels": "*",
     "iconv-lite": "*",
+    "merge-options": "^2.0.0",
     "mutable-buffer": "^2.0.3",
+    "qr-image": "*",
     "table": "^4.0.3"
   },
   "optionalDependencies": {
