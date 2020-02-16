@@ -1,10 +1,7 @@
 'use strict';
 const escpos = require('../');
 
-const device  = new escpos.USB(0x0485, 0x7541);
-// const device  = new escpos.Network('localhost');
-// const device  = new escpos.Serial('/dev/usb/lp0');
-const printer = new escpos.Printer(device);
+const {device, printer} = require('./config');
 
 device.open(function(err){
 

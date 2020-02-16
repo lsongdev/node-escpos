@@ -2,31 +2,49 @@
 const path = require('path');
 const escpos = require('../');
 
-const device  = new escpos.USB();
-const printer = new escpos.Printer(device);
-
+const {device, printer} = require('./config');
 
 const tux = path.join(__dirname, 'tux.png');
-escpos.Image.load(tux, function(image){
+escpos.Image.load(tux, async function(image){
 
-  device.open(function(){
+  device.open(async function(){
 
-    printer
+    await printer
+    .align('lt')
+
+    .raster(image, 'normal');
+
+    await printer
     .align('ct')
 
-    .image(image, 's8')
-    .image(image, 'd8')
-    .image(image, 's24')
-    .image(image, 'd24')
-    
-    .raster(image)
-    .raster(image, 'dw')
-    .raster(image, 'dh')
-    .raster(image, 'dwdh')
+    .raster(image, 'normal');
 
+    await printer
+    .align('rt')
+
+    .raster(image, 'normal');
+
+    printer.reset().align('ct').text("Now using image instead of raster").feed(2);
+
+    await printer
+    .align('lt')
+
+    .image(image, 'd24');
+
+    await printer
+    .align('ct')
+
+    .image(image, 'd24');
+
+    await printer
+    .align('rt')
+
+    .image(image, 'd24');
+
+    printer
     .cut()
     .close();
-  
+
   });
 
 });

@@ -2,11 +2,7 @@
 const escpos = require('../');
 const path = require('path');
 
-const device  = new escpos.Serial('COM9', { baudRate: 9600, autoOpen: false });
-// const device  = new escpos.RawBT();
-// const device  = new escpos.Network('localhost');
-// const device  = new escpos.Serial('/dev/usb/lp0');
-const printer = new escpos.Printer(device);
+const {device, printer} = require('./config');
 
 device.open(function(err){
   printer

@@ -1,6 +1,6 @@
 const escpos = require('..');
 
-const device = new escpos.USB();
+const {device, printer} = require('./config');
 const server = new escpos.Server(device);
 
 device.open(() => {

@@ -1,19 +1,36 @@
 'use strict';
 const escpos = require('../');
 
-const device  = new escpos.USB();
+const config = require('./config');
+const device  = config.device;
+const printer = config.printer;
 
-const printer = new escpos.Printer(device);
-
-device.open(function() {
+device.open(async function() {
   printer
   .font('a')
   .align('ct')
-  .size(1, 1)
+  .style('bu')
+  .feed()
+  .text('UPCA barcode example')
+  .barcode('12345678901', 'UPC_A') // code length 11
+
+  .feed()
+  .text('UPCE barcode example')
+  .barcode('12345678901', 'UPC_E') // code length 11
+
+  .feed()
   .text('EAN13 barcode example')
   .barcode('123456789012', 'EAN13') // code length 12
-  .barcode('109876543210') // default type 'EAN13'
-  .barcode('7654321', 'EAN8') // The EAN parity bit is automatically added.
-  .cut()
+
+  .feed()
+  .text('EAN8 barcode example')
+  .barcode('1234567', 'EAN8') // code length 7
+
+  .feed()
+  .text('QRCode example');
+
+  await printer.qrimage('https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/String/fromCharCode', {mode: 'normal'})
+
+  printer.cut()
   .close();
 });

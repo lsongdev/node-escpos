@@ -1,10 +1,7 @@
 'use strict';
 const escpos = require('../');
 
-// const device  = new escpos.USB(0x0416, 0x5011);
-const device  = new escpos.Network('192.168.0.90');
-// const device  = new escpos.Serial('/dev/usb/lp0');
-const printer = new escpos.Printer(device);
+const {device, printer} = require('./config');
 
 device.open(function(err){
 
@@ -21,6 +18,6 @@ device.open(function(err){
   .text('This line should be back to black')
   .color(1)
   .text('This line should be red')
+  .cut()
   .close()
 });
-
