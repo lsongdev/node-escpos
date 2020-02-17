@@ -238,8 +238,8 @@ If you wish to disable the parity bit you must set `"includeParity": false` in t
 
 **"options"**
 
-- "options.width" (default=100) is a numeric value ranging between 1 up to 255.
-- "options.height" (default=1) is a numeric value ranging between 1 up to 5.
+- "options.width" (default=1) is a numeric value ranging between 1 up to 5. 
+- "options.height" (default=100) is a numeric value ranging between 1 up to 255.
 - "options.includeParity" (default=true) When true parity bit is calculated for EAN13/EAN8 bar code
 - "options.position" (default=BLW) where to place the barcode numeric value: OFF|ABV|BLW|BTH
 
