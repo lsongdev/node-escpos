@@ -785,6 +785,28 @@ Printer.prototype.setReverseColors = function (bool) {
   return this;
 };
 
+
+/**
+ * [writes a low level command to the printer buffer]
+ *
+ * @usage
+ * 1) raw('1d:77:06:1d:6b:02:32:32:30:30:30:30:32:30:30:30:35:30:35:00:0a')
+ * 2) raw('1d 77 06 1d 6b 02 32 32 30 30 30 30 32 30 30 30 35 30 35 00 0a')
+ * 3) raw(Buffer.from('1d77061d6b0232323030303032303030353035000a','hex'))
+ *
+ * @param data {Buffer|string}
+ * @returns {Printer}
+ */
+Printer.prototype.raw = function raw(data) {
+  if (Buffer.isBuffer(data)) {
+    this.buffer.write(data);
+  } else if (typeof data === 'string') {
+    data = data.toLowerCase();
+    this.buffer.write(Buffer.from(data.replace(/(\s|:)/g,''), 'hex'));
+  }
+  return this;
+};
+
 /**
  * [exports description]
  * @type {[type]}
