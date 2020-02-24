@@ -1,0 +1,19 @@
+{
+  "name": "escpos-serialport",
+  "version": "3.0.0-alpha.1",
+  "description": "serialport adapter for escpos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "serialport": "*"
+  },
+  "keywords": [
+    "escpos",
+    "escpos-adapter"
+  ],
+  "author": "Lsong <song940@gmail.com> (https://lsong.org)",
+  "license": "MIT",
+  "gitHead": "a3a65c61c0b990298258331f54546a93d6875ddb"
+}

@@ -8,7 +8,7 @@ const EventEmitter = require('events');
 const Image = require('./image');
 const utils = require('./utils');
 const _ = require('./commands');
-const Promiseify = require('./promiseify');
+const Promiseify = require('./promisify');
 
 /**
  * [function ESC/POS Printer]
@@ -123,7 +123,7 @@ Printer.prototype.println = function (content) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.newLine = function () {
-  return this.print( _.EOL);
+  return this.print(_.EOL);
 };
 
 /**
@@ -145,13 +145,13 @@ Printer.prototype.text = function (content, encoding) {
 Printer.prototype.drawLine = function () {
 
 
-    // this.newLine();
-    for (var i = 0; i < this.width; i++) {
-      this.buffer.write(Buffer.from("-"));
-    }
-    this.newLine();
+  // this.newLine();
+  for (var i = 0; i < this.width; i++) {
+    this.buffer.write(Buffer.from("-"));
+  }
+  this.newLine();
 
-    return this;
+  return this;
 };
 
 
@@ -170,7 +170,7 @@ Printer.prototype.table = function (data, encoding) {
 
   for (var i = 0; i < data.length; i++) {
 
-      lineTxt += data[i].toString();
+    lineTxt += data[i].toString();
 
     var spaces = cellWidth - data[i].toString().length;
     for (var j = 0; j < spaces; j++) {
@@ -179,13 +179,13 @@ Printer.prototype.table = function (data, encoding) {
     }
 
   }
-  this.buffer.write(iconv.encode(lineTxt+_.EOL , encoding || this.encoding));
+  this.buffer.write(iconv.encode(lineTxt + _.EOL, encoding || this.encoding));
 
-   return this;
+  return this;
 
 
 
- };
+};
 
 
 
@@ -197,80 +197,80 @@ Printer.prototype.table = function (data, encoding) {
  */
 Printer.prototype.tableCustom = function (data, encoding) {
 
-    var cellWidth = this.width / data.length;
-    var secondLine = [];
-    var secondLineEnabled = false;
-    var lineStr="";
-    for (var i = 0; i < data.length; i++) {
-      var tooLong = false;
-      var obj = data[i];
-      obj.text = obj.text.toString();
+  var cellWidth = this.width / data.length;
+  var secondLine = [];
+  var secondLineEnabled = false;
+  var lineStr = "";
+  for (var i = 0; i < data.length; i++) {
+    var tooLong = false;
+    var obj = data[i];
+    obj.text = obj.text.toString();
 
-      if (obj.width) {
-        cellWidth = this.width * obj.width;
-      } else if (obj.cols) {
-        cellWidth = obj.cols
-      }
-
-
-      // If text is too wide go to next line
-      if (cellWidth < obj.text.length) {
-        tooLong = true;
-        obj.originalText = obj.text;
-        obj.text = obj.text.substring(0, cellWidth - 1);
-      }
-
-      if (obj.align == "CENTER") {
-        var spaces = (cellWidth - obj.text.toString().length) / 2;
-        for (var j = 0; j < spaces; j++) {
-           lineStr +=" ";
-        }
-        if (obj.text != '')
-          lineStr +=obj.text;
-
-        for (var j = 0; j < spaces - 1; j++) {
-          lineStr +=" ";
-        }
-
-      } else if (obj.align == "RIGHT") {
-        var spaces = cellWidth - obj.text.toString().length;
-        for (var j = 0; j < spaces; j++) {
-          lineStr +=" ";
-        }
-        if (obj.text != '')
-        lineStr +=obj.text;
-
-      } else {
-        if (obj.text != '')
-         lineStr +=obj.text;
-
-        var spaces = cellWidth - obj.text.toString().length;
-        for (var j = 0; j < spaces; j++) {
-          lineStr +=" ";
-        }
-
-      }
-
-
-
-      if (tooLong) {
-        secondLineEnabled = true;
-        obj.text = obj.originalText.substring(cellWidth - 1);
-        secondLine.push(obj);
-      } else {
-        obj.text = "";
-        secondLine.push(obj);
-      }
+    if (obj.width) {
+      cellWidth = this.width * obj.width;
+    } else if (obj.cols) {
+      cellWidth = obj.cols
     }
-    this.buffer.write(iconv.encode(lineStr+_.EOL , encoding || this.encoding));
 
-    // Print the second line
-    if (secondLineEnabled) {
-      return this.tableCustom(secondLine);
+
+    // If text is too wide go to next line
+    if (cellWidth < obj.text.length) {
+      tooLong = true;
+      obj.originalText = obj.text;
+      obj.text = obj.text.substring(0, cellWidth - 1);
+    }
+
+    if (obj.align == "CENTER") {
+      var spaces = (cellWidth - obj.text.toString().length) / 2;
+      for (var j = 0; j < spaces; j++) {
+        lineStr += " ";
+      }
+      if (obj.text != '')
+        lineStr += obj.text;
+
+      for (var j = 0; j < spaces - 1; j++) {
+        lineStr += " ";
+      }
+
+    } else if (obj.align == "RIGHT") {
+      var spaces = cellWidth - obj.text.toString().length;
+      for (var j = 0; j < spaces; j++) {
+        lineStr += " ";
+      }
+      if (obj.text != '')
+        lineStr += obj.text;
+
     } else {
-      return this;
+      if (obj.text != '')
+        lineStr += obj.text;
+
+      var spaces = cellWidth - obj.text.toString().length;
+      for (var j = 0; j < spaces; j++) {
+        lineStr += " ";
+      }
+
     }
- };
+
+
+
+    if (tooLong) {
+      secondLineEnabled = true;
+      obj.text = obj.originalText.substring(cellWidth - 1);
+      secondLine.push(obj);
+    } else {
+      obj.text = "";
+      secondLine.push(obj);
+    }
+  }
+  this.buffer.write(iconv.encode(lineStr + _.EOL, encoding || this.encoding));
+
+  // Print the second line
+  if (secondLineEnabled) {
+    return this.tableCustom(secondLine);
+  } else {
+    return this;
+  }
+};
 
 
 
@@ -802,10 +802,19 @@ Printer.prototype.raw = function raw(data) {
     this.buffer.write(data);
   } else if (typeof data === 'string') {
     data = data.toLowerCase();
-    this.buffer.write(Buffer.from(data.replace(/(\s|:)/g,''), 'hex'));
+    this.buffer.write(Buffer.from(data.replace(/(\s|:)/g, ''), 'hex'));
   }
   return this;
 };
+
+
+/**
+ * Printer Supports
+ */
+Printer.Printer = Printer;
+Printer.Image = require('./image');
+Printer.command = require('./commands');
+Printer.Printer2 = require('./promisify');
 
 /**
  * [exports description]

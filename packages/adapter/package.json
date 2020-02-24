@@ -1,0 +1,15 @@
+{
+  "name": "escpos-adapter",
+  "version": "3.0.0-alpha.1",
+  "description": "escpos adapter base class",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "escpos"
+  ],
+  "author": "Lsong <song940@gmail.com> (https://lsong.org)",
+  "license": "MIT",
+  "gitHead": "a3a65c61c0b990298258331f54546a93d6875ddb"
+}
