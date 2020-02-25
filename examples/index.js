@@ -1,5 +1,5 @@
 'use strict';
-const escpos = require('../');
+const escpos = require('..');
 
 const device  = new escpos.USB(0x0416, 0x5011);
 // const device  = new escpos.RawBT();

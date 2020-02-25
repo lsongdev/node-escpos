@@ -1,0 +1,14 @@
+{
+  "name": "escpos-screen",
+  "version": "0.0.0",
+  "description": "escpos screen api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "escpos"
+  ],
+  "author": "Lsong <song940@gmail.com> (https://lsong.org)",
+  "license": "MIT"
+}

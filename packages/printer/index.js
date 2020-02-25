@@ -811,8 +811,8 @@ Printer.prototype.raw = function raw(data) {
 /**
  * Printer Supports
  */
+Printer.Printer = Printer;
 Printer.Image = require('./image');
-Printer.Printer = require('./printer');
 Printer.command = require('./commands');
 Printer.Printer2 = require('./promisify');
 
