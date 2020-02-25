@@ -44,5 +44,6 @@
     "doc": "docs",
     "example": "examples",
     "test": "test"
-  }
+  },
+  "gitHead": "a3a65c61c0b990298258331f54546a93d6875ddb"
 }
