@@ -1,6 +1,6 @@
 {
   "name": "escpos-bluetooth",
-  "version": "3.0.0-alpha.0",
+  "version": "3.0.0-alpha.1",
   "description": "bluetooth adapter for escpos",
   "main": "index.js",
   "scripts": {
