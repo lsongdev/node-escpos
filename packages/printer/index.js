@@ -195,12 +195,19 @@ Printer.prototype.table = function (data, encoding) {
  * @param  {[String]}  encoding [optional]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-Printer.prototype.tableCustom = function (data, encoding) {
+Printer.prototype.tableCustom = function (data, encoding, size) {
 
+  var [ sizeW = 1, sizeH = 1 ] = size || []
   var cellWidth = this.width / data.length;
   var secondLine = [];
   var secondLineEnabled = false;
   var lineStr = "";
+
+  if (sizeW > 1) {
+    // Add size to line
+    lineStr += _.TEXT_FORMAT.TXT_CUSTOM_SIZE(sizeW, sizeH);
+  }
+
   for (var i = 0; i < data.length; i++) {
     var tooLong = false;
     var obj = data[i];
@@ -210,6 +217,11 @@ Printer.prototype.tableCustom = function (data, encoding) {
       cellWidth = this.width * obj.width;
     } else if (obj.cols) {
       cellWidth = obj.cols
+    }
+
+    if (sizeW > 1) {
+      textLength *= sizeW // Increase text length by width
+      cellWidth -= cellWidth - sizeW >= 0 ? sizeW : 0 // Decrase cellWidth by width
     }
 
 
@@ -234,6 +246,11 @@ Printer.prototype.tableCustom = function (data, encoding) {
 
     } else if (obj.align == "RIGHT") {
       var spaces = cellWidth - obj.text.toString().length;
+      if (sizeW > 1) {
+        // Calculate remaining space and
+        // add extra space for exacly align the right
+        spaces += (obj.text.toString().length % 2 > 0 ? 2 : 1)
+      }
       for (var j = 0; j < spaces; j++) {
         lineStr += " ";
       }
@@ -263,6 +280,11 @@ Printer.prototype.tableCustom = function (data, encoding) {
     }
   }
   this.buffer.write(iconv.encode(lineStr + _.EOL, encoding || this.encoding));
+
+  if (sizeW > 1) {
+    // Reset line size
+    lineStr += _.TEXT_FORMAT.TXT_NORMAL;
+  }
 
   // Print the second line
   if (secondLineEnabled) {
