@@ -229,7 +229,7 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
         lineStr += ' '
       }
 
-      if (obj.text !== '') lineStr += obj.text.trim()
+      if (obj.text !== '') lineStr += obj.text
 
       for (let s = 0; s < spaces - 1; s++) {
         lineStr += ' '
@@ -246,10 +246,10 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
         lineStr += ' '
       }
 
-      if (obj.text !== '') lineStr += obj.text.trim()
+      if (obj.text !== '') lineStr += obj.text
 
     } else {
-      if (obj.text !== '') lineStr += obj.text.trim()
+      if (obj.text !== '') lineStr += obj.text
 
       let spaces = Math.floor(cellWidth - textLength)
       if (leftoverSpace > 0) {
