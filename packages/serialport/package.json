@@ -1,6 +1,6 @@
 {
   "name": "escpos-serialport",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "serialport adapter for escpos",
   "main": "index.js",
   "scripts": {
