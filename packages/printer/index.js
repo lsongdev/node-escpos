@@ -187,113 +187,112 @@ Printer.prototype.table = function (data, encoding) {
 
 };
 
-
-
 /**
  * [function Print  custom table  with End Of Line]
  * @param  {[List]}  data  [mandatory]
  * @param  {[String]}  encoding [optional]
+ * @param  {[Array]}  size [optional]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.tableCustom = function (data, encoding, size) {
+  let [ width = 1, height = 1 ] = size || []
+  let baseWidth = Math.floor(this.width / width)
+  let cellWidth = Math.floor(baseWidth / data.length)
+  let leftoverSpace = baseWidth - cellWidth * data.length
+  let lineStr = ''
+  let secondLineEnabled = false
+  let secondLine = []
 
-  var [ sizeW = 1, sizeH = 1 ] = size || []
-  var cellWidth = this.width / data.length;
-  var secondLine = [];
-  var secondLineEnabled = false;
-  var lineStr = "";
+  for (let i = 0; i < data.length; i++) {
+    let obj = data[i]
+    let align = obj.align.toUpperCase()
+    let tooLong = false
 
-  if (sizeW > 1) {
-    // Add size to line
-    lineStr += _.TEXT_FORMAT.TXT_CUSTOM_SIZE(sizeW, sizeH);
-  }
-
-  for (var i = 0; i < data.length; i++) {
-    var tooLong = false;
-    var obj = data[i];
-    obj.text = obj.text.toString();
-
+    obj.text = obj.text.toString()
+    let textLength = obj.text.length
+    
     if (obj.width) {
-      cellWidth = this.width * obj.width;
+      cellWidth = baseWidth * obj.width
     } else if (obj.cols) {
       cellWidth = obj.cols
     }
 
-    if (sizeW > 1) {
-      textLength *= sizeW // Increase text length by width
-      cellWidth -= cellWidth - sizeW >= 0 ? sizeW : 0 // Decrase cellWidth by width
+    if (cellWidth < textLength) {
+      tooLong = true
+      obj.originalText = obj.text
+      obj.text = obj.text.substring(0, cellWidth)
     }
 
-
-    // If text is too wide go to next line
-    if (cellWidth < obj.text.length) {
-      tooLong = true;
-      obj.originalText = obj.text;
-      obj.text = obj.text.substring(0, cellWidth - 1);
-    }
-
-    if (obj.align == "CENTER") {
-      var spaces = (cellWidth - obj.text.toString().length) / 2;
-      for (var j = 0; j < spaces; j++) {
-        lineStr += " ";
-      }
-      if (obj.text != '')
-        lineStr += obj.text;
-
-      for (var j = 0; j < spaces - 1; j++) {
-        lineStr += " ";
+    if (align === 'CENTER') {
+      let spaces = (cellWidth - textLength) / 2
+      for (let s = 0; s < spaces; s++) {
+        lineStr += ' '
       }
 
-    } else if (obj.align == "RIGHT") {
-      var spaces = cellWidth - obj.text.toString().length;
-      if (sizeW > 1) {
-        // Calculate remaining space and
-        // add extra space for exacly align the right
-        spaces += (obj.text.toString().length % 2 > 0 ? 2 : 1)
+      if (obj.text !== '') lineStr += obj.text.trim()
+
+      for (let s = 0; s < spaces - 1; s++) {
+        lineStr += ' '
       }
-      for (var j = 0; j < spaces; j++) {
-        lineStr += " ";
+
+    } else if (align === 'RIGHT') {
+      let spaces = (cellWidth - textLength)
+      if (leftoverSpace > 0) {
+        spaces += leftoverSpace
+        leftoverSpace = 0
       }
-      if (obj.text != '')
-        lineStr += obj.text;
+
+      for (let s = 0; s < spaces; s++) {
+        lineStr += ' '
+      }
+
+      if (obj.text !== '') lineStr += obj.text.trim()
 
     } else {
-      if (obj.text != '')
-        lineStr += obj.text;
+      if (obj.text !== '') lineStr += obj.text.trim()
 
-      var spaces = cellWidth - obj.text.toString().length;
-      for (var j = 0; j < spaces; j++) {
-        lineStr += " ";
+      let spaces = Math.floor(cellWidth - textLength)
+      if (leftoverSpace > 0) {
+        spaces += leftoverSpace
+        leftoverSpace = 0
       }
 
+      for (let s = 0; s < spaces; s++) {
+        lineStr += ' '
+      }
     }
-
-
 
     if (tooLong) {
-      secondLineEnabled = true;
-      obj.text = obj.originalText.substring(cellWidth - 1);
-      secondLine.push(obj);
+      secondLineEnabled = true
+      obj.text = obj.originalText.substring(cellWidth)
+      secondLine.push(obj)
     } else {
-      obj.text = "";
-      secondLine.push(obj);
+      obj.text = ''
+      secondLine.push(obj)
     }
   }
-  this.buffer.write(iconv.encode(lineStr + _.EOL, encoding || this.encoding));
 
-  if (sizeW > 1) {
-    // Reset line size
-    lineStr += _.TEXT_FORMAT.TXT_NORMAL;
+  // Set size to line
+  if (width > 1) {
+    lineStr = (
+      _.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height) +
+      lineStr +
+      _.TEXT_FORMAT.TXT_NORMAL
+    )
   }
 
-  // Print the second line
+  // Write the line
+  this.buffer.write(
+    iconv.encode(lineStr + _.EOL, encoding || this.encoding)
+  )
+  
   if (secondLineEnabled) {
-    return this.tableCustom(secondLine);
+    // Writes second line if has
+    return this.tableCustom(secondLine, encoding, size)
   } else {
-    return this;
+    return this
   }
-};
-
+}
 
 
 /**
