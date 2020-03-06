@@ -194,8 +194,9 @@ Printer.prototype.table = function (data, encoding) {
  * @param  {[Array]}  size [optional]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-Printer.prototype.tableCustom = function (data, encoding, size) {
-  let [ width = 1, height = 1 ] = size || []
+Printer.prototype.tableCustom = function (data, options = {}) {
+  options = options || { size: [], encoding: this.encoding }
+  let [width = 1, height = 1] = options.size || []
   let baseWidth = Math.floor(this.width / width)
   let cellWidth = Math.floor(baseWidth / data.length)
   let leftoverSpace = baseWidth - cellWidth * data.length
@@ -210,7 +211,7 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
 
     obj.text = obj.text.toString()
     let textLength = obj.text.length
-    
+
     if (obj.width) {
       cellWidth = baseWidth * obj.width
     } else if (obj.cols) {
@@ -229,14 +230,23 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
         lineStr += ' '
       }
 
-      if (obj.text !== '') lineStr += obj.text
+      if (obj.text !== '') {
+        if (obj.style) {
+          lineStr += (
+            this._getStyle(obj.style) +
+            obj.text +
+            this._getStyle("NORMAL")
+          )
+        } else {
+          lineStr += obj.text
+        }
+      }
 
       for (let s = 0; s < spaces - 1; s++) {
         lineStr += ' '
       }
-
     } else if (align === 'RIGHT') {
-      let spaces = (cellWidth - textLength)
+      let spaces = cellWidth - textLength
       if (leftoverSpace > 0) {
         spaces += leftoverSpace
         leftoverSpace = 0
@@ -246,10 +256,29 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
         lineStr += ' '
       }
 
-      if (obj.text !== '') lineStr += obj.text
-
+      if (obj.text !== '') {
+        if (obj.style) {
+          lineStr += (
+            this._getStyle(obj.style) +
+            obj.text +
+            this._getStyle("NORMAL")
+          )
+        } else {
+          lineStr += obj.text
+        }
+      }
     } else {
-      if (obj.text !== '') lineStr += obj.text
+      if (obj.text !== '') {
+        if (obj.style) {
+          lineStr += (
+            this._getStyle(obj.style) +
+            obj.text +
+            this._getStyle("NORMAL")
+          )
+        } else {
+          lineStr += obj.text
+        }
+      }
 
       let spaces = Math.floor(cellWidth - textLength)
       if (leftoverSpace > 0) {
@@ -283,12 +312,12 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
 
   // Write the line
   this.buffer.write(
-    iconv.encode(lineStr + _.EOL, encoding || this.encoding)
+    iconv.encode(lineStr + _.EOL, options.encoding || this.encoding)
   )
-  
+
   if (secondLineEnabled) {
     // Writes second line if has
-    return this.tableCustom(secondLine, encoding, size)
+    return this.tableCustom(secondLine, options)
   } else {
     return this
   }
@@ -362,79 +391,89 @@ Printer.prototype.font = function (family) {
     this.width = this.options && this.options.width || 56;
   return this;
 };
+
+/**
+ * [font style]
+ * @param  {[type]}    type     [description]
+ * @return {[Printer]} printer  [the escpos printer instance]
+ */
+Printer.prototype._getStyle = function (type) {
+  let styled = ''
+  switch (type.toUpperCase()) {
+    case 'B':
+      styled += _.TEXT_FORMAT.TXT_BOLD_ON
+      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
+      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
+      break
+    case 'I':
+      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
+      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
+      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
+      break
+    case 'U':
+      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
+      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
+      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
+      break
+    case 'U2':
+      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
+      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
+      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
+      break
+
+    case 'BI':
+      styled += _.TEXT_FORMAT.TXT_BOLD_ON
+      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
+      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
+      break
+    case 'BIU':
+      styled += _.TEXT_FORMAT.TXT_BOLD_ON
+      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
+      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
+      break
+    case 'BIU2':
+      styled += _.TEXT_FORMAT.TXT_BOLD_ON
+      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
+      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
+      break
+    case 'BU':
+      styled += _.TEXT_FORMAT.TXT_BOLD_ON
+      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
+      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
+      break
+    case 'BU2':
+      styled += _.TEXT_FORMAT.TXT_BOLD_ON
+      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
+      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
+      break
+    case 'IU':
+      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
+      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
+      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
+      break
+    case 'IU2':
+      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
+      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
+      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
+      break
+
+    case 'NORMAL':
+    default:
+      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
+      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
+      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
+      break
+  }
+  return styled
+}
+
 /**
  * [font style]
  * @param  {[type]}    type     [description]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.style = function (type) {
-  switch (type.toUpperCase()) {
-
-    case 'B':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
-      break;
-    case 'I':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
-      break;
-    case 'U':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
-      break;
-    case 'U2':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
-      break;
-
-    case 'BI':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
-      break;
-    case 'BIU':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
-      break;
-    case 'BIU2':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
-      break;
-    case 'BU':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
-      break;
-    case 'BU2':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
-      break;
-    case 'IU':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_ON);
-      break;
-    case 'IU2':
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_ON);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL2_ON);
-      break;
-
-    case 'NORMAL':
-    default:
-      this.buffer.write(_.TEXT_FORMAT.TXT_BOLD_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_ITALIC_OFF);
-      this.buffer.write(_.TEXT_FORMAT.TXT_UNDERL_OFF);
-      break;
-
-  }
+  this.buffer.write(this._getStyle(type));
   return this;
 };
 
