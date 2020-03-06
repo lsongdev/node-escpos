@@ -34,7 +34,7 @@ describe('ESC/POS printing test', function() {
       .tableCustom([
         { text: "Check:13", align: "LEFT" },
         { text: "Table:A1", align: "RIGHT" }
-      ], null, [2, 1])
+      ], { size: [2, 1] })
       .newLine()
       .align("CT")
       .size(1, 1)

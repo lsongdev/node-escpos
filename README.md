@@ -41,11 +41,14 @@ device.open(function(error){
   .text('敏捷的棕色狐狸跳过懒狗')
   .barcode('1234567', 'EAN8')
   .table(["One", "Two", "Three"])
-  .tableCustom([
-    { text:"Left", align:"LEFT", width:0.33 },
-    { text:"Center", align:"CENTER", width:0.33},
-    { text:"Right", align:"RIGHT", width:0.33 }
-  ])
+  .tableCustom(
+    [
+      { text:"Left", align:"LEFT", width:0.33, style: 'B' },
+      { text:"Center", align:"CENTER", width:0.33},
+      { text:"Right", align:"RIGHT", width:0.33 }
+    ],
+    { encoding: 'cp857', size: [1, 1] } // Optional
+  )
   .qrimage('https://github.com/song940/node-escpos', function(err){
     this.cut();
     this.close();
