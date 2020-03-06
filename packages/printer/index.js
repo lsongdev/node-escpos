@@ -205,7 +205,7 @@ Printer.prototype.tableCustom = function (data, encoding, size) {
 
   for (let i = 0; i < data.length; i++) {
     let obj = data[i]
-    let align = obj.align.toUpperCase()
+    let align = (obj.align || '').toUpperCase()
     let tooLong = false
 
     obj.text = obj.text.toString()
