@@ -302,7 +302,7 @@ Printer.prototype.tableCustom = function (data, options = {}) {
   }
 
   // Set size to line
-  if (width > 1) {
+  if (width > 1 || height > 1) {
     lineStr = (
       _.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height) +
       lineStr +
