@@ -1,10 +1,11 @@
 ## ESCPOS PROJECT
 
-ESC/POS Printer driver for node
+ESC/POS Printer driver for Node.js
 
-[![NPM](https://nodei.co/npm/escpos.png?downloads=true&downloadRank=true&stars=true)](https://npmjs.org/escpos )
 [![npm version](https://badge.fury.io/js/escpos.svg)](https://www.npmjs.com/package/escpos )
 [![Build Status](https://travis-ci.org/song940/node-escpos.svg?branch=master)](https://travis-ci.org/song940/node-escpos)
+
+[![NPM](https://nodei.co/npm/escpos.png?downloads=true&downloadRank=true&stars=true)](https://npmjs.org/escpos )
 
 Packages Available:
 
