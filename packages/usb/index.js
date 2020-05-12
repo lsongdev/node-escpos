@@ -66,6 +66,9 @@ function USB(vid, pid){
  * @return {[type]} [description]
  */
 USB.findPrinter = function(){
+  if (!usb) {
+    usb = require('usb');
+  }
   return usb.getDeviceList().filter(function(device){
     try{
       return device.configDescriptor.interfaces.filter(function(iface){
