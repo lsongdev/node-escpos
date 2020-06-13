@@ -108,7 +108,8 @@ _.TEXT_FORMAT = {
   TXT_4SQUARE: '\x1b\x21\x30', // Double width & height text
 
   TXT_CUSTOM_SIZE: function(width, height) { // other sizes
-    var widthDec = (width - 1) * 16;
+    // var widthDec = (width - 1) * 16;
+    var widthDec = width - 1;
     var heightDec = height - 1;
     var sizeDec = widthDec + heightDec;
     /*
