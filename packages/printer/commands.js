@@ -114,8 +114,8 @@ _.TEXT_FORMAT = {
     height = height > 7 ? 7 : height;
     height = height < 0 ? 0 : height;
     
-    var widthDec = width * 16; // Values betwin 0-7
-    var heightDec = height; // Values betwin 0-7
+    var widthDec = width * 16; // Values between 0-7
+    var heightDec = height; // Values between 0-7
     var sizeDec = widthDec + heightDec;
     /*
     * @todo I would suggest replacing the return line by the code below since
