@@ -78,6 +78,18 @@ Serial.prototype.close = function(callback, timeout) {
 };
 
 /**
+ * read buffer from the printer
+ * @param  {Function} callback
+ * @return {Serial}
+ */
+Serial.prototype.read = function(callback) {
+  this.device.on('data', function(data) {
+    callback(data);
+  });
+  return this;
+};
+
+/**
  * expose
  */
 module.exports = Serial;

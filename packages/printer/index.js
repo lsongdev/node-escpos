@@ -9,6 +9,8 @@ const Image = require('./image');
 const utils = require('./utils');
 const _ = require('./commands');
 const Promiseify = require('./promisify');
+const statuses = require('./statuses');
+const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
 
 /**
  * [function ESC/POS Printer]
@@ -857,6 +859,88 @@ Printer.prototype.raw = function raw(data) {
   }
   return this;
 };
+
+
+/**
+ * get one specific status from the printer
+ * @param  {string} statusClassName
+ * @param  {Function} callback
+ * @return {Printer}
+ */
+Printer.prototype.getStatus = function(statusClassName, callback) {
+  this.adapter.read(data => {
+    const byte = data.readInt8(0);
+
+    const status = new statuses[statusClassName](byte);
+
+    callback(status);
+  })
+
+  statuses[statusClassName].commands().forEach((c) => {
+    this.buffer.write(c);
+  });
+
+  return this;
+}
+
+
+/**
+ * get statuses from the printer
+ * @param  {Function} callback
+ * @return {Printer}
+ */
+Printer.prototype.getStatuses = function(callback) {
+  let buffer = [];
+  this.adapter.read(data => {
+    for (let i = 0; i < data.byteLength; i++) {
+      buffer.push(data.readInt8(i));
+    }
+
+    if (buffer.length < 4) {
+      return;
+    }
+
+    let statuses = [];
+    for (let i = 0; i < buffer.length; i++) {
+      let byte = buffer[i];
+      switch (i) {
+        case 0:
+          statuses.push(new PrinterStatus(byte));
+          break;
+        case 1:
+          statuses.push(new RollPaperSensorStatus(byte));
+          break;
+        case 2:
+          statuses.push(new OfflineCauseStatus(byte));
+          break;
+        case 3  :
+          statuses.push(new ErrorCauseStatus(byte));
+          break;
+      }
+    }
+
+    buffer = [];
+    callback(statuses);
+  })
+
+  PrinterStatus.commands().forEach((c) => {
+    this.adapter.write(c);
+  });
+
+  RollPaperSensorStatus.commands().forEach((c) => {
+    this.adapter.write(c);
+  });
+
+  OfflineCauseStatus.commands().forEach((c) => {
+    this.adapter.write(c);
+  });
+
+  ErrorCauseStatus.commands().forEach((c) => {
+    this.adapter.write(c);
+  });
+
+  return this;
+}
 
 
 /**

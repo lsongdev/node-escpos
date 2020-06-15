@@ -15,5 +15,8 @@ class Adapter extends EventEmitter {
   close() {
     throw new NotImplementedException();
   }
+  read() {
+    throw new NotImplementedException();
+  }
 }
 module.exports = Adapter;
