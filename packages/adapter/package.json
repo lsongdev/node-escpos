@@ -1,6 +1,6 @@
 {
   "name": "escpos-adapter",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.4",
   "description": "escpos adapter base class",
   "main": "index.js",
   "scripts": {

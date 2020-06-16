@@ -1,6 +1,6 @@
 {
   "name": "escpos-usb",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.4",
   "description": "usb adapter for escpos",
   "main": "index.js",
   "scripts": {
