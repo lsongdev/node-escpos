@@ -46,6 +46,13 @@ Network.prototype.write = function(data, callback){
   return this;
 };
 
+Network.prototype.read = function(callback) {
+  this.device.on('data', buf => {
+    callback && callback(buf);
+  })
+  return this;
+}
+
 /**
  * [close description]
  * @param  {Function} callback [description]
