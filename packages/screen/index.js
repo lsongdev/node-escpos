@@ -1,10 +1,9 @@
 'use strict';
 const util = require('util');
+const EventEmitter = require('events');
 const iconv = require('iconv-lite');
 const { MutableBuffer } = require('mutable-buffer');
-const EventEmitter = require('events');
 const _ = require('./commands');
-const Promiseify = require('./promiseify');
 
 /**
  * [function ESC/POS Screen]
@@ -21,11 +20,6 @@ function Screen(adapter, options) {
   this.buffer = new MutableBuffer();
   this.encoding = options && options.encoding || 'GB18030';
   this._model = null;
-};
-
-Screen.create = function (device) {
-  const Screen = new Screen(device);
-  return Promise.resolve(Promiseify(Screen))
 };
 
 /**
