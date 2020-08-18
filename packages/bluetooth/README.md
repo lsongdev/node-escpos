@@ -1,4 +1,6 @@
 
+## escpos-bluetooth
+
 #### Bluetooth(address, channel)
 ```javascript
 const escpos = require('escpos');

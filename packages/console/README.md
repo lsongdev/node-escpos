@@ -1,4 +1,6 @@
 
+## escpos-console
+
 #### Console(handler = stdout)
 ```javascript
 const escpos = require('escpos');

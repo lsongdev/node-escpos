@@ -1,4 +1,6 @@
 
+## escpos-network
+
 #### Network(address, port = 9100)
 ```javascript
 const escpos = require('escpos');
