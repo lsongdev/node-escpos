@@ -4,11 +4,14 @@ class NotImplementedException extends Error {
 }
 
 class DeviceStatus {
-  byte = '';
-  bits = [];
-  bitsAsc = [];
+  // byte = '';
+  // bits = [];
+  // bitsAsc = [];
 
   constructor(byte) {
+    this.byte = "";
+    this.bits = [];
+    this.bitsAsc = [];
     this.byte = byte;
     for (let j = 7; j >= 0; j--) {
       let bit = byte & (1 << j) ? 1 : 0;
