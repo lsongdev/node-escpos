@@ -108,14 +108,13 @@ _.TEXT_FORMAT = {
   TXT_4SQUARE: '\x1b\x21\x30', // Double width & height text
 
   TXT_CUSTOM_SIZE: function(width, height) { // other sizes
-    
-    width = width > 7 ? 7 : width;
-    width = width < 0 ? 0 : width;
-    height = height > 7 ? 7 : height;
-    height = height < 0 ? 0 : height;
-    
-    var widthDec = width * 16; // Values between 0-7
-    var heightDec = height; // Values between 0-7
+    width = width > 8 ? 8 : width;
+    width = width < 1 ? 1 : width;
+    height = height > 8 ? 8 : height;
+    height = height < 1 ? 1 : height;
+
+    var widthDec = (width - 1) * 16; // Values between 1-8
+    var heightDec = height - 1; // Values between 1-8
     var sizeDec = widthDec + heightDec;
     /*
     * @todo I would suggest replacing the return line by the code below since
