@@ -201,7 +201,7 @@ Printer.prototype.tableCustom = function (data, options = {}) {
   let [width = 1, height = 1] = options.size || []
   let baseWidth = Math.floor(this.width / width)
   let cellWidth = Math.floor(baseWidth / data.length)
-  let leftoverSpace = baseWidth - cellWidth * data.length
+  let leftoverSpace = baseWidth - cellWidth * data.length // by only data[].width
   let lineStr = ''
   let secondLineEnabled = false
   let secondLine = []
@@ -212,18 +212,19 @@ Printer.prototype.tableCustom = function (data, options = {}) {
     let tooLong = false
 
     obj.text = obj.text.toString()
-    let textLength = obj.text.length
+    let textLength = utils.textLength(obj.text);
 
     if (obj.width) {
       cellWidth = baseWidth * obj.width
     } else if (obj.cols) {
-      cellWidth = obj.cols
+      cellWidth = obj.cols / width
+      leftoverSpace = 0;
     }
 
     if (cellWidth < textLength) {
       tooLong = true
       obj.originalText = obj.text
-      obj.text = obj.text.substring(0, cellWidth)
+      obj.text = utils.textSubstring(obj.text, 0, cellWidth)
     }
 
     if (align === 'CENTER') {
@@ -295,7 +296,7 @@ Printer.prototype.tableCustom = function (data, options = {}) {
 
     if (tooLong) {
       secondLineEnabled = true
-      obj.text = obj.originalText.substring(cellWidth)
+      obj.text = utils.textSubstring(obj.originalText, cellWidth)
       secondLine.push(obj)
     } else {
       obj.text = ''
@@ -486,7 +487,7 @@ Printer.prototype.style = function (type) {
  * @return {[Printer]} printer  [the escpos printer instance]
  */
 Printer.prototype.size = function (width, height) {
-  
+
   this.buffer.write(_.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height));
 
   return this;
