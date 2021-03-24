@@ -141,15 +141,14 @@ Printer.prototype.text = function (content, encoding) {
 
 /**
  * [function Print draw line End Of Line]
-
+ * @param  {[String]}  character [optional]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-Printer.prototype.drawLine = function () {
-
-
-  // this.newLine();
+Printer.prototype.drawLine = function (character) {
+  if (!character) character = '-';
+  
   for (var i = 0; i < this.width; i++) {
-    this.buffer.write(Buffer.from("-"));
+    this.buffer.write(Buffer.from(character));
   }
   this.newLine();
 
