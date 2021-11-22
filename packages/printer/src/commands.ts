@@ -5,7 +5,7 @@
  *   numToHex(256) => '0100'
  *   numToHex(0) => '00'
  */
-var numToHexString = function (value) {
+const numToHexString = function (value: number | string) {
   value = +value;
   if (!isNaN(value)) {
     value = (value).toString(16);
@@ -19,7 +19,7 @@ var numToHexString = function (value) {
 /**
  * ESC/POS _ (Constants)
  */
-var _ = {
+const _ = {
   LF: '\x0a',
   FS: '\x1c',
   FF: '\x0c',
@@ -304,8 +304,8 @@ _.GSV0_FORMAT = {
  * [BEEP description]
  * @type {string}
  */
-_.BEEP = '\x1b\x42', // Printer Buzzer pre hex
-  
+_.BEEP = '\x1b\x42'; // Printer Buzzer pre hex
+
 /**
  * [COLOR description]
  * @type {Object}

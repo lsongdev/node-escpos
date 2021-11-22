@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./adapter/tsconfig.ref.json"
+    },
+    {
+      "path": "./printer/tsconfig.ref.json"
+    },
+  ],
+}

@@ -1,15 +1,18 @@
 'use strict';
-const util = require('util');
-const qr = require('qr-image');
-const iconv = require('iconv-lite');
-const getPixels = require('get-pixels');
-const { MutableBuffer } = require('mutable-buffer');
-const EventEmitter = require('events');
-const Image = require('./image');
-const utils = require('./utils');
-const _ = require('./commands');
-const Promiseify = require('./promisify');
-const statuses = require('./statuses');
+import {Adapter} from "escpos-adapter";
+
+import util from 'util';
+import {statusClasses, StatusClassName} from "./statuses";
+import Promisify from "./promisify";
+import _ from "./commands";
+import utils from "./utils";
+import Image from "./image";
+import EventEmitter from "events";
+import {MutableBuffer} from "mutable-buffer";
+import getPixels from "get-pixels";
+import iconv from "iconv-lite";
+import qr from "qr-image";
+
 const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
 
 /**
@@ -17,7 +20,7 @@ const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} 
  * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
  * @return {[Printer]} printer  [the escpos printer instance]
  */
-function Printer(adapter, options) {
+function Printer(adapter: Adapter, options) {
   if (!(this instanceof Printer)) {
     return new Printer(adapter);
   }
@@ -33,7 +36,7 @@ function Printer(adapter, options) {
 
 Printer.create = function (device) {
   const printer = new Printer(device);
-  return Promise.resolve(Promiseify(printer))
+  return Promise.resolve(Promisify(printer))
 };
 
 /**
@@ -146,7 +149,7 @@ Printer.prototype.text = function (content, encoding) {
  */
 Printer.prototype.drawLine = function (character) {
   if (!character) character = '-';
-  
+
   for (var i = 0; i < this.width; i++) {
     this.buffer.write(Buffer.from(character));
   }
@@ -867,16 +870,18 @@ Printer.prototype.raw = function raw(data) {
  * @param  {Function} callback
  * @return {Printer}
  */
-Printer.prototype.getStatus = function(statusClassName, callback) {
+Printer.prototype.getStatus = function(statusClassName: StatusClassName, callback) {
+  const statusClass = statusClasses[statusClassName];
+
   this.adapter.read(data => {
     const byte = data.readInt8(0);
 
-    const status = new statuses[statusClassName](byte);
+    const status = new statusClass(byte);
 
     callback(status);
   })
 
-  statuses[statusClassName].commands().forEach((c) => {
+  statusClass.commands().forEach((c) => {
     this.buffer.write(c);
   });
 
@@ -947,9 +952,9 @@ Printer.prototype.getStatuses = function(callback) {
  * Printer Supports
  */
 Printer.Printer = Printer;
-Printer.Image = require('./image');
-Printer.command = require('./commands');
-Printer.Printer2 = require('./promisify');
+Printer.Image = Image;
+Printer.command = _;
+Printer.Printer2 = Promisify;
 
 /**
  * [exports description]
