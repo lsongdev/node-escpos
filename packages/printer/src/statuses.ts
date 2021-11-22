@@ -1,4 +1,4 @@
-const _ = require('./commands')
+import _ from "./commands";
 
 enum Status {
   Ok = 'ok',
@@ -22,8 +22,8 @@ interface StatusJSONElementMultiple {
 
 type StatusJSONElement = StatusJSONElementSingle | StatusJSONElementMultiple;
 
-interface StatusJSON {
-  className: StatusClassName,
+interface StatusJSON<T extends string> {
+  className: T,
   byte: number,
   bits: string,
   statuses: StatusJSONElement[]
@@ -34,7 +34,6 @@ export abstract class DeviceStatus {
   byte;
   bits: (0 | 1)[] = [];
   bitsAsc: (0 | 1)[] = [];
-
   public constructor(byte: number) {
     this.byte = byte;
     for (let j = 7; j >= 0; j--) {
@@ -50,7 +49,7 @@ export abstract class DeviceStatus {
     return this.bits.join('');
   }
 
-  protected toJSON(name: StatusClassName): StatusJSON {
+  protected toBaseJSON<T extends StatusClassName>(name: T): StatusJSON<T> {
     return {
       className: name,
       byte: this.byte,
@@ -66,7 +65,7 @@ export class PrinterStatus extends DeviceStatus {
   }
 
   toJSON() {
-    let result = super.toJSON('PrinterStatus');
+    let result = super.toBaseJSON('PrinterStatus');
     for (let i = 0; i < 8; i++) {
       let label = '';
       let status = Status.Ok;
@@ -124,7 +123,7 @@ export class OfflineCauseStatus extends DeviceStatus {
   }
 
   toJSON() {
-    let result = super.toJSON('OfflineCauseStatus');
+    let result = super.toBaseJSON('OfflineCauseStatus');
     for (let i = 0; i < 8; i++) {
       let label = '';
       let status = Status.Error;
@@ -184,7 +183,7 @@ export class ErrorCauseStatus extends DeviceStatus {
   }
 
   toJSON() {
-    let result = super.toJSON('ErrorCauseStatus');
+    let result = super.toBaseJSON('ErrorCauseStatus');
     for (let i = 0; i < 8; i++) {
       let label = '';
       let status = Status.Ok;
@@ -244,7 +243,7 @@ export class RollPaperSensorStatus extends DeviceStatus {
   }
 
   toJSON() {
-    let result = super.toJSON('RollPaperSensorStatus');
+    let result = super.toBaseJSON('RollPaperSensorStatus');
 
     for (let i = 0; i <= 1; i++) {
       result.statuses.push({
@@ -313,5 +312,9 @@ export const statusClasses = {
   ErrorCauseStatus,
   RollPaperSensorStatus,
 }
-
-export type StatusClassName = keyof typeof statusClasses;
+export type Statuses = typeof statusClasses;
+export type StatusClassName = keyof Statuses;
+export type StatusClassConstructor<T extends DeviceStatus> = {
+  new(byte: number): T;
+  commands(): string[];
+}
