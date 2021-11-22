@@ -268,28 +268,16 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
         obj.text = utils.textSubstring(obj.text, 0, cellWidth)
       }
 
-      // TODO: Reduce code duplication
       if (align === 'CENTER') {
         let spaces = (cellWidth - textLength) / 2
-        for (let s = 0; s < spaces; s++) {
-          lineStr += ' '
-        }
+        for (let s = 0; s < spaces; s++) lineStr += ' ';
 
         if (obj.text !== '') {
-          if (obj.style) {
-            lineStr += (
-              this._getStyle(obj.style) +
-              obj.text +
-              this._getStyle("NORMAL")
-            )
-          } else {
-            lineStr += obj.text
-          }
+          if (obj.style) lineStr += `${this._getStyle(obj.style)}${obj.text}${this._getStyle("NORMAL")}`;
+          else lineStr += obj.text
         }
 
-        for (let s = 0; s < spaces - 1; s++) {
-          lineStr += ' '
-        }
+        for (let s = 0; s < spaces - 1; s++) lineStr += ' ';
       } else if (align === 'RIGHT') {
         let spaces = cellWidth - textLength
         if (leftoverSpace > 0) {
@@ -297,32 +285,16 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
           leftoverSpace = 0
         }
 
-        for (let s = 0; s < spaces; s++) {
-          lineStr += ' '
-        }
+        for (let s = 0; s < spaces; s++) lineStr += ' ';
 
         if (obj.text !== '') {
-          if (obj.style) {
-            lineStr += (
-              this._getStyle(obj.style) +
-              obj.text +
-              this._getStyle("NORMAL")
-            )
-          } else {
-            lineStr += obj.text
-          }
+          if (obj.style) lineStr += `${this._getStyle(obj.style)}${obj.text}${this._getStyle("NORMAL")}`;
+          else lineStr += obj.text
         }
       } else {
         if (obj.text !== '') {
-          if (obj.style) {
-            lineStr += (
-              this._getStyle(obj.style) +
-              obj.text +
-              this._getStyle("NORMAL")
-            )
-          } else {
-            lineStr += obj.text
-          }
+          if (obj.style) lineStr += `${this._getStyle(obj.style)}${obj.text}${this._getStyle("NORMAL")}`;
+          else lineStr += obj.text
         }
 
         let spaces = Math.floor(cellWidth - textLength)
@@ -331,9 +303,7 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
           leftoverSpace = 0
         }
 
-        for (let s = 0; s < spaces; s++) {
-          lineStr += ' '
-        }
+        for (let s = 0; s < spaces; s++) lineStr += ' '
       }
 
       if (originalText !== null) {
