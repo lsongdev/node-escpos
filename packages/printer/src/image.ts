@@ -121,8 +121,6 @@ export default class Image {
     return new Promise((resolve, reject) => {
       getPixels(url, type ?? '', (error, pixels) => {
         if (error) reject(error);
-        // TODO: Remove type cast when @types/get-pixels gets updated
-        // See: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/57328
         else resolve(new Image(pixels as NdArray<Uint8Array>));
       });
     })

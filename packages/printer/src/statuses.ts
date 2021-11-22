@@ -1,4 +1,4 @@
-import _ from "./commands";
+import * as _ from "./commands";
 
 enum Status {
   Ok = 'ok',

@@ -1,963 +1,938 @@
 'use strict';
 import {Adapter} from "escpos-adapter";
 
-import util from 'util';
-import {statusClasses, StatusClassName} from "./statuses";
-import Promisify from "./promisify";
-import _ from "./commands";
-import utils from "./utils";
+import {
+  DeviceStatus,
+  ErrorCauseStatus,
+  OfflineCauseStatus,
+  PrinterStatus,
+  RollPaperSensorStatus,
+  StatusClassConstructor
+} from "./statuses";
+import * as _ from "./commands";
+import * as utils from "./utils";
 import Image from "./image";
 import EventEmitter from "events";
 import {MutableBuffer} from "mutable-buffer";
 import getPixels from "get-pixels";
 import iconv from "iconv-lite";
 import qr from "qr-image";
+import {AnyCase} from "./utils";
+import {type} from "os";
 
-const {PrinterStatus,OfflineCauseStatus,ErrorCauseStatus,RollPaperSensorStatus} = statuses;
-
-/**
- * [function ESC/POS Printer]
- * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-function Printer(adapter: Adapter, options) {
-  if (!(this instanceof Printer)) {
-    return new Printer(adapter);
-  }
-  var self = this;
-  EventEmitter.call(this);
-  this.adapter = adapter;
-  this.options = options;
-  this.buffer = new MutableBuffer();
-  this.encoding = options && options.encoding || 'GB18030';
-  this.width = options && options.width || 48;
-  this._model = null;
-};
-
-Printer.create = function (device) {
-  const printer = new Printer(device);
-  return Promise.resolve(Promisify(printer))
-};
-
-/**
- * Printer extends EventEmitter
- */
-util.inherits(Printer, EventEmitter);
-
-/**
- * Set printer model to recognize model-specific commands.
- * Supported models: [ null, 'qsprinter' ]
- *
- * For generic printers, set model to null
- *
- * [function set printer model]
- * @param  {[String]}  model [mandatory]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.model = function (_model) {
-  this._model = _model;
-  return this;
-};
-
-/**
- * Set character code table
- * @param  {[Number]} codeTable
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.setCharacterCodeTable = function (codeTable) {
-  this.buffer.write(_.ESC);
-  this.buffer.write(_.TAB);
-  this.buffer.writeUInt8(codeTable);
-  return this;
-};
-
-/**
- * Fix bottom margin
- * @param  {[String]} size
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.marginBottom = function (size) {
-  this.buffer.write(_.MARGINS.BOTTOM);
-  this.buffer.writeUInt8(size);
-  return this;
-};
-
-/**
- * Fix left margin
- * @param  {[String]} size
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.marginLeft = function (size) {
-  this.buffer.write(_.MARGINS.LEFT);
-  this.buffer.writeUInt8(size);
-  return this;
-};
-
-/**
- * Fix right margin
- * @param  {[String]} size
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.marginRight = function (size) {
-  this.buffer.write(_.MARGINS.RIGHT);
-  this.buffer.writeUInt8(size);
-  return this;
-};
-
-/**
- * [function print]
- * @param  {[String]}  content  [mandatory]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.print = function (content) {
-  this.buffer.write(content);
-  return this;
-};
-/**
- * [function print pure content with End Of Line]
- * @param  {[String]}  content  [mandatory]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.println = function (content) {
-  return this.print(content + _.EOL);
-};
-
-/**
- * [function print pure content with End Of Line]
- * @param  {[String]}  content  [mandatory]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.newLine = function () {
-  return this.print(_.EOL);
-};
-
-/**
- * [function Print encoded alpha-numeric text with End Of Line]
- * @param  {[String]}  content  [mandatory]
- * @param  {[String]}  encoding [optional]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.text = function (content, encoding) {
-  return this.print(iconv.encode(content + _.EOL, encoding || this.encoding));
-};
-
-
-/**
- * [function Print draw line End Of Line]
- * @param  {[String]}  character [optional]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.drawLine = function (character) {
-  if (!character) character = '-';
-
-  for (var i = 0; i < this.width; i++) {
-    this.buffer.write(Buffer.from(character));
-  }
-  this.newLine();
-
-  return this;
-};
-
-
-
-/**
- * [function Print  table   with End Of Line]
- * @param  {[List]}  data  [mandatory]
- * @param  {[String]}  encoding [optional]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.table = function (data, encoding) {
-
-
-  var cellWidth = this.width / data.length;
-  var lineTxt = "";
-
-  for (var i = 0; i < data.length; i++) {
-
-    lineTxt += data[i].toString();
-
-    var spaces = cellWidth - data[i].toString().length;
-    for (var j = 0; j < spaces; j++) {
-      lineTxt += " ";
-
-    }
-
-  }
-  this.buffer.write(iconv.encode(lineTxt + _.EOL, encoding || this.encoding));
-
-  return this;
-
-
-
-};
-
-/**
- * [function Print  custom table  with End Of Line]
- * @param  {[List]}  data  [mandatory]
- * @param  {[String]}  encoding [optional]
- * @param  {[Array]}  size [optional]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.tableCustom = function (data, options = {}) {
-  options = options || { size: [], encoding: this.encoding }
-  let [width = 1, height = 1] = options.size || []
-  let baseWidth = Math.floor(this.width / width)
-  let cellWidth = Math.floor(baseWidth / data.length)
-  let leftoverSpace = baseWidth - cellWidth * data.length // by only data[].width
-  let lineStr = ''
-  let secondLineEnabled = false
-  let secondLine = []
-
-  for (let i = 0; i < data.length; i++) {
-    let obj = data[i]
-    let align = (obj.align || '').toUpperCase()
-    let tooLong = false
-
-    obj.text = obj.text.toString()
-    let textLength = utils.textLength(obj.text);
-
-    if (obj.width) {
-      cellWidth = baseWidth * obj.width
-    } else if (obj.cols) {
-      cellWidth = obj.cols / width
-      leftoverSpace = 0;
-    }
-
-    if (cellWidth < textLength) {
-      tooLong = true
-      obj.originalText = obj.text
-      obj.text = utils.textSubstring(obj.text, 0, cellWidth)
-    }
-
-    if (align === 'CENTER') {
-      let spaces = (cellWidth - textLength) / 2
-      for (let s = 0; s < spaces; s++) {
-        lineStr += ' '
-      }
-
-      if (obj.text !== '') {
-        if (obj.style) {
-          lineStr += (
-            this._getStyle(obj.style) +
-            obj.text +
-            this._getStyle("NORMAL")
-          )
-        } else {
-          lineStr += obj.text
-        }
-      }
-
-      for (let s = 0; s < spaces - 1; s++) {
-        lineStr += ' '
-      }
-    } else if (align === 'RIGHT') {
-      let spaces = cellWidth - textLength
-      if (leftoverSpace > 0) {
-        spaces += leftoverSpace
-        leftoverSpace = 0
-      }
-
-      for (let s = 0; s < spaces; s++) {
-        lineStr += ' '
-      }
-
-      if (obj.text !== '') {
-        if (obj.style) {
-          lineStr += (
-            this._getStyle(obj.style) +
-            obj.text +
-            this._getStyle("NORMAL")
-          )
-        } else {
-          lineStr += obj.text
-        }
-      }
-    } else {
-      if (obj.text !== '') {
-        if (obj.style) {
-          lineStr += (
-            this._getStyle(obj.style) +
-            obj.text +
-            this._getStyle("NORMAL")
-          )
-        } else {
-          lineStr += obj.text
-        }
-      }
-
-      let spaces = Math.floor(cellWidth - textLength)
-      if (leftoverSpace > 0) {
-        spaces += leftoverSpace
-        leftoverSpace = 0
-      }
-
-      for (let s = 0; s < spaces; s++) {
-        lineStr += ' '
-      }
-    }
-
-    if (tooLong) {
-      secondLineEnabled = true
-      obj.text = utils.textSubstring(obj.originalText, cellWidth)
-      secondLine.push(obj)
-    } else {
-      obj.text = ''
-      secondLine.push(obj)
-    }
-  }
-
-  // Set size to line
-  if (width > 1 || height > 1) {
-    lineStr = (
-      _.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height) +
-      lineStr +
-      _.TEXT_FORMAT.TXT_NORMAL
-    )
-  }
-
-  // Write the line
-  this.buffer.write(
-    iconv.encode(lineStr + _.EOL, options.encoding || this.encoding)
-  )
-
-  if (secondLineEnabled) {
-    // Writes second line if has
-    return this.tableCustom(secondLine, options)
-  } else {
-    return this
-  }
+export interface PrinterOptions {
+  encoding?: string | undefined,
+  width?: number | undefined,
 }
 
+export type PrinterModel = null | 'qsprinter';
 
 /**
- * [function Print encoded alpha-numeric text without End Of Line]
- * @param  {[String]}  content  [mandatory]
- * @param  {[String]}  encoding [optional]
- * @return {[Printer]} printer  [the escpos printer instance]
+ * 'dhdw', 'dwh' and 'dhw' are treated as 'dwdh'
  */
-Printer.prototype.pureText = function (content, encoding) {
-  return this.print(iconv.encode(content, encoding || this.encoding));
-};
+export type RasterMode = AnyCase<'normal' | 'dw' | 'dh' | 'dwdh' | 'dhdw' | 'dwh' | 'dhw'>;
 
-/**
- * [function encode text]
- * @param  {[String]}  encoding [mandatory]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.encode = function (encoding) {
-  this.encoding = encoding;
-  return this;
+export interface QrImageOptions extends qr.Options {
+  mode: RasterMode
 }
 
-/**
- * [line feed]
- * @param  {[type]}    lines   [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.feed = function (n) {
-  this.buffer.write(new Array(n || 1).fill(_.EOL).join(''));
-  return this;
-};
+export type BitmapDensity = AnyCase<'s8' | 'd8' | 's24' | 'd24'>;
 
-/**
- * [feed control sequences]
- * @param  {[type]}    ctrl     [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.control = function (ctrl) {
-  this.buffer.write(_.FEED_CONTROL_SEQUENCES[
-    'CTL_' + ctrl.toUpperCase()
-  ]);
-  return this;
-};
-/**
- * [text align]
- * @param  {[type]}    align    [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.align = function (align) {
-  this.buffer.write(_.TEXT_FORMAT[
-    'TXT_ALIGN_' + align.toUpperCase()
-  ]);
-  return this;
-};
-/**
- * [font family]
- * @param  {[type]}    family  [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.font = function (family) {
-  this.buffer.write(_.TEXT_FORMAT[
-    'TXT_FONT_' + family.toUpperCase()
-  ]);
-  if (family.toUpperCase() === 'A')
-    this.width = this.options && this.options.width || 42;
-  else
-    this.width = this.options && this.options.width || 56;
-  return this;
-};
+export type StyleString = AnyCase<'normal' | `${'b'|''}${'i'|''}${'u'|'u2'|''}`>;
 
-/**
- * [font style]
- * @param  {[type]}    type     [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype._getStyle = function (type) {
-  let styled = ''
-  switch (type.toUpperCase()) {
-    case 'B':
-      styled += _.TEXT_FORMAT.TXT_BOLD_ON
-      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
-      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
-      break
-    case 'I':
-      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
-      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
-      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
-      break
-    case 'U':
-      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
-      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
-      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
-      break
-    case 'U2':
-      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
-      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
-      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
-      break
+export type FeedControlSequence = AnyCase<'lf' | 'glf' | 'ff' | 'cr' | 'ht' | 'vt'>;
 
-    case 'BI':
-      styled += _.TEXT_FORMAT.TXT_BOLD_ON
-      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
-      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
-      break
-    case 'BIU':
-      styled += _.TEXT_FORMAT.TXT_BOLD_ON
-      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
-      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
-      break
-    case 'BIU2':
-      styled += _.TEXT_FORMAT.TXT_BOLD_ON
-      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
-      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
-      break
-    case 'BU':
-      styled += _.TEXT_FORMAT.TXT_BOLD_ON
-      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
-      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
-      break
-    case 'BU2':
-      styled += _.TEXT_FORMAT.TXT_BOLD_ON
-      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
-      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
-      break
-    case 'IU':
-      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
-      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
-      styled += _.TEXT_FORMAT.TXT_UNDERL_ON
-      break
-    case 'IU2':
-      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
-      styled += _.TEXT_FORMAT.TXT_ITALIC_ON
-      styled += _.TEXT_FORMAT.TXT_UNDERL2_ON
-      break
+export type Alignment = AnyCase<'lt' | 'ct' | 'rt'>;
 
-    case 'NORMAL':
-    default:
-      styled += _.TEXT_FORMAT.TXT_BOLD_OFF
-      styled += _.TEXT_FORMAT.TXT_ITALIC_OFF
-      styled += _.TEXT_FORMAT.TXT_UNDERL_OFF
-      break
-  }
-  return styled
+export type FontFamily = AnyCase<'a' | 'b' | 'c'>;
+
+export type HardwareCommand = AnyCase<'init' | 'select' | 'reset'>;
+
+export type BarcodeType = AnyCase<'UPC_A' | 'UPC-A' | 'UPC-E' | 'UPC_E' | 'EAN13' | 'EAN8' | 'CODE39' | 'ITF' | 'NW7' | 'CODE93' | 'CODE128'>;
+export type BarcodePosition = AnyCase<'off' | 'abv' | 'blw' | 'bth'>;
+export type BarcodeFont = AnyCase<'a' | 'b'>;
+export interface BarcodeOptions {
+  width: number;
+  height: number;
+  position?: BarcodePosition | undefined;
+  font?: BarcodeFont | undefined;
+  includeParity?: boolean | undefined;
+}
+export type LegacyBarcodeArguments = [
+  width: number,
+  height: number,
+  position?: BarcodePosition | undefined,
+  font?: BarcodeFont | undefined,
+];
+
+export type QRLevel = AnyCase<'l' | 'm' | 'q' | 'h'>;
+
+export type TableAlignment = AnyCase<'left' | 'center' | 'right'>;
+export type CustomTableItem = {
+  text: string;
+  align?: TableAlignment;
+  style?: StyleString | undefined;
+} & ({ width: number } | { cols: number });
+
+export interface CustomTableOptions {
+  size: [number, number];
+  encoding: string;
 }
 
-/**
- * [font style]
- * @param  {[type]}    type     [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.style = function (type) {
-  this.buffer.write(this._getStyle(type));
-  return this;
-};
+export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
+  public adapter: Adapter<AdapterCloseArgs>;
+  public buffer = new MutableBuffer();
+  protected options: PrinterOptions;
+  protected encoding: string;
+  protected width: number;
+  protected _model: PrinterModel = null;
 
-/**
- * [font size]
- * @param  {[String]}  width   [description]
- * @param  {[String]}  height  [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.size = function (width, height) {
-
-  this.buffer.write(_.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height));
-
-  return this;
-};
-
-/**
- * [set character spacing]
- * @param  {[type]}    n     [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.spacing = function (n) {
-  if (n === undefined || n === null) {
-    this.buffer.write(_.CHARACTER_SPACING.CS_DEFAULT);
-  } else {
-    this.buffer.write(_.CHARACTER_SPACING.CS_SET);
-    this.buffer.writeUInt8(n);
-  }
-  return this;
-}
-
-/**
- * [set line spacing]
- * @param  {[type]} n [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.lineSpace = function (n) {
-  if (n === undefined || n === null) {
-    this.buffer.write(_.LINE_SPACING.LS_DEFAULT);
-  } else {
-    this.buffer.write(_.LINE_SPACING.LS_SET);
-    this.buffer.writeUInt8(n);
-  }
-  return this;
-};
-
-/**
- * [hardware]
- * @param  {[type]}    hw       [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.hardware = function (hw) {
-  this.buffer.write(_.HARDWARE['HW_' + hw.toUpperCase()]);
-  return this;
-};
-/**
- * [barcode]
- * @param  {[type]}    code     [description]
- * @param  {[type]}    type     [description]
- * @param  {[type]}    options  [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.barcode = function (code, type, options) {
-  options = options || {};
-  var width, height, position, font, includeParity;
-  // Backward compatibility
-  width = arguments[2];
-  if (typeof width === 'string' || typeof width === 'number') {
-    width = arguments[2];
-    height = arguments[3];
-    position = arguments[4];
-    font = arguments[5];
-  } else {
-    width = options.width;
-    height = options.height;
-    position = options.position;
-    font = options.font;
-    includeParity = options.includeParity !== false; // true by default
+  /**
+   * [function ESC/POS Printer]
+   * @param  {[Adapter]} adapter [eg: usb, network, or serialport]
+   * @param {[PrinterOptions]} options
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  constructor(adapter: Adapter<AdapterCloseArgs>, options: PrinterOptions) {
+    super();
+    this.adapter = adapter;
+    this.options = options;
+    this.encoding = options.encoding ?? 'GB18030';
+    this.width = options.width ?? 48;
   }
 
-  type = type || 'EAN13'; // default type is EAN13, may a good choice ?
-  var convertCode = String(code), parityBit = '', codeLength = '';
-  if (typeof type === 'undefined' || type === null) {
-    throw new TypeError('barcode type is required');
+  /**
+   * Set printer model to recognize model-specific commands.
+   * Supported models: [ null, 'qsprinter' ]
+   *
+   * For generic printers, set model to null
+   *
+   * [function set printer model]
+   * @param  {[String]} model [mandatory]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  model(model: PrinterModel) {
+    this._model = model;
+    return this;
   }
-  if (type === 'EAN13' && convertCode.length !== 12) {
-    throw new Error('EAN13 Barcode type requires code length 12');
-  }
-  if (type === 'EAN8' && convertCode.length !== 7) {
-    throw new Error('EAN8 Barcode type requires code length 7');
-  }
-  if (this._model === 'qsprinter') {
-    this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.ON);
-  }
-  if (this._model === 'qsprinter') {
-    // qsprinter has no BARCODE_WIDTH command (as of v7.5)
-  } else if (width >= 1 && width <= 5) {
-    this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[width]);
-  } else {
-    this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
-  }
-  if (height >= 1 && height <= 255) {
-    this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT(height));
-  } else {
-    if (this._model === 'qsprinter') {
-      this.buffer.write(_.MODEL.QSPRINTER.BARCODE_HEIGHT_DEFAULT);
-    } else {
-      this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
-    }
-  }
-  if (this._model === 'qsprinter') {
-    // Qsprinter has no barcode font
-  } else {
-    this.buffer.write(_.BARCODE_FORMAT[
-      'BARCODE_FONT_' + (font || 'A').toUpperCase()
-    ]);
-  }
-  this.buffer.write(_.BARCODE_FORMAT[
-    'BARCODE_TXT_' + (position || 'BLW').toUpperCase()
-  ]);
-  this.buffer.write(_.BARCODE_FORMAT[
-    'BARCODE_' + ((type || 'EAN13').replace('-', '_').toUpperCase())
-  ]);
-  if (includeParity) {
-    if (type === 'EAN13' || type === 'EAN8') {
-      parityBit = utils.getParityBit(code);
-    }
-  }
-  if (type == 'CODE128' || type == 'CODE93') {
-    codeLength = utils.codeLength(code);
-  }
-  this.buffer.write(codeLength + code + (includeParity ? parityBit : '') + '\x00'); // Allow to skip the parity byte
-  if (this._model === 'qsprinter') {
-    this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.OFF);
-  }
-  return this;
-};
 
-/**
- * [print qrcode]
- * @param  {[type]} code    [description]
- * @param  {[type]} version [description]
- * @param  {[type]} level   [description]
- * @param  {[type]} size    [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.qrcode = function (code, version, level, size) {
-  if (this._model !== 'qsprinter') {
-    this.buffer.write(_.CODE2D_FORMAT.TYPE_QR);
-    this.buffer.write(_.CODE2D_FORMAT.CODE2D);
-    this.buffer.writeUInt8(version || 3);
-    this.buffer.write(_.CODE2D_FORMAT[
-      'QR_LEVEL_' + (level || 'L').toUpperCase()
-    ]);
-    this.buffer.writeUInt8(size || 6);
-    this.buffer.writeUInt16LE(code.length);
-    this.buffer.write(code);
-  } else {
-    const dataRaw = iconv.encode(code, 'utf8');
-    if (dataRaw.length < 1 && dataRaw.length > 2710) {
-      throw new Error('Invalid code length in byte. Must be between 1 and 2710');
-    }
+  /**
+   * Set character code table
+   * @param  {[Number]} codeTable
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  setCharacterCodeTable(codeTable: number) {
+    this.buffer.write(_.ESC);
+    this.buffer.write(_.TAB);
+    this.buffer.writeUInt8(codeTable);
+    return this;
+  };
 
-    // Set pixel size
-    if (!size || (size && typeof size !== 'number'))
-      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
-    else if (size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
-      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
-    else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
-      size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
+  /**
+   * Fix bottom margin
+   * @param  {[String]} size
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  marginBottom(size: number) {
+    this.buffer.write(_.MARGINS.BOTTOM);
     this.buffer.writeUInt8(size);
+    return this;
+  };
 
-    // Set version
-    if (!version || (version && typeof version !== 'number'))
-      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
-    else if (version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
-      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
-    else if (version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
-      version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
-    this.buffer.writeUInt8(version);
+  /**
+   * Fix left margin
+   * @param  {[String]} size
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  marginLeft(size: number) {
+    this.buffer.write(_.MARGINS.LEFT);
+    this.buffer.writeUInt8(size);
+    return this;
+  };
 
-    // Set level
-    if (!level || (level && typeof level !== 'string'))
-      level = _.CODE2D_FORMAT.QR_LEVEL_L;
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[level.toUpperCase()]);
+  /**
+   * Fix right margin
+   * @param  {[String]} size
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  marginRight(size: number) {
+    this.buffer.write(_.MARGINS.RIGHT);
+    this.buffer.writeUInt8(size);
+    return this;
+  };
 
-    // Transfer data(code) to buffer
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
-    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
-    this.buffer.write(dataRaw);
+  /**
+   * [function print]
+   * @param  {[String]}  content  [mandatory]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  print(content: string | Buffer) {
+    this.buffer.write(content);
+    return this;
+  };
+  /**
+   * [function print pure content with End Of Line]
+   * @param  {[String]}  content  [mandatory]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  println(content: string) {
+    return this.print(content + _.EOL);
+  };
 
-    // Print from buffer
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
-    this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
-    this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
-  }
-  return this;
-};
+  /**
+   * [function print End Of Line]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  newLine() {
+    return this.print(_.EOL);
+  };
 
-/**
- * [print qrcode image]
- * @param  {[type]}   content  [description]
- * @param  {[type]}   options  [description]
- * @param  {[Function]} callback [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.qrimage = function (content, options, callback) {
-  var self = this;
-  if (typeof options == 'function') {
-    callback = options;
-    options = null;
-  }
-  options = options || { type: 'png', mode: 'dhdw' };
-  var buffer = qr.imageSync(content, options);
-  var type = ['image', options.type].join('/');
-  getPixels(buffer, type, function (err, pixels) {
-    if (err) return callback && callback(err);
-    self.raster(new Image(pixels), options.mode);
-    callback && callback.call(self, null, self);
-  });
-  return this;
-};
-
-/**
- * [image description]
- * @param  {[type]} image   [description]
- * @param  {[type]} density [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.image = async function (image, density) {
-  if (!(image instanceof Image))
-    throw new TypeError('Only escpos.Image supported');
-  density = density || 'd24';
-  var n = !!~['d8', 's8'].indexOf(density) ? 1 : 3;
-  var header = _.BITMAP_FORMAT['BITMAP_' + density.toUpperCase()];
-  var bitmap = image.toBitmap(n * 8);
-  var self = this;
-
-  // added a delay so the printer can process the graphical data
-  // when connected via slower connection ( e.g.: Serial)
-  this.lineSpace(0); // set line spacing to 0
-  bitmap.data.forEach(async (line) => {
-    self.buffer.write(header);
-    self.buffer.writeUInt16LE(line.length / n);
-    self.buffer.write(line);
-    self.buffer.write(_.EOL);
-    await new Promise((resolve, reject) => {
-      setTimeout(() => { resolve(true) }, 200);
-    });
-  });
-  return this.lineSpace();
-};
-
-/**
- * [raster description]
- * @param  {[type]} image [description]
- * @param  {[type]} mode  [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.raster = function (image, mode) {
-  if (!(image instanceof Image))
-    throw new TypeError('Only escpos.Image supported');
-  mode = mode || 'normal';
-  if (mode === 'dhdw' ||
-    mode === 'dwh' ||
-    mode === 'dhw') mode = 'dwdh';
-  var raster = image.toRaster();
-  var header = _.GSV0_FORMAT['GSV0_' + mode.toUpperCase()];
-  this.buffer.write(header);
-  this.buffer.writeUInt16LE(raster.width);
-  this.buffer.writeUInt16LE(raster.height);
-  this.buffer.write(raster.data);
-  return this;
-};
-
-/**
- * [function Send pulse to kick the cash drawer]
- * @param  {[type]} pin [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.cashdraw = function (pin) {
-  this.buffer.write(_.CASH_DRAWER[
-    'CD_KICK_' + (pin || 2)
-  ]);
-  return this;
-};
-
-/**
- * Printer Buzzer (Beep sound)
- * @param  {[Number]} n Refers to the number of buzzer times
- * @param  {[Number]} t Refers to the buzzer sound length in (t * 100) milliseconds.
- */
-Printer.prototype.beep = function (n, t) {
-  this.buffer.write(_.BEEP);
-  this.buffer.writeUInt8(n);
-  this.buffer.writeUInt8(t);
-  return this;
-};
-
-/**
- * Send data to hardware and flush buffer
- * @param  {Function} callback
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.flush = function (callback) {
-  var buf = this.buffer.flush();
-  this.adapter.write(buf, callback);
-  return this;
-};
-
-/**
- * [function Cut paper]
- * @param  {[type]} part [description]
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.cut = function (part, feed) {
-  this.feed(feed || 3);
-  this.buffer.write(_.PAPER[
-    part ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
-  ]);
-  return this;
-};
-
-/**
- * [close description]
- * @param  {Function} callback [description]
- * @param  {[type]}   options  [description]
- * @return {[type]}            [description]
- */
-Printer.prototype.close = function (callback, options) {
-  var self = this;
-  return this.flush(function () {
-    self.adapter.close(callback, options);
-  });
-};
-
-/**
- * [color select between two print color modes, if your printer supports it]
- * @param  {Number} color - 0 for primary color (black) 1 for secondary color (red)
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.color = function (color) {
-  this.buffer.write(_.COLOR[
-    color === 0 || color === 1 ? color : 0
-  ]);
-  return this;
-};
-
-/**
- * [reverse colors, if your printer supports it]
- * @param {Boolean} bool - True for reverse, false otherwise
- * @return {[Printer]} printer  [the escpos printer instance]
- */
-Printer.prototype.setReverseColors = function (bool) {
-  this.buffer.write(bool ? _.COLOR.REVERSE : _.COLOR.UNREVERSE);
-  return this;
-};
+  /**
+   * [function Print encoded alpha-numeric text with End Of Line]
+   * @param  {[String]}  content  [mandatory]
+   * @param  {[String]}  encoding [optional]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  text(content: string, encoding = this.encoding) {
+    return this.print(iconv.encode(`${content}${_.EOL}`, encoding));
+  };
 
 
-/**
- * [writes a low level command to the printer buffer]
- *
- * @usage
- * 1) raw('1d:77:06:1d:6b:02:32:32:30:30:30:30:32:30:30:30:35:30:35:00:0a')
- * 2) raw('1d 77 06 1d 6b 02 32 32 30 30 30 30 32 30 30 30 35 30 35 00 0a')
- * 3) raw(Buffer.from('1d77061d6b0232323030303032303030353035000a','hex'))
- *
- * @param data {Buffer|string}
- * @returns {Printer}
- */
-Printer.prototype.raw = function raw(data) {
-  if (Buffer.isBuffer(data)) {
-    this.buffer.write(data);
-  } else if (typeof data === 'string') {
-    data = data.toLowerCase();
-    this.buffer.write(Buffer.from(data.replace(/(\s|:)/g, ''), 'hex'));
-  }
-  return this;
-};
-
-
-/**
- * get one specific status from the printer
- * @param  {string} statusClassName
- * @param  {Function} callback
- * @return {Printer}
- */
-Printer.prototype.getStatus = function(statusClassName: StatusClassName, callback) {
-  const statusClass = statusClasses[statusClassName];
-
-  this.adapter.read(data => {
-    const byte = data.readInt8(0);
-
-    const status = new statusClass(byte);
-
-    callback(status);
-  })
-
-  statusClass.commands().forEach((c) => {
-    this.buffer.write(c);
-  });
-
-  return this;
-}
-
-
-/**
- * get statuses from the printer
- * @param  {Function} callback
- * @return {Printer}
- */
-Printer.prototype.getStatuses = function(callback) {
-  let buffer = [];
-  this.adapter.read(data => {
-    for (let i = 0; i < data.byteLength; i++) {
-      buffer.push(data.readInt8(i));
+  /**
+   * [function Print draw line End Of Line]
+   * @param  {[String]}  character [optional]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  drawLine(character = '-') {
+    for (let i = 0; i < this.width; i++) {
+      this.buffer.write(Buffer.from(character));
     }
+    this.newLine();
 
-    if (buffer.length < 4) {
-      return;
+    return this;
+  };
+
+
+
+  /**
+   * [function Print  table   with End Of Line]
+   * @param  {[data]}  data  [mandatory]
+   * @param  {[String]}  encoding [optional]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  table(data: (string | number)[], encoding = this.encoding) {
+    const cellWidth = this.width / data.length;
+    let lineTxt = "";
+
+    for (let i = 0; i < data.length; i++) {
+      lineTxt += data[i].toString();
+
+      const spaces = cellWidth - data[i].toString().length;
+      for (let j = 0; j < spaces; j++) lineTxt += " ";
     }
+    this.buffer.write(iconv.encode(lineTxt + _.EOL, encoding));
+    return this;
+  };
 
-    let statuses = [];
-    for (let i = 0; i < buffer.length; i++) {
-      let byte = buffer[i];
-      switch (i) {
-        case 0:
-          statuses.push(new PrinterStatus(byte));
-          break;
-        case 1:
-          statuses.push(new RollPaperSensorStatus(byte));
-          break;
-        case 2:
-          statuses.push(new OfflineCauseStatus(byte));
-          break;
-        case 3  :
-          statuses.push(new ErrorCauseStatus(byte));
-          break;
+  /**
+   * [function Print  custom table  with End Of Line]
+   * @param  {[data]}  data  [mandatory]
+   * @param  {[String]}  options [optional]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  tableCustom(data: CustomTableItem[], options: CustomTableOptions = { size: [1, 1], encoding: this.encoding }): this {
+    let [width, height] = options.size;
+    let baseWidth = Math.floor(this.width / width)
+    let cellWidth = Math.floor(baseWidth / data.length)
+    let leftoverSpace = baseWidth - cellWidth * data.length // by only data[].width
+    let lineStr = ''
+    let secondLineEnabled = false
+    let secondLine = []
+
+    for (let i = 0; i < data.length; i++) {
+      const obj = data[i]
+      const align = utils.upperCase(obj.align || 'left');
+
+      const textLength = utils.textLength(obj.text);
+
+      if ("width" in obj) {
+        cellWidth = baseWidth * obj.width
+      } else if (obj.cols) {
+        cellWidth = obj.cols / width
+        leftoverSpace = 0;
+      }
+
+      let originalText: string | null = null;
+      if (cellWidth < textLength) {
+        originalText = obj.text;
+        obj.text = utils.textSubstring(obj.text, 0, cellWidth)
+      }
+
+      // TODO: Reduce code duplication
+      if (align === 'CENTER') {
+        let spaces = (cellWidth - textLength) / 2
+        for (let s = 0; s < spaces; s++) {
+          lineStr += ' '
+        }
+
+        if (obj.text !== '') {
+          if (obj.style) {
+            lineStr += (
+              this._getStyle(obj.style) +
+              obj.text +
+              this._getStyle("NORMAL")
+            )
+          } else {
+            lineStr += obj.text
+          }
+        }
+
+        for (let s = 0; s < spaces - 1; s++) {
+          lineStr += ' '
+        }
+      } else if (align === 'RIGHT') {
+        let spaces = cellWidth - textLength
+        if (leftoverSpace > 0) {
+          spaces += leftoverSpace
+          leftoverSpace = 0
+        }
+
+        for (let s = 0; s < spaces; s++) {
+          lineStr += ' '
+        }
+
+        if (obj.text !== '') {
+          if (obj.style) {
+            lineStr += (
+              this._getStyle(obj.style) +
+              obj.text +
+              this._getStyle("NORMAL")
+            )
+          } else {
+            lineStr += obj.text
+          }
+        }
+      } else {
+        if (obj.text !== '') {
+          if (obj.style) {
+            lineStr += (
+              this._getStyle(obj.style) +
+              obj.text +
+              this._getStyle("NORMAL")
+            )
+          } else {
+            lineStr += obj.text
+          }
+        }
+
+        let spaces = Math.floor(cellWidth - textLength)
+        if (leftoverSpace > 0) {
+          spaces += leftoverSpace
+          leftoverSpace = 0
+        }
+
+        for (let s = 0; s < spaces; s++) {
+          lineStr += ' '
+        }
+      }
+
+      if (originalText !== null) {
+        secondLineEnabled = true
+        obj.text = utils.textSubstring(originalText, cellWidth)
+        secondLine.push(obj)
+      } else {
+        obj.text = ''
+        secondLine.push(obj)
       }
     }
 
-    buffer = [];
-    callback(statuses);
-  })
+    // Set size to line
+    if (width > 1 || height > 1) {
+      lineStr = (
+        _.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height) +
+        lineStr +
+        _.TEXT_FORMAT.TXT_NORMAL
+      )
+    }
 
-  PrinterStatus.commands().forEach((c) => {
-    this.adapter.write(c);
-  });
+    // Write the line
+    this.buffer.write(
+      iconv.encode(lineStr + _.EOL, options.encoding || this.encoding)
+    )
 
-  RollPaperSensorStatus.commands().forEach((c) => {
-    this.adapter.write(c);
-  });
+    if (secondLineEnabled) {
+      // Writes second line if has
+      return this.tableCustom(secondLine, options)
+    } else {
+      return this
+    }
+  }
 
-  OfflineCauseStatus.commands().forEach((c) => {
-    this.adapter.write(c);
-  });
 
-  ErrorCauseStatus.commands().forEach((c) => {
-    this.adapter.write(c);
-  });
+  /**
+   * [function Print encoded alpha-numeric text without End Of Line]
+   * @param  {[String]}  content  [mandatory]
+   * @param  {[String]}  encoding [optional]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  pureText(content: string, encoding = this.encoding) {
+    return this.print(iconv.encode(content, encoding));
+  };
 
-  return this;
+  /**
+   * [function encode text]
+   * @param  {[String]}  encoding [mandatory]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  encode(encoding: string) {
+    this.encoding = encoding;
+    return this;
+  }
+
+  /**
+   * [line feed]
+   * @param  {[type]}    n   Number of lines
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  feed(n = 1) {
+    this.buffer.write(new Array(n).fill(_.EOL).join(''));
+    return this;
+  };
+
+  /**
+   * [feed control sequences]
+   * @param  {[type]}    ctrl     [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  control(ctrl: FeedControlSequence) {
+    this.buffer.write(_.FEED_CONTROL_SEQUENCES[
+      `CTL_${utils.upperCase(ctrl)}` as const
+    ]);
+    return this;
+  };
+  /**
+   * [text align]
+   * @param  {[type]}    align    [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  align(align: Alignment) {
+    this.buffer.write(_.TEXT_FORMAT[
+      `TXT_ALIGN_${utils.upperCase(align)}` as const
+    ]);
+    return this;
+  };
+  /**
+   * [font family]
+   * @param  {[type]}    family  [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  font(family: FontFamily) {
+    this.buffer.write(_.TEXT_FORMAT[
+    `TXT_FONT_${utils.upperCase(family)}` as const
+      ]);
+    if (family.toUpperCase() === 'A')
+      this.width = this.options && this.options.width || 42;
+    else
+      this.width = this.options && this.options.width || 56;
+    return this;
+  };
+
+  /**
+   * [font style]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  _getStyle(string: StyleString): string;
+  _getStyle(bold: boolean, italic: boolean, underline: boolean | 0 | 1 | 2): string;
+  _getStyle(boldOrString: boolean | StyleString, italic?: boolean, underline?: boolean | 0 | 1 | 2) {
+    if (typeof boldOrString === 'string') {
+      switch (utils.upperCase(boldOrString)) {
+        case 'B':
+          return this._getStyle(true, false, 0);
+        case 'I':
+          return this._getStyle(false, true, 0);
+        case 'U':
+          return this._getStyle(false, false, 1);
+        case 'U2':
+          return this._getStyle(false, false, 2);
+        case 'BI':
+          return this._getStyle(true, true, 0);
+        case 'BIU':
+          return this._getStyle(true, true, 1);
+        case 'BIU2':
+          return this._getStyle(true, true, 2);
+        case 'BU':
+          return this._getStyle(true, false, 1);
+        case 'BU2':
+          return this._getStyle(true, false, 2);
+        case 'IU':
+          return this._getStyle(false, true, 1);
+        case 'IU2':
+          return this._getStyle(false, true, 2);
+        case 'NORMAL':
+        default:
+          return this._getStyle(false, false, 0);
+      }
+    } else {
+      let styled = `${
+        boldOrString ? _.TEXT_FORMAT.TXT_BOLD_ON : _.TEXT_FORMAT.TXT_BOLD_OFF
+      }${
+        italic ? _.TEXT_FORMAT.TXT_ITALIC_ON : _.TEXT_FORMAT.TXT_ITALIC_OFF
+      }`;
+      if (underline === 0 || underline === false) styled += _.TEXT_FORMAT.TXT_UNDERL_OFF;
+      else if (underline === 1 || underline === true) styled += _.TEXT_FORMAT.TXT_UNDERL_ON;
+      else if (underline === 2) styled += _.TEXT_FORMAT.TXT_UNDERL2_ON;
+      return styled;
+    }
+  }
+
+  /**
+   * [font style]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  style(string: StyleString): this;
+  style(bold: boolean, italic: boolean, underline: boolean | 0 | 1 | 2): this;
+  style(boldOrString: boolean | StyleString, italic?: boolean, underline?: boolean | 0 | 1 | 2) {
+    const style = (typeof boldOrString === 'string')
+      ? this._getStyle(boldOrString)
+      : this._getStyle(boldOrString, italic as boolean, underline as boolean);
+    this.buffer.write(style);
+    return this;
+  };
+
+  /**
+   * [font size]
+   * @param  {[String]}  width   [description]
+   * @param  {[String]}  height  [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  size(width: number, height: number) {
+    this.buffer.write(_.TEXT_FORMAT.TXT_CUSTOM_SIZE(width, height));
+    return this;
+  };
+
+  /**
+   * [set character spacing]
+   * @param  {[type]}    n     [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  spacing(n?: number | null) {
+    if (n === undefined || n === null) {
+      this.buffer.write(_.CHARACTER_SPACING.CS_DEFAULT);
+    } else {
+      this.buffer.write(_.CHARACTER_SPACING.CS_SET);
+      this.buffer.writeUInt8(n);
+    }
+    return this;
+  }
+
+  /**
+   * [set line spacing]
+   * @param  {[type]} n [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  lineSpace(n?: number | null) {
+    if (n === undefined || n === null) {
+      this.buffer.write(_.LINE_SPACING.LS_DEFAULT);
+    } else {
+      this.buffer.write(_.LINE_SPACING.LS_SET);
+      this.buffer.writeUInt8(n);
+    }
+    return this;
+  };
+
+  /**
+   * [hardware]
+   * @param  {[type]}    hw       [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  hardware(hw: HardwareCommand) {
+    this.buffer.write(_.HARDWARE[`HW_${utils.upperCase(hw)}` as const]);
+    return this;
+  };
+
+  private static isLegacyBarcodeOptions(
+    optionsOrLegacy: [BarcodeOptions] | LegacyBarcodeArguments
+  ): optionsOrLegacy is LegacyBarcodeArguments {
+    return typeof optionsOrLegacy[0] === 'object';
+  }
+
+  /**
+   * [barcode]
+   * @param  {[type]}    code     [description]
+   * @param  {[type]}    type     [description]
+   * @param  {[type]}    options  [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  barcode(code: number, type: BarcodeType, options: BarcodeOptions): this;
+  barcode(code: number, type: BarcodeType, ...optionsOrLegacy: [BarcodeOptions] | LegacyBarcodeArguments) {
+    let options: BarcodeOptions;
+    if (Printer.isLegacyBarcodeOptions(optionsOrLegacy)) {
+      options = {
+        width: optionsOrLegacy[0],
+        height: optionsOrLegacy[1],
+        position: optionsOrLegacy[2],
+        font: optionsOrLegacy[3],
+        includeParity: true,
+      };
+    } else [options] = optionsOrLegacy;
+    options.font = options.font ?? 'a';
+    options.position = options.position ?? 'blw';
+    options.includeParity = options.includeParity ?? true;
+
+    const convertCode = code.toString(10);
+    let parityBit = '';
+    let codeLength = '';
+    if (typeof type === 'undefined' || type === null) {
+      throw new TypeError('barcode type is required');
+    }
+    if (type === 'EAN13' && convertCode.length !== 12) {
+      throw new Error('EAN13 Barcode type requires code length 12');
+    }
+    if (type === 'EAN8' && convertCode.length !== 7) {
+      throw new Error('EAN8 Barcode type requires code length 7');
+    }
+    if (this._model === 'qsprinter') {
+      this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.ON);
+    }
+    if (this._model === 'qsprinter') {
+      // qsprinter has no BARCODE_WIDTH command (as of v7.5)
+    } else if (utils.isKey(options.width, _.BARCODE_FORMAT.BARCODE_WIDTH)) {
+      this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH[options.width]);
+    } else {
+      this.buffer.write(_.BARCODE_FORMAT.BARCODE_WIDTH_DEFAULT);
+    }
+    if (options.height >= 1 && options.height <= 255) {
+      this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT(options.height));
+    } else {
+      if (this._model === 'qsprinter') {
+        this.buffer.write(_.MODEL.QSPRINTER.BARCODE_HEIGHT_DEFAULT);
+      } else {
+        this.buffer.write(_.BARCODE_FORMAT.BARCODE_HEIGHT_DEFAULT);
+      }
+    }
+    if (this._model === 'qsprinter') {
+      // Qsprinter has no barcode font
+    } else {
+      this.buffer.write(_.BARCODE_FORMAT[
+        `BARCODE_FONT_${utils.upperCase(options.font)}` as const
+      ]);
+    }
+    this.buffer.write(_.BARCODE_FORMAT[
+      `BARCODE_TXT_${utils.upperCase(options.position)}` as const
+    ]);
+
+    let normalizedType = utils.upperCase(type);
+    if (normalizedType === 'UPC-A') normalizedType = 'UPC_A';
+    else if (normalizedType === 'UPC-E') normalizedType = 'UPC_E';
+
+    this.buffer.write(_.BARCODE_FORMAT[
+      `BARCODE_${normalizedType}` as const
+    ]);
+    if (options.includeParity) {
+      if (type === 'EAN13' || type === 'EAN8') {
+        parityBit = utils.getParityBit(convertCode);
+      }
+    }
+    if (type == 'CODE128' || type == 'CODE93') {
+      codeLength = utils.codeLength(convertCode);
+    }
+    this.buffer.write(codeLength + convertCode + (options.includeParity ? parityBit : '') + '\x00'); // Allow to skip the parity byte
+    if (this._model === 'qsprinter') {
+      this.buffer.write(_.MODEL.QSPRINTER.BARCODE_MODE.OFF);
+    }
+    return this;
+  };
+
+  /**
+   * [print qrcode]
+   * @param  {[type]} content    [description]
+   * @param  {[type]} version [description]
+   * @param  {[type]} level   [description]
+   * @param  {[type]} size    [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  qrcode(content: string, version?: number | undefined, level?: QRLevel | undefined, size?: number | undefined) {
+    if (this._model !== 'qsprinter') {
+      this.buffer.write(_.CODE2D_FORMAT.TYPE_QR);
+      this.buffer.write(_.CODE2D_FORMAT.CODE2D);
+      this.buffer.writeUInt8(version ?? 3);
+      this.buffer.write(_.CODE2D_FORMAT[
+        `QR_LEVEL_${utils.upperCase(level ?? 'L')}` as const
+      ]);
+      this.buffer.writeUInt8(size ?? 6);
+      this.buffer.writeUInt16LE(content.length);
+      this.buffer.write(content);
+    } else {
+      const dataRaw = iconv.encode(content, 'utf8');
+      if (dataRaw.length < 1 && dataRaw.length > 2710) {
+        throw new Error('Invalid code length in byte. Must be between 1 and 2710');
+      }
+
+      // Set pixel size
+      if (!size || (size && typeof size !== 'number'))
+        size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.DEFAULT;
+      else if (size && size < _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN)
+        size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MIN;
+      else if (size && size > _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX)
+        size = _.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.MAX;
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PIXEL_SIZE.CMD);
+      this.buffer.writeUInt8(size);
+
+      // Set version
+      if (!version || (version && typeof version !== 'number'))
+        version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.DEFAULT;
+      else if (version && version < _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN)
+        version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MIN;
+      else if (version && version > _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX)
+        version = _.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.MAX;
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.VERSION.CMD);
+      this.buffer.writeUInt8(version);
+
+      // Set level
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.CMD);
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.LEVEL.OPTIONS[
+        utils.upperCase(level ?? 'L')
+      ]);
+
+      // Transfer data(code) to buffer
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P1);
+      this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.SAVEBUF.CMD_P2);
+      this.buffer.write(dataRaw);
+
+      // Print from buffer
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P1);
+      this.buffer.writeUInt16LE(dataRaw.length + _.MODEL.QSPRINTER.CODE2D_FORMAT.LEN_OFFSET);
+      this.buffer.write(_.MODEL.QSPRINTER.CODE2D_FORMAT.PRINTBUF.CMD_P2);
+    }
+    return this;
+  };
+
+  /**
+   * [print qrcode image]
+   * @param  {[type]}   text  [description]
+   * @param  {[type]}   options  [description]
+   * @return {[Promise]}
+   */
+  qrimage(text: string, options: QrImageOptions = { type: 'png', mode: 'dhdw' }): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const buffer = qr.imageSync(text, options);
+      const type = ['image', options.type].join('/');
+      getPixels(buffer, type, (err, pixels) => {
+        if (err) reject(err);
+        this.raster(new Image(pixels), options.mode);
+        resolve();
+      });
+    })
+  };
+
+  /**
+   * [image description]
+   * @param  {[type]} image   [description]
+   * @param  {[type]} density [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  async image(image: Image, density: BitmapDensity = 'd24') {
+    if (!(image instanceof Image)) throw new TypeError('Only escpos.Image supported');
+    const n = !!~['D8', 'S8'].indexOf(utils.upperCase(density)) ? 1 : 3;
+    const header = _.BITMAP_FORMAT[`BITMAP_${utils.upperCase(density)}` as const];
+    const bitmap = image.toBitmap(n * 8);
+
+    this.lineSpace(0); // set line spacing to 0
+    bitmap.data.forEach((line) => {
+      this.buffer.write(header);
+      this.buffer.writeUInt16LE(line.length / n);
+      this.buffer.write(line);
+      this.buffer.write(_.EOL);
+    });
+    // added a delay so the printer can process the graphical data
+    // when connected via slower connection ( e.g.: Serial)
+    await new Promise<void>((resolve) => {
+      setTimeout(() => { resolve() }, 200);
+    });
+    return this.lineSpace();
+  };
+
+  /**
+   * [raster description]
+   * @param  {[type]} image [description]
+   * @param  {[type]} mode  Raster mode (
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  raster(image: Image, mode: RasterMode = 'NORMAL') {
+    if (!(image instanceof Image))
+      throw new TypeError('Only escpos.Image supported');
+    mode = utils.upperCase(mode);
+    if (mode === 'DHDW' ||
+      mode === 'DWH' ||
+      mode === 'DHW') mode = 'DWDH';
+    const raster = image.toRaster();
+    const header = _.GSV0_FORMAT[`GSV0_${mode}` as const];
+    this.buffer.write(header);
+    this.buffer.writeUInt16LE(raster.width);
+    this.buffer.writeUInt16LE(raster.height);
+    this.buffer.write(raster.data);
+    return this;
+  };
+
+  /**
+   * [function Send pulse to kick the cash drawer]
+   * @param  {[type]} pin [description]
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  cashdraw(pin: 2 | 5 = 2) {
+    this.buffer.write(_.CASH_DRAWER[
+      pin === 5 ? 'CD_KICK_5' : 'CD_KICK_2'
+    ]);
+    return this;
+  };
+
+  /**
+   * Printer Buzzer (Beep sound)
+   * @param  {[Number]} n Refers to the number of buzzer times
+   * @param  {[Number]} t Refers to the buzzer sound length in (t * 100) milliseconds.
+   */
+  beep(n: number, t: number) {
+    this.buffer.write(_.BEEP);
+    this.buffer.writeUInt8(n);
+    this.buffer.writeUInt8(t);
+    return this;
+  };
+
+  /**
+   * Send data to hardware and flush buffer
+   * @return {[Promise]}
+   */
+  flush(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const buf = this.buffer.flush();
+      this.adapter.write(buf, (error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+  };
+
+  /**
+   * Cut paper
+   * @param  {[boolean]} partial set a full or partial cut. Default: full Partial cut is not implemented in all printers
+   * @param  {[number]} feed Number of lines to feed before cutting
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  cut(partial = false, feed = 3) {
+    this.feed(feed);
+    this.buffer.write(_.PAPER[
+      partial ? 'PAPER_PART_CUT' : 'PAPER_FULL_CUT'
+    ]);
+    return this;
+  };
+
+  /**
+   * [close description]
+   * @param closeArgs Arguments passed to adapter's close function
+   */
+  async close(...closeArgs: AdapterCloseArgs): Promise<void> {
+    await this.flush();
+    return new Promise((resolve, reject) => {
+      this.adapter.close((error) => {
+        if (error) reject(error);
+        resolve();
+      }, ...closeArgs);
+    });
+  };
+
+  /**
+   * [color select between two print color modes, if your printer supports it]
+   * @param  {Number} color - 0 for primary color (black) 1 for secondary color (red)
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  color(color: 0 | 1) {
+    if (color !== 0 && color !== 1) {
+      console.warn(`Unknown color ${color}`);
+      this.buffer.write(_.COLOR[0]);
+    } else this.buffer.write(_.COLOR[color]);
+    return this;
+  };
+
+  /**
+   * [reverse colors, if your printer supports it]
+   * @param {Boolean} reverse - True for reverse, false otherwise
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  setReverseColors(reverse: boolean) {
+    this.buffer.write(reverse ? _.COLOR.REVERSE : _.COLOR.UNREVERSE);
+    return this;
+  };
+
+
+  /**
+   * [writes a low level command to the printer buffer]
+   *
+   * @usage
+   * 1) raw('1d:77:06:1d:6b:02:32:32:30:30:30:30:32:30:30:30:35:30:35:00:0a')
+   * 2) raw('1d 77 06 1d 6b 02 32 32 30 30 30 30 32 30 30 30 35 30 35 00 0a')
+   * 3) raw(Buffer.from('1d77061d6b0232323030303032303030353035000a','hex'))
+   *
+   * @param data {Buffer|string}
+   * @returns {Printer}
+   */
+  raw(data: Buffer | string) {
+    if (Buffer.isBuffer(data)) {
+      this.buffer.write(data);
+    } else if (typeof data === 'string') {
+      data = data.toLowerCase();
+      this.buffer.write(Buffer.from(data.replace(/(\s|:)/g, ''), 'hex'));
+    }
+    return this;
+  };
+
+  /**
+   * get one specific status from the printer using it's class
+   * @param  {string} statusClass
+   * @return {Promise} promise returning given status
+   */
+  getStatus<T extends DeviceStatus>(statusClass: StatusClassConstructor<T>): Promise<T> {
+    return new Promise((resolve) => {
+      this.adapter.read(data => {
+        const byte = data.readInt8(0);
+        resolve(new statusClass(byte));
+      })
+
+      statusClass.commands().forEach((c) => {
+        this.buffer.write(c);
+      });
+    });
+  }
+
+  /**
+   * get statuses from the printer
+   * @return {Promise}
+   */
+  getStatuses() {
+    return new Promise((resolve) => {
+      this.adapter.read(data => {
+        let buffer: number[] = [];
+        for (let i = 0; i < data.byteLength; i++) buffer.push(data.readInt8(i));
+        if (buffer.length < 4) return;
+
+        let statuses = [
+          new PrinterStatus(buffer[0]),
+          new RollPaperSensorStatus(buffer[1]),
+          new OfflineCauseStatus(buffer[2]),
+          new ErrorCauseStatus(buffer[3]),
+        ];
+        resolve(statuses);
+      });
+
+      [PrinterStatus, RollPaperSensorStatus, OfflineCauseStatus, ErrorCauseStatus].forEach((statusClass) => {
+        statusClass.commands().forEach((command) => {
+          this.adapter.write(command);
+        })
+      });
+    });
+  }
 }
 
-
-/**
- * Printer Supports
- */
-Printer.Printer = Printer;
-Printer.Image = Image;
-Printer.command = _;
-Printer.Printer2 = Promisify;
-
-/**
- * [exports description]
- * @type {[type]}
- */
-module.exports = Printer;
+export default Printer;
+export { default as Image } from './image';
+export const command = _;

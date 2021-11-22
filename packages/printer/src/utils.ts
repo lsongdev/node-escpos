@@ -2,34 +2,45 @@
  * [getParityBit description]
  * @return {[type]} [description]
  */
-exports.getParityBit = function (str) {
-  var parity = 0, reversedCode = str.split('').reverse().join('');
-  for (var counter = 0; counter < reversedCode.length; counter += 1) {
+export function getParityBit(str: string) {
+  let parity = 0;
+  let reversedCode = str.split('').reverse().join('');
+  for (let counter = 0; counter < reversedCode.length; counter += 1) {
     parity += parseInt(reversedCode.charAt(counter), 10) * Math.pow(3, ((counter + 1) % 2));
   }
-  return String((10 - (parity % 10)) % 10);
-};
+  return ((10 - (parity % 10)) % 10).toString();
+}
 
-exports.codeLength = function (str) {
+export function codeLength(str: string) {
   let buff = Buffer.from((str.length).toString(16), 'hex');
   return buff.toString();
 }
 
-function charLength (char) {
+export function charLength(char: string) {
   const code = char.charCodeAt(0);
   return code > 0x7f && code <= 0xffff ? 2 : 1; // More than 2bytes count as 2
 }
 
-exports.textLength = function (str) {
+export function textLength(str: string) {
   return str.split('').reduce((accLen, char) => {
     return accLen + charLength(char);
   }, 0)
 }
 
-exports.textSubstring = function (str, start, end) {
+export function textSubstring(str: string, start: number, end?: number) {
   let accLen = 0;
   return str.split('').reduce((accStr, char) => {
     accLen = accLen + charLength(char);
     return accStr + (accLen > start && (!end || accLen <= end) ? char : '');
   }, '')
+}
+
+export function upperCase<T extends string>(string: T): Uppercase<T> {
+  return string.toUpperCase() as Uppercase<T>;
+}
+
+export type AnyCase<T extends string> = Uppercase<T> | Lowercase<T>;
+
+export function isKey<T extends {} | []>(key: string | number | symbol, of: T): key is keyof T {
+  return key in of;
 }
