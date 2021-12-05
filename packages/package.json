@@ -6,7 +6,8 @@
       "adapter",
       "printer",
       "usb",
-      "console"
+      "console",
+      "serialport"
     ]
   }
 }
