@@ -25,7 +25,7 @@ function stdout(data: string | Buffer) {
 /**
  * [Console description]
  */
-export class Console extends Adapter<[]> {
+export default class Console extends Adapter<[]> {
   public handler: (data: (string | Buffer)) => void;
 
   constructor(handler: (data: string | Buffer) => void = stdout) {
