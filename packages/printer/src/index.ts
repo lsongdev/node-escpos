@@ -684,14 +684,14 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * @param  {[type]}   options  [description]
    * @return {[Promise]}
    */
-  qrimage(text: string, options: QrImageOptions = { type: 'png', mode: 'dhdw' }): Promise<void> {
+  qrimage(text: string, options: QrImageOptions = { type: 'png', mode: 'dhdw' }): Promise<this> {
     return new Promise((resolve, reject) => {
       const buffer = qr.imageSync(text, options);
       const type = ['image', options.type].join('/');
       getPixels(buffer, type, (err, pixels) => {
         if (err) reject(err);
         this.raster(new Image(pixels), options.mode);
-        resolve();
+        resolve(this);
       });
     })
   };
@@ -773,12 +773,12 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * Send data to hardware and flush buffer
    * @return {[Promise]}
    */
-  flush(): Promise<void> {
+  flush(): Promise<this> {
     return new Promise((resolve, reject) => {
       const buf = this.buffer.flush();
       this.adapter.write(buf, (error) => {
         if (error) reject(error);
-        else resolve();
+        else resolve(this);
       });
     });
   };
@@ -801,12 +801,12 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
    * [close description]
    * @param closeArgs Arguments passed to adapter's close function
    */
-  async close(...closeArgs: AdapterCloseArgs): Promise<void> {
+  async close(...closeArgs: AdapterCloseArgs): Promise<this> {
     await this.flush();
     return new Promise((resolve, reject) => {
       this.adapter.close((error) => {
         if (error) reject(error);
-        resolve();
+        resolve(this);
       }, ...closeArgs);
     });
   };

@@ -2,8 +2,10 @@
   "name": "escpos-usb",
   "version": "3.0.0-alpha.4",
   "description": "usb adapter for escpos",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -12,5 +14,8 @@
   "keywords": [],
   "author": "Lsong <song940@gmail.com> (https://lsong.org)",
   "license": "MIT",
-  "gitHead": "a3a65c61c0b990298258331f54546a93d6875ddb"
+  "gitHead": "a3a65c61c0b990298258331f54546a93d6875ddb",
+  "devDependencies": {
+    "@types/usb": "^1.5.3"
+  }
 }

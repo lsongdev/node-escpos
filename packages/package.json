@@ -2,6 +2,6 @@
   "name": "escpos-packages",
   "private": true,
   "workspaces": {
-    "packages": ["adapter", "printer"]
+    "packages": ["adapter", "printer", "usb"]
   }
 }
