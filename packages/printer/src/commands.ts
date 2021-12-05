@@ -65,8 +65,8 @@ export const HARDWARE = {
  * @type {Object}
  */
 export const CASH_DRAWER = {
-  CD_KICK_2: '\x1b\x70\x00\x19\xfa', // Sends a pulse to pin 2 []
-  CD_KICK_5: '\x1b\x70\x01\x19\xfa', // Sends a pulse to pin 5 []
+  CD_KICK_2: '\x1b\x70\x00\x19\x78', // Sends a pulse to pin 2 []
+  CD_KICK_5: '\x1b\x70\x01\x19\x78', // Sends a pulse to pin 5 []
 };
 
 /**
