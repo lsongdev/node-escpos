@@ -12,6 +12,7 @@ device.open(function (error) {
     }
 
     printer
+        // TODO: Update
         .getStatus('PrinterStatus', status => {
             console.log(status.toJSON());
         })
