@@ -5,6 +5,7 @@
     { "path": "./printer/tsconfig.ref.json" },
     { "path": "./usb/tsconfig.ref.json" },
     { "path": "./console/tsconfig.ref.json" },
-    { "path": "./serialport/tsconfig.ref.json" }
+    { "path": "./serialport/tsconfig.ref.json" },
+    { "path": "./screen/tsconfig.ref.json" }
   ],
 }
