@@ -139,7 +139,6 @@ export default class USB extends Adapter<[]> {
     if (this.device) {
       try {
         this.device.close();
-        // TODO: Update definitions when ready: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/57557
         usb.removeAllListeners('detach');
 
         callback && callback(null);
