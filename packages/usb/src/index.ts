@@ -1,7 +1,8 @@
 'use strict';
-import usb, {OutEndpoint} from 'usb';
-import os from "os";
-import {Adapter, NotImplementedException} from "escpos-adapter";
+const os           = require('os');
+const util          = require('util');
+const EventEmitter  = require('events');
+let mUsb = null;
 
 /**
  * [USB Class Codes ]
@@ -15,87 +16,111 @@ const IFACE_CLASS = {
   HUB    : 0x09
 };
 
-export default class USB extends Adapter<[]> {
-  private device: usb.Device | null = null;
-  private endpoint: usb.OutEndpoint | null = null;
+/**
+ * [function USB]
+ * @param  {[type]} vid [description]
+ * @param  {[type]} pid [description]
+ * @return {[type]}     [description]
+ */
+function USB(vid, pid){
 
-  constructor();
-  constructor(vid: number, pid: number);
-  constructor(device: usb.Device);
-  constructor(vidOrDevice?: number | usb.Device, pid?: number) {
-    super();
-    if(vidOrDevice !== undefined && pid !== undefined){
-      this.device = usb.findByIds(vidOrDevice as number, pid);
-    } else if(vidOrDevice !== undefined){
+  if (!mUsb) {
+    /** Changing Code From USB Library NPM
+     * @see https://github.com/node-usb/node-usb#migrating-to-v200
+     * **/
+    let { usb } = require('usb');
+    mUsb = usb;
+  }
+
+  EventEmitter.call(this);
+  let self = this;
+  this.device = null;
+  if(vid && pid){
+    this.device = mUsb.findByIds(vid, pid);
+  }else if(vid){
       // Set spesific USB device from devices array as coming from USB.findPrinter() function.
       // for example
       // let devices = escpos.USB.findPrinter();
       // => devices [ Device1, Device2 ];
       // And Then
       // const device = new escpos.USB(Device1); OR device = new escpos.USB(Device2);
-      this.device = vidOrDevice as usb.Device;
-    } else {
-      const devices = USB.findPrinter();
-      if (devices.length > 0) [this.device] = devices;
-    }
-    if (!this.device) throw new Error('Can not find printer');
-
-    usb.on('detach', device => {
-      if(device == this.device) {
-        this.emit('detach'    , device);
-        this.emit('disconnect', device);
-        this.device = null;
-      }
-    });
+      this.device = vid;
+  }else{
+    let devices = USB.findPrinter();
+    if(devices && devices.length)
+      this.device = devices[0];
   }
+  if (!this.device)
+    throw new Error('Can not find printer');
 
-  /**
-   * [findPrinter description]
-   * @return {[type]} [description]
-   */
-  static findPrinter() {
-    return usb.getDeviceList().filter(device => {
-      try {
-        return device.configDescriptor.interfaces
-          .filter(iface => iface.filter(conf => conf.bInterfaceClass === IFACE_CLASS.PRINTER).length > 0)
-          .length > 0;
-      } catch(e) {
-        // console.warn(e)
-        return false;
-      }
+  mUsb.on('detach', function(device){
+    if(device == self.device) {
+      self.emit('detach'    , device);
+      self.emit('disconnect', device);
+      self.device = null;
+    }
+  });
+
+  return this;
+
+};
+
+/**
+ * [findPrinter description]
+ * @return {[type]} [description]
+ */
+USB.findPrinter = function(){
+  if (!mUsb) {
+    let { usb } = require('usb');
+    mUsb = usb;
+  }
+  return usb.getDeviceList().filter(function(device){
+    try{
+      return device.configDescriptor.interfaces.filter(function(iface){
+        return iface.filter(function(conf){
+          return conf.bInterfaceClass === IFACE_CLASS.PRINTER;
+        }).length;
+      }).length;
+    }catch(e){
+      // console.warn(e)
+      return false;
+    }
+  });
+};
+/**
+ * getDevice
+ */
+USB.getDevice = function(vid, pid){
+  return new Promise((resolve, reject) => {
+    const device = new USB(vid, pid);
+    device.open(err => {
+      if(err) return reject(err);
+      resolve(device);
     });
-  };
+  });
+};
 
-  /**
-   * getDevice
-   */
-  static getDevice(vid: number, pid: number) {
-    return new Promise((resolve, reject) => {
-      const device = new USB(vid, pid);
-      device.open(err => {
-        if(err) return reject(err);
-        resolve(device);
-      });
-    });
-  };
+/**
+ * make USB extends EventEmitter
+ */
+util.inherits(USB, EventEmitter);
 
-  /**
-   * [open usb device]
-   * @param  {Function} callback [description]
-   * @return {[type]}            [description]
-   */
-  open(callback?: (error: Error | null) => void) {
-    let counter = 0;
-    const device = this.device;
-    if (device === null) throw new Error('The device has been detached');
-    device.open();
-    device.interfaces.forEach(iface => {
-      iface.setAltSetting(iface.altSetting, () => {
+/**
+ * [open usb device]
+ * @param  {Function} callback [description]
+ * @return {[type]}            [description]
+ */
+USB.prototype.open = function (callback){
+  let self = this, counter = 0, index = 0;
+  this.device.open();
+  this.device.interfaces.forEach(function(iface){
+    (function(iface){
+      iface.setAltSetting(iface.altSetting, function(){
         try {
           // http://libusb.sourceforge.net/api-1.0/group__dev.html#gab14d11ed6eac7519bb94795659d2c971
           // libusb_kernel_driver_active / libusb_attach_kernel_driver / libusb_detach_kernel_driver : "This functionality is not available on Windows."
           if ("win32" !== os.platform()) {
-            if (iface.isKernelDriverActive()) {
+            if(iface.isKernelDriverActive()) {
               try {
                 iface.detachKernelDriver();
               } catch(e) {
@@ -104,15 +129,18 @@ export default class USB extends Adapter<[]> {
             }
           }
           iface.claim(); // must be called before using any endpoints of this interface.
-          iface.endpoints.filter(endpoint => {
-            if (endpoint.direction == 'out' && !this.endpoint) {
-              this.endpoint = endpoint as OutEndpoint;
+          iface.endpoints.filter(function(endpoint){
+            if(endpoint.direction == 'out' && !self.endpoint) {
+              self.endpoint = endpoint;
+            }
+            if(endpoint.direction == 'in' && !self.deviceToPcEndpoint) {
+              self.deviceToPcEndpoint = endpoint;
             }
           });
-          if (this.endpoint) {
-            this.emit('connect', this.device);
-            callback && callback(null);
-          } else if (++counter === device.interfaces.length && !this.endpoint){
+          if(self.endpoint) {
+            self.emit('connect', self.device);
+            callback && callback(null, self);
+          } else if(++counter === this.device.interfaces.length && !self.endpoint){
             callback && callback(new Error('Can not find endpoint from printer'));
           }
         } catch (e) {
@@ -122,39 +150,62 @@ export default class USB extends Adapter<[]> {
           callback && callback(e);
         }
       });
-    });
-    return this;
-  };
+    })(iface);
+  });
+  return this;
 
-  write(data: Buffer, callback?: (error: Error | null) => void) {
-    this.emit('data', data);
-    if (this.endpoint === null) throw new Error('Device not connected');
-    this.endpoint.transfer(data, (error) => {
-      callback && callback(error ?? null);
-    });
-    return this;
-  };
+};
 
-  close(callback?: (error: Error | null) => void) {
-    if (this.device) {
-      try {
-        this.device.close();
-        usb.removeAllListeners('detach');
+/**
+ * [function write]
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+USB.prototype.write = function(data, callback){
+  this.emit('data', data);
+  this.endpoint.transfer(data, callback);
+  return this;
+};
 
-        callback && callback(null);
-        this.emit('close', this.device);
-      } catch (e) {
-        callback && callback(e);
-      }
-    }
-    else {
+/**
+ * read buffer from the printer
+ * @param  {Function} callback
+ * @return {USB}
+ */
+ USB.prototype.read = function(callback) {
+  this.deviceToPcEndpoint.transfer(64, (error,data) => callback(data));
+   
+ return this;
+};
+
+USB.prototype.close = function(callback){
+
+  if(this.device) {
+
+    try {
+
+      this.device.close();
+      mUsb.removeAllListeners('detach');
+
       callback && callback(null);
+      this.emit('close', this.device);
+
+    }
+    catch (e) {
+      callback && callback(e);
     }
 
-    return this;
+  }
+  else {
+    callback && callback(null);
   }
 
-  read() {
-    throw new NotImplementedException();
-  }
-}
+  return this;
+
+};
+
+/**
+ * [exports description]
+ * @type {[type]}
+ */
+module.exports = USB;
