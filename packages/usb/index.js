@@ -128,6 +128,9 @@ USB.prototype.open = function (callback){
             if(endpoint.direction == 'out' && !self.endpoint) {
               self.endpoint = endpoint;
             }
+            if(endpoint.direction == 'in' && !self.deviceToPcEndpoint) {
+              self.deviceToPcEndpoint = endpoint;
+            }
           });
           if(self.endpoint) {
             self.emit('connect', self.device);
@@ -157,6 +160,17 @@ USB.prototype.write = function(data, callback){
   this.emit('data', data);
   this.endpoint.transfer(data, callback);
   return this;
+};
+
+/**
+ * read buffer from the printer
+ * @param  {Function} callback
+ * @return {USB}
+ */
+ USB.prototype.read = function(callback) {
+  this.deviceToPcEndpoint.transfer(64, (error,data) => callback(data));
+   
+ return this;
 };
 
 USB.prototype.close = function(callback){
