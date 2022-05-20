@@ -2,7 +2,7 @@
 const os           = require('os');
 const util          = require('util');
 const EventEmitter  = require('events');
-let usb = null;
+let mUsb = null;
 
 /**
  * [USB Class Codes ]
@@ -24,15 +24,19 @@ const IFACE_CLASS = {
  */
 function USB(vid, pid){
 
-  if (!usb) {
-    usb = require('usb');
+  if (!mUsb) {
+    /** Changing Code From USB Library NPM
+     * @see https://github.com/node-usb/node-usb#migrating-to-v200
+     * **/
+    let { usb } = require('usb');
+    mUsb = usb;
   }
 
   EventEmitter.call(this);
-  var self = this;
+  let self = this;
   this.device = null;
   if(vid && pid){
-    this.device = usb.findByIds(vid, pid);
+    this.device = mUsb.findByIds(vid, pid);
   }else if(vid){
       // Set spesific USB device from devices array as coming from USB.findPrinter() function.
       // for example
@@ -42,14 +46,14 @@ function USB(vid, pid){
       // const device = new escpos.USB(Device1); OR device = new escpos.USB(Device2);
       this.device = vid;
   }else{
-    var devices = USB.findPrinter();
+    let devices = USB.findPrinter();
     if(devices && devices.length)
       this.device = devices[0];
   }
   if (!this.device)
     throw new Error('Can not find printer');
 
-  usb.on('detach', function(device){
+  mUsb.on('detach', function(device){
     if(device == self.device) {
       self.emit('detach'    , device);
       self.emit('disconnect', device);
@@ -66,8 +70,9 @@ function USB(vid, pid){
  * @return {[type]} [description]
  */
 USB.findPrinter = function(){
-  if (!usb) {
-    usb = require('usb');
+  if (!mUsb) {
+    let { usb } = require('usb');
+    mUsb = usb;
   }
   return usb.getDeviceList().filter(function(device){
     try{
@@ -180,7 +185,7 @@ USB.prototype.close = function(callback){
     try {
 
       this.device.close();
-      usb.removeAllListeners('detach');
+      mUsb.removeAllListeners('detach');
 
       callback && callback(null);
       this.emit('close', this.device);
