@@ -1,6 +1,7 @@
 .idea
 
 *.log
+.idea/
 yarn.lock
 package-lock.json
 
