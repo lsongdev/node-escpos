@@ -1,6 +1,6 @@
 const escpos = require('../packages/printer');
-escpos.SerialPort = require('../packages/serialport');
-const statuses = require('../packages/printer/statuses');
+escpos.SerialPort = require('../packages/serialport/src');
+const statuses = require('../packages/printer/src/statuses');
 
 const device = new escpos.SerialPort('COM3');
 const printer = new escpos.Printer(device);
@@ -12,7 +12,8 @@ device.open(function (error) {
     }
 
     printer
-        .getStatus(statuses.PrinterStatus.getClassName(), status => {
+        // TODO: Update
+        .getStatus('PrinterStatus', status => {
             console.log(status.toJSON());
         })
         .close();

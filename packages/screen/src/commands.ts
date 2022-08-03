@@ -1,13 +1,4 @@
-
-
-const _ = {
-
-};
-/**
- * [SCREEN description]
- * @type {Object}
- */
-_.SCREEN = {
+export const SCREEN = {
   BS: '\x08', // Moves the cursor one character position to the left
   HT: '\x09', // Moves the cursor one character position to the right
   LF: '\x0a', // Moves the cursor down one line
@@ -29,6 +20,4 @@ _.SCREEN = {
   US_X: '\x1f\x58', // Sets the brightness of the fluorescent character display tube
   US_r: '\x1f\x72', // Selects or cancels reverse display of the characters received after this command
   US_v: '\x1f\x76' // Sets the DTR signal in the host interface to the MARK or SPACE state
-};
-
-module.exports = _;
+}

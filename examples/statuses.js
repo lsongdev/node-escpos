@@ -1,5 +1,5 @@
 const escpos = require('../packages/printer');
-escpos.SerialPort = require('../packages/serialport');
+escpos.SerialPort = require('../packages/serialport/src');
 
 const device = new escpos.SerialPort('COM3');
 const printer = new escpos.Printer(device);

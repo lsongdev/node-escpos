@@ -2,8 +2,10 @@
   "name": "escpos-screen",
   "version": "3.0.0-alpha.6",
   "description": "Escpos Screen API",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -16,5 +18,10 @@
   "dependencies": {
     "iconv-lite": "^0.6.2",
     "mutable-buffer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node10": "1.0.8",
+    "@types/get-pixels": "^3.3.2",
+    "@types/node": "^10.0.0"
   }
 }

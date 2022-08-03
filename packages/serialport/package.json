@@ -2,12 +2,20 @@
   "name": "escpos-serialport",
   "version": "3.0.0-alpha.4",
   "description": "serialport adapter for escpos",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "serialport": "*"
+    "serialport": "^9.2.8"
+  },
+  "devDependencies": {
+    "@tsconfig/node10": "^1.0.8",
+    "@types/node": "^10.0.0",
+    "@types/serialport": "^8.0.2",
+    "typescript": "^4.5.2"
   },
   "keywords": [
     "escpos",

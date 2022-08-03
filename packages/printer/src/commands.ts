@@ -5,7 +5,7 @@
  *   numToHex(256) => '0100'
  *   numToHex(0) => '00'
  */
-var numToHexString = function (value) {
+const numToHexString = function (value: number | string) {
   value = +value;
   if (!isNaN(value)) {
     value = (value).toString(16);
@@ -16,28 +16,22 @@ var numToHexString = function (value) {
   return value;
 };
 
-/**
- * ESC/POS _ (Constants)
- */
-var _ = {
-  LF: '\x0a',
-  FS: '\x1c',
-  FF: '\x0c',
-  GS: '\x1d',
-  DLE: '\x10',
-  EOT: '\x04',
-  NUL: '\x00',
-  ESC: '\x1b',
-  TAB: '\x74',
-  EOL: '\n'
-};
-
+export const LF = '\x0a';
+export const FS = '\x1c';
+export const FF = '\x0c';
+export const GS = '\x1d';
+export const DLE = '\x10';
+export const EOT = '\x04';
+export const NUL = '\x00';
+export const ESC = '\x1b';
+export const TAB = '\x74';
+export const EOL = '\n';
 
 /**
  * [FEED_CONTROL_SEQUENCES Feed control sequences]
  * @type {Object}
  */
-_.FEED_CONTROL_SEQUENCES = {
+export const FEED_CONTROL_SEQUENCES = {
   CTL_LF: '\x0a',   // Print and line feed
   CTL_GLF: '\x4a\x00',   // Print and feed paper (without spaces between lines)
   CTL_FF: '\x0c',   // Form feed
@@ -46,12 +40,12 @@ _.FEED_CONTROL_SEQUENCES = {
   CTL_VT: '\x0b',   // Vertical tab
 };
 
-_.CHARACTER_SPACING = {
+export const CHARACTER_SPACING = {
   CS_DEFAULT: '\x1b\x20\x00',
   CS_SET: '\x1b\x20'
 }
 
-_.LINE_SPACING = {
+export const LINE_SPACING = {
   LS_DEFAULT: '\x1b\x32',
   LS_SET: '\x1b\x33'
 };
@@ -60,7 +54,7 @@ _.LINE_SPACING = {
  * [HARDWARE Printer hardware]
  * @type {Object}
  */
-_.HARDWARE = {
+export const HARDWARE = {
   HW_INIT: '\x1b\x40', // Clear data in buffer and reset modes
   HW_SELECT: '\x1b\x3d\x01', // Printer select
   HW_RESET: '\x1b\x3f\x0a\x00', // Reset printer hardware
@@ -70,7 +64,7 @@ _.HARDWARE = {
  * [CASH_DRAWER Cash Drawer]
  * @type {Object}
  */
-_.CASH_DRAWER = {
+export const CASH_DRAWER = {
   CD_KICK_2: '\x1b\x70\x00\x19\x78', // Sends a pulse to pin 2 []
   CD_KICK_5: '\x1b\x70\x01\x19\x78', // Sends a pulse to pin 5 []
 };
@@ -79,7 +73,7 @@ _.CASH_DRAWER = {
  * [MARGINS Margins sizes]
  * @type {Object}
  */
-_.MARGINS = {
+export const MARGINS = {
   BOTTOM: '\x1b\x4f', // Fix bottom size
   LEFT: '\x1b\x6c', // Fix left size
   RIGHT: '\x1b\x51', // Fix right size
@@ -89,7 +83,7 @@ _.MARGINS = {
  * [PAPER Paper]
  * @type {Object}
  */
-_.PAPER = {
+export const PAPER = {
   PAPER_FULL_CUT: '\x1d\x56\x00', // Full cut paper
   PAPER_PART_CUT: '\x1d\x56\x01', // Partial cut paper
   PAPER_CUT_A: '\x1d\x56\x41', // Partial cut paper
@@ -100,14 +94,14 @@ _.PAPER = {
  * [TEXT_FORMAT Text format]
  * @type {Object}
  */
-_.TEXT_FORMAT = {
+export const TEXT_FORMAT = {
 
   TXT_NORMAL: '\x1b\x21\x00', // Normal text
   TXT_2HEIGHT: '\x1b\x21\x10', // Double height text
   TXT_2WIDTH: '\x1b\x21\x20', // Double width text
   TXT_4SQUARE: '\x1b\x21\x30', // Double width & height text
 
-  TXT_CUSTOM_SIZE: function(width, height) { // other sizes
+  TXT_CUSTOM_SIZE: function(width: number, height: number) { // other sizes
     width = width > 8 ? 8 : width;
     width = width < 1 ? 1 : width;
     height = height > 8 ? 8 : height;
@@ -169,7 +163,7 @@ _.TEXT_FORMAT = {
  * [MODEL Model-specific commands]
  * @type {Object}
  */
-_.MODEL = {
+export const MODEL = {
   QSPRINTER: {
     BARCODE_MODE: {
       ON: '\x1d\x45\x43\x01', // Barcode mode on
@@ -218,7 +212,7 @@ _.MODEL = {
  * [BARCODE_FORMAT Barcode format]
  * @type {Object}
  */
-_.BARCODE_FORMAT = {
+export const BARCODE_FORMAT = {
   BARCODE_TXT_OFF: '\x1d\x48\x00', // HRI barcode chars OFF
   BARCODE_TXT_ABV: '\x1d\x48\x01', // HRI barcode chars above
   BARCODE_TXT_BLW: '\x1d\x48\x02', // HRI barcode chars below
@@ -227,7 +221,7 @@ _.BARCODE_FORMAT = {
   BARCODE_FONT_A: '\x1d\x66\x00', // Font type A for HRI barcode chars
   BARCODE_FONT_B: '\x1d\x66\x01', // Font type B for HRI barcode chars
 
-  BARCODE_HEIGHT: function (height) { // Barcode Height [1-255]
+  BARCODE_HEIGHT: function (height: number) { // Barcode Height [1-255]
     return Buffer.from('1d68'+ numToHexString(height), 'hex');
   },
   // Barcode Width  [2-6]
@@ -256,11 +250,11 @@ _.BARCODE_FORMAT = {
  * [CODE2D_FORMAT description]
  * @type {Object}
  */
-_.CODE2D_FORMAT = {
-  TYPE_PDF417: _.GS + 'Z' + '\x00',
-  TYPE_DATAMATRIX: _.GS + 'Z' + '\x01',
-  TYPE_QR: _.GS + 'Z' + '\x02',
-  CODE2D: _.ESC + 'Z',
+export const CODE2D_FORMAT = {
+  TYPE_PDF417: GS + 'Z' + '\x00',
+  TYPE_DATAMATRIX: GS + 'Z' + '\x01',
+  TYPE_QR: GS + 'Z' + '\x02',
+  CODE2D: ESC + 'Z',
   QR_LEVEL_L: 'L', // correct level 7%
   QR_LEVEL_M: 'M', // correct level 15%
   QR_LEVEL_Q: 'Q', // correct level 25%
@@ -271,7 +265,7 @@ _.CODE2D_FORMAT = {
  * [IMAGE_FORMAT Image format]
  * @type {Object}
  */
-_.IMAGE_FORMAT = {
+export const IMAGE_FORMAT = {
   S_RASTER_N: '\x1d\x76\x30\x00', // Set raster image normal size
   S_RASTER_2W: '\x1d\x76\x30\x01', // Set raster image double width
   S_RASTER_2H: '\x1d\x76\x30\x02', // Set raster image double height
@@ -282,7 +276,7 @@ _.IMAGE_FORMAT = {
  * [BITMAP_FORMAT description]
  * @type {Object}
  */
-_.BITMAP_FORMAT = {
+export const BITMAP_FORMAT = {
   BITMAP_S8: '\x1b\x2a\x00',
   BITMAP_D8: '\x1b\x2a\x01',
   BITMAP_S24: '\x1b\x2a\x20',
@@ -293,7 +287,7 @@ _.BITMAP_FORMAT = {
  * [GSV0_FORMAT description]
  * @type {Object}
  */
-_.GSV0_FORMAT = {
+export const GSV0_FORMAT = {
   GSV0_NORMAL: '\x1d\x76\x30\x00',
   GSV0_DW: '\x1d\x76\x30\x01',
   GSV0_DH: '\x1d\x76\x30\x02',
@@ -304,21 +298,15 @@ _.GSV0_FORMAT = {
  * [BEEP description]
  * @type {string}
  */
-_.BEEP = '\x1b\x42', // Printer Buzzer pre hex
-  
+export const BEEP = '\x1b\x42'; // Printer Buzzer pre hex
+
 /**
  * [COLOR description]
  * @type {Object}
  */
-_.COLOR = {
+export const COLOR = {
   0: '\x1b\x72\x00', // black
   1: '\x1b\x72\x01', // red
   REVERSE: '\x1dB1', // Reverses the colors - white text on black background
   UNREVERSE: '\x1dB0' // Default: undo the reverse - black text on white background
 };
-
-/**
- * [exports description]
- * @type {[type]}
- */
-module.exports = _;

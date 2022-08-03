@@ -2,8 +2,10 @@
   "name": "escpos",
   "version": "3.0.0-alpha.6",
   "description": "ESC/POS Printer driver for nodejs",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "test": "mocha"
   },
   "repository": {
@@ -35,7 +37,12 @@
     "qr-image": "*"
   },
   "devDependencies": {
-    "mocha": "*"
+    "@tsconfig/node10": "1.0.8",
+    "@types/get-pixels": "^3.3.2",
+    "@types/node": "^10.0.0",
+    "@types/qr-image": "^3.2.4",
+    "mocha": "*",
+    "typescript": "^4.5.2"
   },
   "engines": {
     "node": ">=8.x"
