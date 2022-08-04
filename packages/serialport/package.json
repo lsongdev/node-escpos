@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "serialport": "^9.2.8"
+    "serialport": "10"
   },
   "devDependencies": {
     "@tsconfig/node10": "^1.0.8",

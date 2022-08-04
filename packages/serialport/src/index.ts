@@ -1,6 +1,6 @@
 'use strict';
-import {Adapter} from "escpos-adapter/src";
-import SerialPort from 'serialport';
+import { Adapter } from "escpos-adapter/src";
+import { SerialPort } from 'serialport';
 
 /**
  * SerialPort device
@@ -9,17 +9,22 @@ import SerialPort from 'serialport';
  */
 export default class Serial extends Adapter<[timeout?: number]> {
   private device: SerialPort | null;
-  constructor(port: string, options: SerialPort.OpenOptions) {
+  constructor(port: string, options: any) {
     super();
-    options = options || {
-      baudRate: 9600,
-      autoOpen: false
-    };
-    this.device = new SerialPort(port, options);
+    this.device = new SerialPort({ path: port, ...options });
     this.device.on('close', () => {
       this.emit('disconnect', this.device);
       this.device = null;
     });
+  }
+
+  /**
+   * List Printers
+   * @returns {[Array]}
+   */
+  async list() {
+    const ports = await SerialPort.list();
+    return ports;
   }
 
   /**
@@ -29,7 +34,7 @@ export default class Serial extends Adapter<[timeout?: number]> {
    */
   open(callback?: (error: Error | null) => void) {
     if (this.device === null) throw new Error('Serial port device disconnected');
-    this.device.open((error) => {
+    this.device.open((error: any) => {
       if (callback) callback(error ?? null);
     });
     return this;
@@ -81,7 +86,7 @@ export default class Serial extends Adapter<[timeout?: number]> {
    */
   read(callback?: (data: Buffer) => void) {
     if (this.device === null) throw new Error('Serial port device disconnected');
-    this.device.on('data', function(data) {
+    this.device.on('data', function (data) {
       if (callback) callback(data);
     });
     return this;
