@@ -901,6 +901,33 @@ export class Printer<AdapterCloseArgs extends []> extends EventEmitter {
       });
     });
   }
+
+  /**
+   * STAR printer - Paper cut instruction
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  starFullCut() {
+    this.buffer.write(_.PAPER.STAR_FULL_CUT);
+    return this;
+  };
+
+  /**
+   * STAR printer - Select emphasized printing
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  emphasize() {
+    this.buffer.write(_.TEXT_FORMAT.STAR_TXT_EMPHASIZED);
+    return this;
+  };
+
+  /**
+   * STAR printer - Cancel emphasized printing
+   * @return {[Printer]} printer  [the escpos printer instance]
+   */
+  cancelEmphasize() {
+    this.buffer.write(_.TEXT_FORMAT.STAR_CANCEL_TXT_EMPHASIZED);
+    return this;
+  }
 }
 
 export default Printer;
