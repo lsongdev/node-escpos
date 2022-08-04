@@ -88,6 +88,7 @@ export const PAPER = {
   PAPER_PART_CUT: '\x1d\x56\x01', // Partial cut paper
   PAPER_CUT_A: '\x1d\x56\x41', // Partial cut paper
   PAPER_CUT_B: '\x1d\x56\x42', // Partial cut paper
+  STAR_FULL_CUT: '\x1B\x64\x02' , // STAR printer - Full cut
 };
 
 /**
@@ -100,6 +101,8 @@ export const TEXT_FORMAT = {
   TXT_2HEIGHT: '\x1b\x21\x10', // Double height text
   TXT_2WIDTH: '\x1b\x21\x20', // Double width text
   TXT_4SQUARE: '\x1b\x21\x30', // Double width & height text
+  STAR_TXT_EMPHASIZED: '\x1B\x45', // STAR printer - Select emphasized printing
+  STAR_CANCEL_TXT_EMPHASIZED: '\x1B\x46', // STAR printer - Cancel emphasized printing
 
   TXT_CUSTOM_SIZE: function(width: number, height: number) { // other sizes
     width = width > 8 ? 8 : width;
@@ -155,6 +158,10 @@ export const TEXT_FORMAT = {
   TXT_ALIGN_LT: '\x1b\x61\x00', // Left justification
   TXT_ALIGN_CT: '\x1b\x61\x01', // Centering
   TXT_ALIGN_RT: '\x1b\x61\x02', // Right justification
+
+  STAR_TXT_ALIGN_LA: '\x1B\x1D\x61\x00', // STAR printer - Left alignment
+  STAR_TXT_ALIGN_CA: '\x1B\x1D\x61\x01', // STAR printer - Center alignment
+  STAR_TXT_ALIGN_RA: '\x1B\x1D\x61\x02', // STAR printer - Right alignment
 };
 
 /**
