@@ -2,8 +2,7 @@
 const os           = require('os');
 const util          = require('util');
 const EventEmitter  = require('events');
-let mUsb = null;
-
+let { usb, findByIds, getDeviceList } = require("usb");
 /**
  * [USB Class Codes ]
  * @type {Object}
@@ -20,23 +19,15 @@ const IFACE_CLASS = {
  * [function USB]
  * @param  {[type]} vid [description]
  * @param  {[type]} pid [description]
- * @return {[type]}     [description]
+ * @return {USB}     [description]
  */
 function USB(vid, pid){
-
-  if (!mUsb) {
-    /** Changing Code From USB Library NPM
-     * @see https://github.com/node-usb/node-usb#migrating-to-v200
-     * **/
-    let { usb } = require('usb');
-    mUsb = usb;
-  }
 
   EventEmitter.call(this);
   let self = this;
   this.device = null;
   if(vid && pid){
-    this.device = mUsb.findByIds(vid, pid);
+    this.device = findByIds(vid, pid);
   }else if(vid){
       // Set spesific USB device from devices array as coming from USB.findPrinter() function.
       // for example
@@ -53,8 +44,8 @@ function USB(vid, pid){
   if (!this.device)
     throw new Error('Can not find printer');
 
-  mUsb.on('detach', function(device){
-    if(device == self.device) {
+  usb.on('detach', function(device){
+    if(device === self.device) {
       self.emit('detach'    , device);
       self.emit('disconnect', device);
       self.device = null;
@@ -63,18 +54,14 @@ function USB(vid, pid){
 
   return this;
 
-};
+}
 
 /**
  * [findPrinter description]
  * @return {[type]} [description]
  */
 USB.findPrinter = function(){
-  if (!mUsb) {
-    let { usb } = require('usb');
-    mUsb = usb;
-  }
-  return usb.getDeviceList().filter(function(device){
+  return getDeviceList().filter(function(device){
     try{
       return device.configDescriptor.interfaces.filter(function(iface){
         return iface.filter(function(conf){
@@ -111,7 +98,7 @@ util.inherits(USB, EventEmitter);
  * @return {[type]}            [description]
  */
 USB.prototype.open = function (callback){
-  let self = this, counter = 0, index = 0;
+  let self = this, counter = 0;
   this.device.open();
   this.device.interfaces.forEach(function(iface){
     (function(iface){
@@ -130,10 +117,10 @@ USB.prototype.open = function (callback){
           }
           iface.claim(); // must be called before using any endpoints of this interface.
           iface.endpoints.filter(function(endpoint){
-            if(endpoint.direction == 'out' && !self.endpoint) {
+            if(endpoint.direction === 'out' && !self.endpoint) {
               self.endpoint = endpoint;
             }
-            if(endpoint.direction == 'in' && !self.deviceToPcEndpoint) {
+            if(endpoint.direction === 'in' && !self.deviceToPcEndpoint) {
               self.deviceToPcEndpoint = endpoint;
             }
           });
@@ -159,6 +146,7 @@ USB.prototype.open = function (callback){
 /**
  * [function write]
  * @param  {[type]} data [description]
+ * @param {[type]} callback
  * @return {[type]}      [description]
  */
 USB.prototype.write = function(data, callback){
@@ -174,7 +162,7 @@ USB.prototype.write = function(data, callback){
  */
  USB.prototype.read = function(callback) {
   this.deviceToPcEndpoint.transfer(64, (error,data) => callback(data));
-   
+
  return this;
 };
 
@@ -185,7 +173,7 @@ USB.prototype.close = function(callback){
     try {
 
       this.device.close();
-      mUsb.removeAllListeners('detach');
+      usb.removeAllListeners('detach');
 
       callback && callback(null);
       this.emit('close', this.device);
