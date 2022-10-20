@@ -12,7 +12,8 @@ export function getParityBit(str: string) {
 }
 
 export function codeLength(str: string) {
-  let buff = Buffer.from((str.length).toString(16), 'hex');
+  const hex = Number(str.length).toString(16).padStart(2, '0')
+  let buff = Buffer.from(hex, 'hex');
   return buff.toString();
 }
 
