@@ -60,7 +60,7 @@ export default class Network extends Adapter<[device: net.Socket]> {
     const handler: Function = (error?: Error | null) => {
       if (callback) callback(error ?? null);
     };
-    if (typeof data === 'string') this.device.write(data, handler);
+    if (typeof data === 'string') this.device.write(data, null, handler);
     else this.device.write(data, handler);
     return this;
   };
