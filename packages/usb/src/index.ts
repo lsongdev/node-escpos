@@ -1,7 +1,7 @@
 'use strict';
 const os = require('os');
 import { Adapter } from "escpos-adapter";
-import { usb, WebUSB, findByIds } from 'usb';
+import { usb, getDeviceList, findByIds } from 'usb';
 
 /**
  * [USB Class Codes ]
@@ -49,10 +49,7 @@ export default class USBAdapter extends Adapter<[timeout?: number]> {
     return this;
   }
   static findPrinter() {
-    const customWebUSB = new WebUSB({
-      allowAllDevices: true
-    });
-    return customWebUSB.filter(function (device) {
+    return getDeviceList().filter(function (device) {
       try {
         return device.configDescriptor?.interfaces.filter(function (iface) {
           return iface.filter(function (conf) {
